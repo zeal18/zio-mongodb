@@ -107,3 +107,9 @@ lazy val driver = (project in file("driver"))
     ),
   )
   .dependsOn(bson)
+
+addCommandAlias("fmt", "all scalafmtSbt; scalafmt; Test / scalafmt; scalafix; Test / scalafix")
+addCommandAlias(
+  "check",
+  "all scalafmtSbtCheck; scalafmtCheck; Test / scalafmtCheck; scalafix --check; Test / scalafix --check",
+)
