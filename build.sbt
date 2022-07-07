@@ -37,6 +37,24 @@ ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaV
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 ThisBuild / scalafixDependencies += "org.scala-lang"       %% "scala-rewrites"   % "0.1.3"
 
+inThisBuild(
+  List(
+    organization := "io.github.zeal18",
+    homepage     := Some(url("https://github.com/zeal18/zio-mongodb")),
+    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    sonatypeCredentialHost := "s01.oss.sonatype.org",
+    sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
+    developers := List(
+      Developer(
+        "zeal18",
+        "Aleksei Lezhoev",
+        "lezhoev@gmail.com",
+        url("https://github.com/zeal18"),
+      ),
+    ),
+  ),
+)
+
 val commonSettings =
   Seq(
     updateOptions := updateOptions.value.withCachedResolution(true),
