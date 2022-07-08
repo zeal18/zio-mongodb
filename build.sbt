@@ -24,10 +24,6 @@ ThisBuild / Test / parallelExecution := false
 ThisBuild / fork                     := true
 ThisBuild / Test / fork              := true
 
-ThisBuild / Compile / doc / sources                := Seq.empty
-ThisBuild / Compile / packageDoc / publishArtifact := false
-ThisBuild / Compile / packageSrc / publishArtifact := false
-
 lazy val IntegrationTest = config("it") extend Test
 
 ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
