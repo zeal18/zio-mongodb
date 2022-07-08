@@ -83,7 +83,7 @@ sealed trait Projection { self =>
               fieldName,
               new BsonDocument(
                 "$slice",
-                new BsonArray(ju.List.of(new BsonInt32(skip), new BsonInt32(limit))),
+                new BsonArray(ju.Arrays.asList(new BsonInt32(skip), new BsonInt32(limit))),
               ),
             )
         case Projection.Fields(projections) => fields(projections)
