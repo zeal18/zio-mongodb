@@ -3,9 +3,6 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 val scala2_13 = "2.13.8"
 val scala3    = "3.1.2"
 
-ThisBuild / organization := "io.github.zeal18"
-ThisBuild / version      := "0.0.1"
-
 ThisBuild / scalaVersion := scala2_13
 ThisBuild / crossScalaVersions ++= Seq(scala2_13, scala3)
 
