@@ -68,6 +68,7 @@ val commonSettings =
           else "-Wconf:any:warning",
         )
     }),
+    Compile / doc / scalacOptions -= "-Wconf:any:error",
     libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         Seq()
