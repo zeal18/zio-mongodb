@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import org.bson.codecs.BsonValueCodecProvider
 import org.bson.codecs.ValueCodecProvider
@@ -25,7 +25,6 @@ object Registry {
 
   val DEFAULT_CODEC_REGISTRY: CodecRegistry = fromProviders(
     DocumentCodecProvider(),
-    IterableCodecProvider(),
     new ValueCodecProvider(),
     new BsonValueCodecProvider(),
   )

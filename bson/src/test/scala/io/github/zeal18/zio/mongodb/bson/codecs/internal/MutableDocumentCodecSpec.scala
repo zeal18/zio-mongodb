@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import java.nio.ByteBuffer
 import java.util.Date
@@ -22,7 +22,7 @@ import java.util.Date
 import scala.jdk.CollectionConverters.*
 
 import io.github.zeal18.zio.mongodb.bson.BaseSpec
-import io.github.zeal18.zio.mongodb.bson.codecs.Registry.DEFAULT_CODEC_REGISTRY
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.Registry.DEFAULT_CODEC_REGISTRY
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document
 import org.bson.*

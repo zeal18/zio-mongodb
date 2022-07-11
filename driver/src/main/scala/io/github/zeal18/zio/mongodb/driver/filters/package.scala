@@ -1,8 +1,8 @@
 package io.github.zeal18.zio.mongodb.driver
 
+import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter.*
 import org.bson.BsonType
-import org.bson.codecs.Codec
 import org.bson.conversions.Bson
 
 package object filters {
@@ -15,7 +15,7 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/eq $eq
     */
-  def eq[A](value: A)(implicit c: Codec[A]): Eq[A] =
+  def eq[A](value: A)(implicit e: Encoder[A]): Eq[A] =
     eq("_id", value)
 
   /** Creates a filter that matches all documents where the value of the field name equals the specified value. Note that this doesn't
@@ -27,8 +27,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/eq $eq
     */
-  def eq[A](fieldName: String, value: A)(implicit c: Codec[A]): Eq[A] =
-    Eq(fieldName, value, c)
+  def eq[A](fieldName: String, value: A)(implicit e: Encoder[A]): Eq[A] =
+    Eq(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of _id field equals the specified value. Note that this doesn't
     * actually generate a $eq operator, as the query language doesn't require it.
@@ -38,7 +38,7 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/eq $eq
     */
-  def equal[A](value: A)(implicit c: Codec[A]): Eq[A] =
+  def equal[A](value: A)(implicit e: Encoder[A]): Eq[A] =
     equal("_id", value)
 
   /** Creates a filter that matches all documents where the value of the field name equals the specified value. Note that this doesn't
@@ -50,8 +50,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/eq $eq
     */
-  def equal[A](fieldName: String, value: A)(implicit c: Codec[A]): Eq[A] =
-    Eq(fieldName, value, c)
+  def equal[A](fieldName: String, value: A)(implicit e: Encoder[A]): Eq[A] =
+    Eq(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the field name does not equal the specified value.
     *
@@ -61,8 +61,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/ne $ne
     */
-  def ne[A](fieldName: String, value: A)(implicit c: Codec[A]): Ne[A] =
-    Ne(fieldName, value, c)
+  def ne[A](fieldName: String, value: A)(implicit e: Encoder[A]): Ne[A] =
+    Ne(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the field name does not equal the specified value.
     *
@@ -72,8 +72,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/ne $ne
     */
-  def notEqual[A](fieldName: String, value: A)(implicit c: Codec[A]): Ne[A] =
-    Ne(fieldName, value, c)
+  def notEqual[A](fieldName: String, value: A)(implicit e: Encoder[A]): Ne[A] =
+    Ne(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the given field is greater than the specified value.
     *
@@ -83,8 +83,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/gt $gt
     */
-  def gt[A](fieldName: String, value: A)(implicit c: Codec[A]): Gt[A] =
-    Gt(fieldName, value, c)
+  def gt[A](fieldName: String, value: A)(implicit e: Encoder[A]): Gt[A] =
+    Gt(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the given field is less than the specified value.
     *
@@ -94,8 +94,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/lt $lt
     */
-  def lt[A](fieldName: String, value: A)(implicit c: Codec[A]): Lt[A] =
-    Lt(fieldName, value, c)
+  def lt[A](fieldName: String, value: A)(implicit e: Encoder[A]): Lt[A] =
+    Lt(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the given field is greater than or equal to the specified value.
     *
@@ -105,8 +105,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/gte $gte
     */
-  def gte[A](fieldName: String, value: A)(implicit c: Codec[A]): Gte[A] =
-    Gte(fieldName, value, c)
+  def gte[A](fieldName: String, value: A)(implicit e: Encoder[A]): Gte[A] =
+    Gte(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the given field is less than or equal to the specified value.
     *
@@ -116,8 +116,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/lte $lte
     */
-  def lte[A](fieldName: String, value: A)(implicit c: Codec[A]): Lte[A] =
-    Lte(fieldName, value, c)
+  def lte[A](fieldName: String, value: A)(implicit e: Encoder[A]): Lte[A] =
+    Lte(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of a field equals any value in the list of specified values.
     *
@@ -127,8 +127,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/in $in
     */
-  def in[A](fieldName: String, values: Set[A])(implicit c: Codec[A]): In[A] =
-    In(fieldName, values, c)
+  def in[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): In[A] =
+    In(fieldName, values, e)
 
   /** Creates a filter that matches all documents where the value of a field equals any value in the list of specified values.
     *
@@ -138,8 +138,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/in $in
     */
-  def in[A](fieldName: String, values: Seq[A])(implicit c: Codec[A]): In[A] =
-    In(fieldName, values.toSet, c)
+  def in[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): In[A] =
+    In(fieldName, values.toSet, e)
 
   /** Creates a filter that matches all documents where the value of a field does not equal any of the specified values or does not exist.
     *
@@ -149,8 +149,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/nin $nin
     */
-  def nin[A](fieldName: String, values: Set[A])(implicit c: Codec[A]): Nin[A] =
-    Nin(fieldName, values.toSet, c)
+  def nin[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): Nin[A] =
+    Nin(fieldName, values.toSet, e)
 
   /** Creates a filter that matches all documents where the value of a field does not equal any of the specified values or does not exist.
     *
@@ -160,8 +160,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/nin $nin
     */
-  def nin[A](fieldName: String, values: Seq[A])(implicit c: Codec[A]): Nin[A] =
-    Nin(fieldName, values.toSet, c)
+  def nin[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): Nin[A] =
+    Nin(fieldName, values.toSet, e)
 
   /** Creates a filter that performs a logical AND of the provided list of filters.
     *
@@ -355,8 +355,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/all $all
     */
-  def all[A](fieldName: String, values: Set[A])(implicit c: Codec[A]): All[A] =
-    All[A](fieldName, values, c)
+  def all[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): All[A] =
+    All[A](fieldName, values, e)
 
   /** Creates a filter that matches all documents where the value of a field is an array that contains all the specified values.
     *
@@ -366,8 +366,8 @@ package object filters {
     * @return the filter
     * @mongodb.driver.manual reference/operator/query/all $all
     */
-  def all[A](fieldName: String, values: Seq[A])(implicit c: Codec[A]): All[A] =
-    All[A](fieldName, values.toSet, c)
+  def all[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): All[A] =
+    All[A](fieldName, values.toSet, e)
 
   /** Creates a filter that matches all documents containing a field that is an array where at least one member of the array matches the
     * given filter.

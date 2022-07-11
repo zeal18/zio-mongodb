@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import io.github.zeal18.zio.mongodb.bson.BaseSpec
 import io.github.zeal18.zio.mongodb.bson.collection.Document

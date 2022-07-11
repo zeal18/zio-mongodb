@@ -11,7 +11,6 @@ val zioInteropRSVersion = "1.3.12"
 
 val mongoVersion      = "4.6.1"
 val flapdoodleVersion = "3.4.6"
-val bsonJsr310Version = "3.5.4"
 
 val scalatestVersion = "3.2.12"
 
@@ -92,11 +91,12 @@ lazy val bson = (project in file("bson")).settings(
   name := "zio-mongodb-bson",
   commonSettings,
   libraryDependencies ++= Seq(
-    "org.mongodb"          % "bson"                     % mongoVersion,
-    "io.github.cbartosiak" % "bson-codecs-jsr310"       % bsonJsr310Version,
-    "org.scalatest"       %% "scalatest"                % scalatestVersion % Test,
-    "org.scalatest"       %% "scalatest-flatspec"       % scalatestVersion % Test,
-    "org.scalatest"       %% "scalatest-shouldmatchers" % scalatestVersion % Test,
+    "org.mongodb"    % "bson"                     % mongoVersion,
+    "org.scalatest" %% "scalatest"                % scalatestVersion % Test,
+    "org.scalatest" %% "scalatest-flatspec"       % scalatestVersion % Test,
+    "org.scalatest" %% "scalatest-shouldmatchers" % scalatestVersion % Test,
+    "dev.zio"       %% "zio-test"                 % zioVersion       % Test,
+    "dev.zio"       %% "zio-test-sbt"             % zioVersion       % Test,
   ),
 )
 

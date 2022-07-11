@@ -9,8 +9,7 @@ import com.mongodb.connection.ClusterDescription
 import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoClients
 import com.mongodb.reactivestreams.client.MongoClient as JMongoClient
-import io.github.zeal18.zio.mongodb.bson.codecs.DocumentCodecProvider
-import io.github.zeal18.zio.mongodb.bson.codecs.IterableCodecProvider
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.DocumentCodecProvider
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.ClientSessionOptions
@@ -87,7 +86,7 @@ object MongoClient {
   }
 
   val DEFAULT_CODEC_REGISTRY: CodecRegistry = fromRegistries(
-    fromProviders(DocumentCodecProvider(), IterableCodecProvider()),
+    fromProviders(DocumentCodecProvider()),
     com.mongodb.MongoClientSettings.getDefaultCodecRegistry,
   )
 }

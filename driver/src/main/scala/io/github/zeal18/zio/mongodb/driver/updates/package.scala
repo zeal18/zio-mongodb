@@ -1,11 +1,8 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import io.github.zeal18.zio.mongodb.bson.codecs.doubleCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.intCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.longCodec
+import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.updates.Update.*
-import org.bson.codecs.Codec
 
 package object updates {
 
@@ -24,8 +21,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/set/ \$set]]
     */
-  def set[A](fieldName: String, value: A)(implicit codec: Codec[A]): Set[A] =
-    Set[A](fieldName, value, codec)
+  def set[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): Set[A] =
+    Set[A](fieldName, value, encoder)
 
   /** Creates an update that deletes the field with the given name.
     *
@@ -45,8 +42,8 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/setOnInsert/ \$setOnInsert]]
     * @see UpdateOptions#upsert(boolean)
     */
-  def setOnInsert[A](fieldName: String, value: A)(implicit codec: Codec[A]): SetOnInsert[A] =
-    SetOnInsert(fieldName, value, codec)
+  def setOnInsert[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): SetOnInsert[A] =
+    SetOnInsert(fieldName, value, encoder)
 
   /** Creates an update that renames a field.
     *
@@ -66,7 +63,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Int): Increment[Int] =
-    Increment[Int](fieldName, number, intCodec)
+    Increment[Int](fieldName, number, Encoder[Int])
 
   /** Creates an update that increments the value of the field with the given name by the given value.
     *
@@ -76,7 +73,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Long): Increment[Long] =
-    Increment[Long](fieldName, number, longCodec)
+    Increment[Long](fieldName, number, Encoder[Long])
 
   /** Creates an update that increments the value of the field with the given name by the given value.
     *
@@ -86,7 +83,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Double): Increment[Double] =
-    Increment[Double](fieldName, number, doubleCodec)
+    Increment[Double](fieldName, number, Encoder[Double])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -96,7 +93,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Int): Multiply[Int] =
-    Multiply[Int](fieldName, number, intCodec)
+    Multiply[Int](fieldName, number, Encoder[Int])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -106,7 +103,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Long): Multiply[Long] =
-    Multiply[Long](fieldName, number, longCodec)
+    Multiply[Long](fieldName, number, Encoder[Long])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -116,7 +113,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Double): Multiply[Double] =
-    Multiply[Double](fieldName, number, doubleCodec)
+    Multiply[Double](fieldName, number, Encoder[Double])
 
   /** Creates an update that sets the value of the field to the given value if the given value is less than the current value of the
     * field.
@@ -127,8 +124,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/min/ \$min]]
     */
-  def min[A](fieldName: String, value: A)(implicit codec: Codec[A]): Min[A] =
-    Min(fieldName, value, codec)
+  def min[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): Min[A] =
+    Min(fieldName, value, encoder)
 
   /** Creates an update that sets the value of the field to the given value if the given value is greater than the current value of the
     * field.
@@ -139,8 +136,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/min/ \$min]]
     */
-  def max[A](fieldName: String, value: A)(implicit codec: Codec[A]): Max[A] =
-    Max(fieldName, value, codec)
+  def max[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): Max[A] =
+    Max(fieldName, value, encoder)
 
   /** Creates an update that sets the value of the field to the current date as a BSON date.
     *
@@ -169,8 +166,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/ \$addToSet]]
     */
-  def addToSet[A](fieldName: String, value: A)(implicit codec: Codec[A]): AddToSet[A] =
-    AddToSet(fieldName, value, codec)
+  def addToSet[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): AddToSet[A] =
+    AddToSet(fieldName, value, encoder)
 
   /** Creates an update that adds each of the given values to the array value of the field with the given name, unless the value is
     * already present, in which case it does nothing
@@ -181,8 +178,10 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/ \$addToSet]]
     */
-  def addEachToSet[A](fieldName: String, values: A*)(implicit codec: Codec[A]): AddEachToSet[A] =
-    AddEachToSet(fieldName, values, codec)
+  def addEachToSet[A](fieldName: String, values: A*)(implicit
+    encoder: Encoder[A],
+  ): AddEachToSet[A] =
+    AddEachToSet(fieldName, values, encoder)
 
   /** Creates an update that adds the given value to the array value of the field with the given name.
     *
@@ -192,8 +191,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
     */
-  def push[A](fieldName: String, value: A)(implicit codec: Codec[A]): Push[A] =
-    Push(fieldName, value, codec)
+  def push[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): Push[A] =
+    Push(fieldName, value, encoder)
 
   /** Creates an update that adds each of the given values to the array value of the field with the given name.
     *
@@ -203,8 +202,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
     */
-  def pushEach[A](fieldName: String, values: A*)(implicit codec: Codec[A]): PushEach[A] =
-    PushEach(fieldName, values, codec)
+  def pushEach[A](fieldName: String, values: A*)(implicit encoder: Encoder[A]): PushEach[A] =
+    PushEach(fieldName, values, encoder)
 
   // /** Creates an update that adds each of the given values to the array value of the field with the given name, applying the given
   //   * options for positioning the pushed values, and then slicing and/or sorting the array.
@@ -217,7 +216,7 @@ package object updates {
   //   * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
   //   */
   // def pushEach[A](fieldName: String, options: JPushOptions, values: A*)(implicit
-  //   codec: Codec[A],
+  //   encoder: Encoder[A],
   // ): Bson =
   //   JUpdates.pushEach(fieldName, values.asJava, options)
 
@@ -229,8 +228,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/pull/ \$pull]]
     */
-  def pull[A](fieldName: String, value: A)(implicit codec: Codec[A]): Pull[A] =
-    Pull(fieldName, value, codec)
+  def pull[A](fieldName: String, value: A)(implicit encoder: Encoder[A]): Pull[A] =
+    Pull(fieldName, value, encoder)
 
   /** Creates an update that removes from an array all elements that match the given filter.
     *
@@ -248,8 +247,8 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/pull/ \$pull]]
     */
-  def pullAll[A](fieldName: String, values: A*)(implicit codec: Codec[A]): PullAll[A] =
-    PullAll(fieldName, values, codec)
+  def pullAll[A](fieldName: String, values: A*)(implicit encoder: Encoder[A]): PullAll[A] =
+    PullAll(fieldName, values, encoder)
 
   /** Creates an update that pops the first element of an array that is the value of the field with the given name.
     *
