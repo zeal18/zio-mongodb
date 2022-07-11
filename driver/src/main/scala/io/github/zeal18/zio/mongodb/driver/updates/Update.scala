@@ -3,10 +3,7 @@ package io.github.zeal18.zio.mongodb.driver.updates
 import scala.jdk.CollectionConverters.*
 
 import com.mongodb.client.model.Updates as JUpdates
-import io.github.zeal18.zio.mongodb.bson.codecs.booleanCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.bsonDocumentCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.intCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.stringCodec
+import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import org.bson.BsonDocument
 import org.bson.BsonDocumentWriter
@@ -14,7 +11,6 @@ import org.bson.BsonInt32
 import org.bson.BsonInt64
 import org.bson.BsonString
 import org.bson.BsonValue
-import org.bson.codecs.Codec
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
@@ -29,7 +25,7 @@ sealed trait Update { self =>
         operator: String,
         fieldName: String,
         value: A,
-        codec: Codec[A],
+        encoder: Encoder[A],
       ): BsonDocument = {
         val writer = new BsonDocumentWriter(new BsonDocument())
 
@@ -38,7 +34,7 @@ sealed trait Update { self =>
 
         writer.writeStartDocument()
         writer.writeName(fieldName)
-        codec.encode(writer, value, EncoderContext.builder().build())
+        encoder.encode(writer, value, EncoderContext.builder().build())
         writer.writeEndDocument()
 
         writer.writeEndDocument()
@@ -50,7 +46,7 @@ sealed trait Update { self =>
         operator: String,
         fieldName: String,
         values: Seq[A],
-        codec: Codec[A],
+        encoder: Encoder[A],
       ): BsonDocument = {
         val writer  = new BsonDocumentWriter(new BsonDocument())
         val context = EncoderContext.builder().build()
@@ -64,7 +60,7 @@ sealed trait Update { self =>
 
         writer.writeStartArray("$each")
         values.foreach { value =>
-          codec.encode(writer, value, context)
+          encoder.encode(writer, value, context)
         }
         writer.writeEndArray()
 
@@ -75,7 +71,7 @@ sealed trait Update { self =>
         writer.getDocument()
       }
 
-      def pullAllUpdate[A](fieldName: String, values: Seq[A], codec: Codec[A]): BsonDocument = {
+      def pullAllUpdate[A](fieldName: String, values: Seq[A], encoder: Encoder[A]): BsonDocument = {
         val writer  = new BsonDocumentWriter(new BsonDocument())
         val context = EncoderContext.builder().build()
 
@@ -86,7 +82,7 @@ sealed trait Update { self =>
         writer.writeName(fieldName)
 
         writer.writeStartArray()
-        values.foreach(value => codec.encode(writer, value, context))
+        values.foreach(value => encoder.encode(writer, value, context))
         writer.writeEndArray()
 
         writer.writeEndDocument()
@@ -120,59 +116,59 @@ sealed trait Update { self =>
           JUpdates
             .combine(updates.map(_.toBson).asJava)
             .toBsonDocument(documentClass, codecRegistry)
-        case Update.Set(fieldName, value, codec) =>
-          simpleUpdate("$set", fieldName, value, codec)
+        case Update.Set(fieldName, value, encoder) =>
+          simpleUpdate("$set", fieldName, value, encoder)
         case Update.Unset(fieldName) =>
-          simpleUpdate("$unset", fieldName, "", stringCodec)
-        case Update.SetOnInsert(fieldName, value, codec) =>
-          simpleUpdate("$setOnInsert", fieldName, value, codec)
+          simpleUpdate("$unset", fieldName, "", Encoder[String])
+        case Update.SetOnInsert(fieldName, value, encoder) =>
+          simpleUpdate("$setOnInsert", fieldName, value, encoder)
         case Update.Rename(fieldName, newFieldName) =>
-          simpleUpdate("$rename", fieldName, newFieldName, stringCodec)
-        case Update.Increment(fieldName, number, codec) =>
-          simpleUpdate("$inc", fieldName, number, codec)
-        case Update.Multiply(fieldName, number, codec) =>
-          simpleUpdate("$mul", fieldName, number, codec)
-        case Update.Min(fieldName, value, codec) =>
-          simpleUpdate("$min", fieldName, value, codec)
-        case Update.Max(fieldName, value, codec) =>
-          simpleUpdate("$max", fieldName, value, codec)
+          simpleUpdate("$rename", fieldName, newFieldName, Encoder[String])
+        case Update.Increment(fieldName, number, encoder) =>
+          simpleUpdate("$inc", fieldName, number, encoder)
+        case Update.Multiply(fieldName, number, encoder) =>
+          simpleUpdate("$mul", fieldName, number, encoder)
+        case Update.Min(fieldName, value, encoder) =>
+          simpleUpdate("$min", fieldName, value, encoder)
+        case Update.Max(fieldName, value, encoder) =>
+          simpleUpdate("$max", fieldName, value, encoder)
         case Update.CurrentDate(fieldName) =>
-          simpleUpdate("$currentDate", fieldName, true, booleanCodec)
+          simpleUpdate("$currentDate", fieldName, true, Encoder[Boolean])
         case Update.CurrentTimestamp(fieldName) =>
           new BsonDocument()
           simpleUpdate(
             "$currentDate",
             fieldName,
             new BsonDocument("$type", new BsonString("timestamp")),
-            bsonDocumentCodec,
+            Encoder[BsonDocument],
           )
-        case Update.AddToSet(fieldName, value, codec) =>
-          simpleUpdate("$addToSet", fieldName, value, codec)
-        case Update.AddEachToSet(fieldName, values, codec) =>
-          withEachUpdate("$addToSet", fieldName, values, codec)
-        case Update.Push(fieldName, value, codec) =>
-          simpleUpdate("$push", fieldName, value, codec)
-        case Update.PushEach(fieldName, values, codec) =>
-          withEachUpdate("$push", fieldName, values, codec)
-        case Update.Pull(fieldName, value, codec) =>
-          simpleUpdate("$pull", fieldName, value, codec)
+        case Update.AddToSet(fieldName, value, encoder) =>
+          simpleUpdate("$addToSet", fieldName, value, encoder)
+        case Update.AddEachToSet(fieldName, values, encoder) =>
+          withEachUpdate("$addToSet", fieldName, values, encoder)
+        case Update.Push(fieldName, value, encoder) =>
+          simpleUpdate("$push", fieldName, value, encoder)
+        case Update.PushEach(fieldName, values, encoder) =>
+          withEachUpdate("$push", fieldName, values, encoder)
+        case Update.Pull(fieldName, value, encoder) =>
+          simpleUpdate("$pull", fieldName, value, encoder)
         case Update.PullByFilter(filter) =>
           val writer = new BsonDocumentWriter(new BsonDocument())
           writer.writeStartDocument()
           writer.writeName("$pull")
-          bsonDocumentCodec.encode(
+          Encoder[BsonDocument].encode(
             writer,
             filter.toBson.toBsonDocument(documentClass, codecRegistry),
             EncoderContext.builder().build(),
           )
           writer.writeEndDocument()
           writer.getDocument()
-        case Update.PullAll(fieldName, values, codec) =>
-          pullAllUpdate(fieldName, values, codec)
+        case Update.PullAll(fieldName, values, encoder) =>
+          pullAllUpdate(fieldName, values, encoder)
         case Update.PopFirst(fieldName) =>
-          simpleUpdate("$pop", fieldName, -1, intCodec)
+          simpleUpdate("$pop", fieldName, -1, Encoder[Int])
         case Update.PopLast(fieldName) =>
-          simpleUpdate("$pop", fieldName, 1, intCodec)
+          simpleUpdate("$pop", fieldName, 1, Encoder[Int])
         case Update.BitwiseAndInt(fieldName, value) =>
           createBitUpdateDocumentInt(fieldName, "and", value)
         case Update.BitwiseAndLong(fieldName, value) =>
@@ -191,24 +187,26 @@ sealed trait Update { self =>
 }
 
 object Update {
-  final case class Combine(updates: Seq[Update])                                      extends Update
-  final case class Set[A](fieldName: String, value: A, codec: Codec[A])               extends Update
-  final case class Unset(fieldName: String)                                           extends Update
-  final case class SetOnInsert[A](fieldName: String, value: A, codec: Codec[A])       extends Update
-  final case class Rename(fieldName: String, newFieldName: String)                    extends Update
-  final case class Increment[A](fieldName: String, number: A, codec: Codec[A])        extends Update
-  final case class Multiply[A](fieldName: String, number: A, codec: Codec[A])         extends Update
-  final case class Min[A](fieldName: String, value: A, codec: Codec[A])               extends Update
-  final case class Max[A](fieldName: String, value: A, codec: Codec[A])               extends Update
-  final case class CurrentDate(fieldName: String)                                     extends Update
-  final case class CurrentTimestamp(fieldName: String)                                extends Update
-  final case class AddToSet[A](fieldName: String, value: A, codec: Codec[A])          extends Update
-  final case class AddEachToSet[A](fieldName: String, value: Seq[A], codec: Codec[A]) extends Update
-  final case class Push[A](fieldName: String, value: A, codec: Codec[A])              extends Update
-  final case class PushEach[A](fieldName: String, values: Seq[A], codec: Codec[A])    extends Update
-  final case class Pull[A](fieldName: String, value: A, codec: Codec[A])              extends Update
+  final case class Combine(updates: Seq[Update])                                    extends Update
+  final case class Set[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
+  final case class Unset(fieldName: String)                                         extends Update
+  final case class SetOnInsert[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
+  final case class Rename(fieldName: String, newFieldName: String)                  extends Update
+  final case class Increment[A](fieldName: String, number: A, encoder: Encoder[A])  extends Update
+  final case class Multiply[A](fieldName: String, number: A, encoder: Encoder[A])   extends Update
+  final case class Min[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
+  final case class Max[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
+  final case class CurrentDate(fieldName: String)                                   extends Update
+  final case class CurrentTimestamp(fieldName: String)                              extends Update
+  final case class AddToSet[A](fieldName: String, value: A, encoder: Encoder[A])    extends Update
+  final case class AddEachToSet[A](fieldName: String, value: Seq[A], encoder: Encoder[A])
+      extends Update
+  final case class Push[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
+  final case class PushEach[A](fieldName: String, values: Seq[A], encoder: Encoder[A])
+      extends Update
+  final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A])          extends Update
   final case class PullByFilter(filter: Filter)                                       extends Update
-  final case class PullAll[A](fieldName: String, values: Seq[A], codec: Codec[A])     extends Update
+  final case class PullAll[A](fieldName: String, values: Seq[A], encoder: Encoder[A]) extends Update
   final case class PopFirst(fieldName: String)                                        extends Update
   final case class PopLast(fieldName: String)                                         extends Update
   final case class BitwiseAndInt(fieldName: String, value: Int)                       extends Update

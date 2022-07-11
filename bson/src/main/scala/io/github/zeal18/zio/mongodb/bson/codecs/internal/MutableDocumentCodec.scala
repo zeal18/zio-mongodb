@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document
 import org.bson.BsonReader
@@ -28,14 +28,14 @@ import org.bson.codecs.configuration.CodecRegistry
 
 /** Companion helper for mutable Document instances.
   */
-object MutableDocumentCodec {
+private[mongodb] object MutableDocumentCodec {
   def apply(): MutableDocumentCodec                        = MutableDocumentCodec(None)
   def apply(registry: CodecRegistry): MutableDocumentCodec = MutableDocumentCodec(Some(registry))
 }
 
 /** A Codec for mutable Document instances.
   */
-case class MutableDocumentCodec(registry: Option[CodecRegistry])
+private[mongodb] case class MutableDocumentCodec(registry: Option[CodecRegistry])
     extends CollectibleCodec[Document] {
 
   lazy val underlying: BsonDocumentCodec =

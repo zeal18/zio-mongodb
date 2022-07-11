@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import io.github.zeal18.zio.mongodb.bson.collection.immutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
@@ -25,7 +25,7 @@ import org.bson.codecs.configuration.CodecRegistry
 /** A [[http://api.mongodb.org/java/current/org/bson/codecs/configuration/CodecProvider.html CodecProvider]] for the Document
   * class and all the default Codec implementations on which it depends.
   */
-case class DocumentCodecProvider() extends CodecProvider {
+private[mongodb] case class DocumentCodecProvider() extends CodecProvider {
 
   val IMMUTABLE: Class[immutable.Document] = classOf[immutable.Document]
   val MUTABLE: Class[mutable.Document]     = classOf[mutable.Document]

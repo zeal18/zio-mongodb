@@ -5,17 +5,13 @@ import scala.annotation.nowarn
 import com.mongodb.client.model.TextSearchOptions
 import com.mongodb.client.model.Filters as JFilters
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
-import io.github.zeal18.zio.mongodb.bson.codecs.booleanCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.intCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.longCodec
-import io.github.zeal18.zio.mongodb.bson.codecs.sequenceCodec
+import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import org.bson.BsonArray
 import org.bson.BsonDocumentWriter
 import org.bson.BsonRegularExpression
 import org.bson.BsonString
 import org.bson.BsonType
 import org.bson.BsonValue
-import org.bson.codecs.Codec
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
@@ -30,12 +26,16 @@ sealed trait Filter { self =>
 
       def simpleFilter(fieldName: String, value: BsonValue): BsonDocument =
         new BsonDocument(fieldName, value)
-      def simpleEncodingFilter[A](fieldName: String, value: A, codec: Codec[A]): BsonDocument = {
+      def simpleEncodingFilter[A](
+        fieldName: String,
+        value: A,
+        encoder: Encoder[A],
+      ): BsonDocument = {
         val writer = new BsonDocumentWriter(new BsonDocument())
 
         writer.writeStartDocument()
         writer.writeName(fieldName)
-        codec.encode(writer, value, EncoderContext.builder().build())
+        encoder.encode(writer, value, EncoderContext.builder().build())
         writer.writeEndDocument()
 
         writer.getDocument()
@@ -44,7 +44,7 @@ sealed trait Filter { self =>
         operator: String,
         fieldName: String,
         value: A,
-        codec: Codec[A],
+        encoder: Encoder[A],
       ): BsonDocument = {
         val writer = new BsonDocumentWriter(new BsonDocument())
 
@@ -52,7 +52,7 @@ sealed trait Filter { self =>
         writer.writeName(fieldName);
         writer.writeStartDocument();
         writer.writeName(operator);
-        codec.encode(writer, value, EncoderContext.builder().build())
+        encoder.encode(writer, value, EncoderContext.builder().build())
         writer.writeEndDocument();
         writer.writeEndDocument();
 
@@ -62,7 +62,7 @@ sealed trait Filter { self =>
         operator: String,
         fieldName: String,
         values: Iterable[A],
-        codec: Codec[A],
+        encoder: Encoder[A],
       ): BsonDocument = {
         val writer = new BsonDocumentWriter(new BsonDocument())
 
@@ -72,7 +72,7 @@ sealed trait Filter { self =>
         writer.writeStartDocument();
         writer.writeName(operator);
         writer.writeStartArray();
-        values.foreach(codec.encode(writer, _, EncoderContext.builder().build()))
+        values.foreach(encoder.encode(writer, _, EncoderContext.builder().build()))
         writer.writeEndArray();
         writer.writeEndDocument();
 
@@ -105,32 +105,32 @@ sealed trait Filter { self =>
 
       self match {
         case Filter.Empty => new BsonDocument()
-        case Filter.Eq(fieldName, value, codec) =>
-          simpleEncodingFilter(fieldName, value, codec)
-        case Filter.Ne(fieldName, value, codec) =>
-          operatorFilter("$ne", fieldName, value, codec)
-        case Filter.Gt(fieldName, value, codec) =>
-          operatorFilter("$gt", fieldName, value, codec)
-        case Filter.Gte(fieldName, value, codec) =>
-          operatorFilter("$gte", fieldName, value, codec)
-        case Filter.Lt(fieldName, value, codec) =>
-          operatorFilter("$lt", fieldName, value, codec)
-        case Filter.Lte(fieldName, value, codec) =>
-          operatorFilter("$lte", fieldName, value, codec)
-        case Filter.In(fieldName, value, codec) =>
-          iterableOperatorFilter("$in", fieldName, value.toSeq, codec)
-        case Filter.Nin(fieldName, value, codec) =>
-          iterableOperatorFilter("$nin", fieldName, value.toSeq, codec)
+        case Filter.Eq(fieldName, value, encoder) =>
+          simpleEncodingFilter(fieldName, value, encoder)
+        case Filter.Ne(fieldName, value, encoder) =>
+          operatorFilter("$ne", fieldName, value, encoder)
+        case Filter.Gt(fieldName, value, encoder) =>
+          operatorFilter("$gt", fieldName, value, encoder)
+        case Filter.Gte(fieldName, value, encoder) =>
+          operatorFilter("$gte", fieldName, value, encoder)
+        case Filter.Lt(fieldName, value, encoder) =>
+          operatorFilter("$lt", fieldName, value, encoder)
+        case Filter.Lte(fieldName, value, encoder) =>
+          operatorFilter("$lte", fieldName, value, encoder)
+        case Filter.In(fieldName, value, encoder) =>
+          iterableOperatorFilter("$in", fieldName, value.toSeq, encoder)
+        case Filter.Nin(fieldName, value, encoder) =>
+          iterableOperatorFilter("$nin", fieldName, value.toSeq, encoder)
         case Filter.And(filters) => combineFilters("$and", filters)
         case Filter.Or(filters)  => combineFilters("$or", filters)
         case Filter.Nor(filters) => combineFilters("$nor", filters)
         case Filter.Not(filter)  => notFilter(filter.toBson)
         case Filter.Exists(fieldName, exists) =>
-          operatorFilter("$exists", fieldName, exists, booleanCodec)
+          operatorFilter("$exists", fieldName, exists, Encoder[Boolean])
         case Filter.Type(fieldName, bsonType) =>
-          operatorFilter("$type", fieldName, bsonType.getValue(), intCodec)
+          operatorFilter("$type", fieldName, bsonType.getValue(), Encoder[Int])
         case Filter.Mod(fieldName, divisor, remainder) =>
-          operatorFilter[Seq[Long]]("$mod", fieldName, Seq(divisor, remainder), sequenceCodec)
+          operatorFilter[Seq[Long]]("$mod", fieldName, Seq(divisor, remainder), Encoder[Seq[Long]])
         case Filter.Regex(fieldName, pattern, options) =>
           simpleFilter(fieldName, new BsonRegularExpression(pattern, options))
         case Filter.Text(search, language, caseSensitive, diacriticSensitive) =>
@@ -139,8 +139,8 @@ sealed trait Filter { self =>
           new BsonDocument("$where", new BsonString(javaScriptExpression))
         case Filter.Expr(expression) =>
           JFilters.expr(expression).toBsonDocument(documentClass, codecRegistry)
-        case Filter.All(fieldName, values, codec) =>
-          iterableOperatorFilter("$all", fieldName, values, codec)
+        case Filter.All(fieldName, values, encoder) =>
+          iterableOperatorFilter("$all", fieldName, values, encoder)
         case Filter.ElemMatch(fieldName, filter) =>
           new BsonDocument(
             fieldName,
@@ -150,15 +150,15 @@ sealed trait Filter { self =>
             ),
           );
         case Filter.Size(fieldName, size) =>
-          operatorFilter("$size", fieldName, size, intCodec)
+          operatorFilter("$size", fieldName, size, Encoder[Int])
         case Filter.BitsAllClear(fieldName, bitmask) =>
-          operatorFilter("$bitsAllClear", fieldName, bitmask, longCodec)
+          operatorFilter("$bitsAllClear", fieldName, bitmask, Encoder[Long])
         case Filter.BitsAllSet(fieldName, bitmask) =>
-          operatorFilter("$bitsAllSet", fieldName, bitmask, longCodec)
+          operatorFilter("$bitsAllSet", fieldName, bitmask, Encoder[Long])
         case Filter.BitsAnyClear(fieldName, bitmask) =>
-          operatorFilter("$bitsAnyClear", fieldName, bitmask, longCodec)
+          operatorFilter("$bitsAnyClear", fieldName, bitmask, Encoder[Long])
         case Filter.BitsAnySet(fieldName, bitmask) =>
-          operatorFilter("$bitsAnySet", fieldName, bitmask, longCodec)
+          operatorFilter("$bitsAnySet", fieldName, bitmask, Encoder[Long])
         case Filter.JsonSchema(schema) =>
           simpleFilter("$jsonSchema", schema.toBsonDocument())
       }
@@ -169,14 +169,14 @@ sealed trait Filter { self =>
 object Filter {
   case object Empty extends Filter
 
-  final case class Eq[A](fieldName: String, value: A, codec: Codec[A])        extends Filter
-  final case class Ne[A](fieldName: String, value: A, codec: Codec[A])        extends Filter
-  final case class Gt[A](fieldName: String, value: A, codec: Codec[A])        extends Filter
-  final case class Gte[A](fieldName: String, value: A, codec: Codec[A])       extends Filter
-  final case class Lt[A](fieldName: String, value: A, codec: Codec[A])        extends Filter
-  final case class Lte[A](fieldName: String, value: A, codec: Codec[A])       extends Filter
-  final case class In[A](fieldName: String, values: Set[A], codec: Codec[A])  extends Filter
-  final case class Nin[A](fieldName: String, values: Set[A], codec: Codec[A]) extends Filter
+  final case class Eq[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter
+  final case class Ne[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter
+  final case class Gt[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter
+  final case class Gte[A](fieldName: String, value: A, encoder: Encoder[A])       extends Filter
+  final case class Lt[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter
+  final case class Lte[A](fieldName: String, value: A, encoder: Encoder[A])       extends Filter
+  final case class In[A](fieldName: String, values: Set[A], encoder: Encoder[A])  extends Filter
+  final case class Nin[A](fieldName: String, values: Set[A], encoder: Encoder[A]) extends Filter
 
   final case class And(filters: Set[Filter])                   extends Filter
   final case class Or(filters: Set[Filter])                    extends Filter
@@ -194,11 +194,11 @@ object Filter {
     caseSensitive: Option[Boolean],
     diacriticSensitive: Option[Boolean],
   ) extends Filter
-  final case class Where(javaScriptExpression: String)                        extends Filter
-  final case class Expr(expression: String)                                   extends Filter
-  final case class All[A](fieldName: String, values: Set[A], codec: Codec[A]) extends Filter
-  final case class ElemMatch(fieldName: String, filter: Filter)               extends Filter
-  final case class Size(fieldName: String, size: Int)                         extends Filter
+  final case class Where(javaScriptExpression: String)                            extends Filter
+  final case class Expr(expression: String)                                       extends Filter
+  final case class All[A](fieldName: String, values: Set[A], encoder: Encoder[A]) extends Filter
+  final case class ElemMatch(fieldName: String, filter: Filter)                   extends Filter
+  final case class Size(fieldName: String, size: Int)                             extends Filter
 
   final case class BitsAllClear(fieldName: String, bitmask: Long) extends Filter
   final case class BitsAllSet(fieldName: String, bitmask: Long)   extends Filter

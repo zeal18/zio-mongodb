@@ -25,7 +25,7 @@ import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.*
 
 import io.github.zeal18.zio.mongodb.bson.*
-import io.github.zeal18.zio.mongodb.bson.codecs.ImmutableDocumentCodec
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.ImmutableDocumentCodec
 import io.github.zeal18.zio.mongodb.bson.collection.BaseDocument
 import org.bson.codecs.Codec
 

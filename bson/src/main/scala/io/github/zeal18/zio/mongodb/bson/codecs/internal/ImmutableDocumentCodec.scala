@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.zeal18.zio.mongodb.bson.codecs
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import org.bson.BsonReader
@@ -28,7 +28,7 @@ import org.bson.codecs.configuration.CodecRegistry
 
 /** Companion helper for immutable Document instances.
   */
-object ImmutableDocumentCodec {
+private[mongodb] object ImmutableDocumentCodec {
   def apply(): ImmutableDocumentCodec = ImmutableDocumentCodec(None)
   def apply(registry: CodecRegistry): ImmutableDocumentCodec = ImmutableDocumentCodec(
     Some(registry),
@@ -40,7 +40,7 @@ object ImmutableDocumentCodec {
   * As the underlying driver expects documents to be mutable the driver has direct access to the Documents underlying
   * mutable `BsonDocument` instance and therefore will mutate the document when adding an `_id`
   */
-case class ImmutableDocumentCodec(registry: Option[CodecRegistry])
+private[mongodb] case class ImmutableDocumentCodec(registry: Option[CodecRegistry])
     extends CollectibleCodec[Document] {
 
   lazy val underlying: BsonDocumentCodec =
