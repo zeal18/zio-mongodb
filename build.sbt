@@ -12,6 +12,9 @@ val zioInteropRSVersion = "1.3.12"
 val mongoVersion      = "4.6.1"
 val flapdoodleVersion = "3.4.6"
 
+val magnolia2Version = "1.1.2"
+val magnolia3Version = "1.1.4"
+
 val scalatestVersion = "3.2.12"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -98,6 +101,17 @@ lazy val bson = (project in file("bson")).settings(
     "dev.zio"       %% "zio-test"                 % zioVersion       % Test,
     "dev.zio"       %% "zio-test-sbt"             % zioVersion       % Test,
   ),
+  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((3, _)) =>
+      Seq(
+        "com.softwaremill.magnolia1_3" %% "magnolia" % magnolia3Version,
+      )
+    case _ =>
+      Seq(
+        "com.softwaremill.magnolia1_2" %% "magnolia" % magnolia2Version,
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia
+      )
+  }),
 )
 
 lazy val driver = (project in file("driver"))
