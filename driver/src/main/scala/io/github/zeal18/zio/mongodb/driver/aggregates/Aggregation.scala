@@ -5,7 +5,7 @@ import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
-import io.github.zeal18.zio.mongodb.driver.accumulators.Accumulator
+import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.projections.Projection

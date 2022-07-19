@@ -1,7 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import io.github.zeal18.zio.mongodb.driver.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
+import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
