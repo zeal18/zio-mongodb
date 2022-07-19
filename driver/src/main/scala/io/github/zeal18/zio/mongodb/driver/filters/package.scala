@@ -13,7 +13,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/eq $eq
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
     */
   def eq[A](value: A)(implicit e: Encoder[A]): Eq[A] =
     eq("_id", value)
@@ -25,7 +25,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/eq $eq
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
     */
   def eq[A](fieldName: String, value: A)(implicit e: Encoder[A]): Eq[A] =
     Eq(fieldName, value, e)
@@ -36,7 +36,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/eq $eq
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
     */
   def equal[A](value: A)(implicit e: Encoder[A]): Eq[A] =
     equal("_id", value)
@@ -48,7 +48,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/eq $eq
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
     */
   def equal[A](fieldName: String, value: A)(implicit e: Encoder[A]): Eq[A] =
     Eq(fieldName, value, e)
@@ -59,7 +59,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/ne $ne
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/ne/]]
     */
   def ne[A](fieldName: String, value: A)(implicit e: Encoder[A]): Ne[A] =
     Ne(fieldName, value, e)
@@ -70,7 +70,7 @@ package object filters {
     * @param value     the value, which may be null
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/ne $ne
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/ne/]]
     */
   def notEqual[A](fieldName: String, value: A)(implicit e: Encoder[A]): Ne[A] =
     Ne(fieldName, value, e)
@@ -81,7 +81,7 @@ package object filters {
     * @param value     the value
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/gt $gt
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/gt/]]
     */
   def gt[A](fieldName: String, value: A)(implicit e: Encoder[A]): Gt[A] =
     Gt(fieldName, value, e)
@@ -92,7 +92,7 @@ package object filters {
     * @param value     the value
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/lt $lt
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/lt/]]
     */
   def lt[A](fieldName: String, value: A)(implicit e: Encoder[A]): Lt[A] =
     Lt(fieldName, value, e)
@@ -103,7 +103,7 @@ package object filters {
     * @param value     the value
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/gte $gte
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/gte/]]
     */
   def gte[A](fieldName: String, value: A)(implicit e: Encoder[A]): Gte[A] =
     Gte(fieldName, value, e)
@@ -114,7 +114,7 @@ package object filters {
     * @param value     the value
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/lte $lte
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/lte/]]
     */
   def lte[A](fieldName: String, value: A)(implicit e: Encoder[A]): Lte[A] =
     Lte(fieldName, value, e)
@@ -125,7 +125,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/in $in
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/in/]]
     */
   def in[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): In[A] =
     In(fieldName, values, e)
@@ -136,7 +136,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/in $in
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/in/]]
     */
   def in[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): In[A] =
     In(fieldName, values.toSet, e)
@@ -147,7 +147,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/nin $nin
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/nin/]]
     */
   def nin[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): Nin[A] =
     Nin(fieldName, values.toSet, e)
@@ -158,7 +158,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/nin $nin
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/nin/]]
     */
   def nin[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): Nin[A] =
     Nin(fieldName, values.toSet, e)
@@ -176,7 +176,7 @@ package object filters {
     *
     * @param filters the list of filters to and together
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/and $and
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/and/]]
     */
   def and(filters: Set[Filter]): And = And(filters)
 
@@ -193,7 +193,7 @@ package object filters {
     *
     * @param filters the list of filters to and together
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/and $and
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/and/]]
     */
   def and(filters: Filter*): And = And(filters.toSet)
 
@@ -201,7 +201,7 @@ package object filters {
     *
     * @param filters the list of filters to and together
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/or $or
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/or/]]
     */
   def or(filters: Set[Filter]): Or = Or(filters)
 
@@ -209,7 +209,7 @@ package object filters {
     *
     * @param filters the list of filters to and together
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/or $or
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/or/]]
     */
   def or(filters: Filter*): Or = Or(filters.toSet)
 
@@ -227,7 +227,7 @@ package object filters {
     *
     * @param filter the value
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/not $not
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/not/]]
     */
   def not(filter: Filter): Not = Not(filter)
 
@@ -235,7 +235,7 @@ package object filters {
     *
     * @param filters the list of values
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/nor $nor
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/nor/]]
     */
   def nor(filters: Set[Filter]): Nor = Nor(filters)
 
@@ -243,7 +243,7 @@ package object filters {
     *
     * @param filters the list of values
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/nor $nor
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/nor/]]
     */
   def nor(filters: Filter*): Nor = Nor(filters.toSet)
 
@@ -251,7 +251,7 @@ package object filters {
     *
     * @param fieldName the field name
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/exists $exists
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/exists/]]
     */
   def exists(fieldName: String): Exists = Exists(fieldName, exists = true)
 
@@ -261,7 +261,7 @@ package object filters {
     * @param fieldName the field name
     * @param exists    true to check for existence, false to check for absence
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/exists $exists
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/exists/]]
     */
   def exists(fieldName: String, exists: Boolean): Exists = Exists(fieldName, exists)
 
@@ -270,7 +270,7 @@ package object filters {
     * @param fieldName the field name
     * @param type      the BSON type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/type $type
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/type/]]
     */
   def `type`(fieldName: String, `type`: BsonType): Type = Type(fieldName, `type`)
 
@@ -281,7 +281,7 @@ package object filters {
     * @param divisor   the modulus
     * @param remainder the remainder
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/mod $mod
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/mod/]]
     */
   def mod(fieldName: String, divisor: Long, remainder: Long): Mod =
     Mod(fieldName, divisor, remainder)
@@ -291,7 +291,7 @@ package object filters {
     * @param fieldName the field name
     * @param pattern   the pattern
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/regex $regex
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/regex/]]
     */
   def regex(fieldName: String, pattern: String): Regex = Regex(fieldName, pattern, options = "")
 
@@ -301,7 +301,7 @@ package object filters {
     * @param pattern   the pattern
     * @param options   the options
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/regex $regex
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/regex/]]
     */
   def regex(fieldName: String, pattern: String, options: String): Regex =
     Regex(fieldName, pattern, options)
@@ -310,7 +310,7 @@ package object filters {
     *
     * @param search the search term
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/text $text
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/text/]]
     */
   def text(search: String): Text =
     Text(search, language = None, caseSensitive = None, diacriticSensitive = None)
@@ -319,7 +319,7 @@ package object filters {
     *
     * @param search the search term
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/text $text
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/text/]]
     */
   def text(
     search: String,
@@ -333,7 +333,7 @@ package object filters {
     *
     * @param javaScriptExpression the JavaScript expression
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/where $where
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/where/]]
     */
   def where(javaScriptExpression: String): Where = Where(javaScriptExpression)
 
@@ -343,7 +343,7 @@ package object filters {
     * @param <TExpression> the expression type
     * @return the filter
     * @mongodb.server.release 3.6
-    * @mongodb.driver.manual reference/operator/query/expr/ $expr
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/expr/]]
     */
   def expr(expression: String): Expr = Expr(expression)
 
@@ -353,7 +353,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/all $all
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/all/]]
     */
   def all[A](fieldName: String, values: Set[A])(implicit e: Encoder[A]): All[A] =
     All[A](fieldName, values, e)
@@ -364,7 +364,7 @@ package object filters {
     * @param values    the list of values
     * @tparam A        the value type
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/all $all
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/all/]]
     */
   def all[A](fieldName: String, values: Seq[A])(implicit e: Encoder[A]): All[A] =
     All[A](fieldName, values.toSet, e)
@@ -375,7 +375,7 @@ package object filters {
     * @param fieldName the field name
     * @param filter    the filter to apply to each element
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/elemMatch $elemMatch
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/elemMatch/]]
     */
   def elemMatch(fieldName: String, filter: Filter): ElemMatch = ElemMatch(fieldName, filter)
 
@@ -384,7 +384,7 @@ package object filters {
     * @param fieldName the field name
     * @param size      the size of the array
     * @return the filter
-    * @mongodb.driver.manual reference/operator/query/size $size
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/size/]]
     */
   def size(fieldName: String, size: Int): Size = Size(fieldName, size)
 
@@ -394,7 +394,7 @@ package object filters {
     * @param bitmask   the bitmask
     * @return the filter
     * @mongodb.server.release 3.2
-    * @mongodb.driver.manual reference/operator/query/bitsAllClear $bitsAllClear
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/bitsAllClear/]]
     */
   def bitsAllClear(fieldName: String, bitmask: Long): BitsAllClear =
     BitsAllClear(fieldName, bitmask)
@@ -405,7 +405,7 @@ package object filters {
     * @param bitmask   the bitmask
     * @return the filter
     * @mongodb.server.release 3.2
-    * @mongodb.driver.manual reference/operator/query/bitsAllSet $bitsAllSet
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/bitsAllSet/]]
     */
   def bitsAllSet(fieldName: String, bitmask: Long): BitsAllSet =
     BitsAllSet(fieldName, bitmask)
@@ -416,7 +416,7 @@ package object filters {
     * @param bitmask   the bitmask
     * @return the filter
     * @mongodb.server.release 3.2
-    * @mongodb.driver.manual reference/operator/query/BitsAnyClear $BitsAnyClear
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/bitsAnyClear/]]
     */
   def bitsAnyClear(fieldName: String, bitmask: Long): BitsAnyClear =
     BitsAnyClear(fieldName, bitmask)
@@ -427,7 +427,7 @@ package object filters {
     * @param bitmask   the bitmask
     * @return the filter
     * @mongodb.server.release 3.2
-    * @mongodb.driver.manual reference/operator/query/bitsAnySet $bitsAnySet
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/bitsAnySet/]]
     */
   def bitsAnySet(fieldName: String, bitmask: Long): BitsAnySet =
     BitsAnySet(fieldName, bitmask)
@@ -437,7 +437,7 @@ package object filters {
     * @param schema the JSON schema to validate against
     * @return the filter
     * @mongodb.server.release 3.6
-    * @mongodb.driver.manual reference/operator/query/jsonSchema/ $jsonSchema
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/jsonSchema/]]
     */
   def jsonSchema(schema: Bson): JsonSchema = JsonSchema(schema)
 
