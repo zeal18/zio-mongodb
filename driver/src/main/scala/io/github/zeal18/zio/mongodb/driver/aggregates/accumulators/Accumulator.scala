@@ -1,4 +1,4 @@
-package io.github.zeal18.zio.mongodb.driver.accumulators
+package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
 import scala.jdk.CollectionConverters.*
 

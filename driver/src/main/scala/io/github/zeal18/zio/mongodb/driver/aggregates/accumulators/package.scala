@@ -1,6 +1,6 @@
-package io.github.zeal18.zio.mongodb.driver
+package io.github.zeal18.zio.mongodb.driver.aggregates
 
-import io.github.zeal18.zio.mongodb.driver.accumulators.Accumulator.*
+import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator.*
 import org.bson.codecs.Codec
 
 package object accumulators {
