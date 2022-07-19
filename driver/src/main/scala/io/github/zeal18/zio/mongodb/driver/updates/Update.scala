@@ -45,7 +45,7 @@ sealed trait Update { self =>
       def withEachUpdate[A](
         operator: String,
         fieldName: String,
-        values: Seq[A],
+        values: Iterable[A],
         encoder: Encoder[A],
       ): BsonDocument = {
         val writer  = new BsonDocumentWriter(new BsonDocument())
@@ -71,7 +71,11 @@ sealed trait Update { self =>
         writer.getDocument()
       }
 
-      def pullAllUpdate[A](fieldName: String, values: Seq[A], encoder: Encoder[A]): BsonDocument = {
+      def pullAllUpdate[A](
+        fieldName: String,
+        values: Iterable[A],
+        encoder: Encoder[A],
+      ): BsonDocument = {
         val writer  = new BsonDocumentWriter(new BsonDocument())
         val context = EncoderContext.builder().build()
 
@@ -199,20 +203,21 @@ object Update {
   final case class CurrentDate(fieldName: String)                                   extends Update
   final case class CurrentTimestamp(fieldName: String)                              extends Update
   final case class AddToSet[A](fieldName: String, value: A, encoder: Encoder[A])    extends Update
-  final case class AddEachToSet[A](fieldName: String, value: Seq[A], encoder: Encoder[A])
+  final case class AddEachToSet[A](fieldName: String, value: Iterable[A], encoder: Encoder[A])
       extends Update
   final case class Push[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
-  final case class PushEach[A](fieldName: String, values: Seq[A], encoder: Encoder[A])
+  final case class PushEach[A](fieldName: String, values: Iterable[A], encoder: Encoder[A])
       extends Update
-  final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A])          extends Update
-  final case class PullByFilter(filter: Filter)                                       extends Update
-  final case class PullAll[A](fieldName: String, values: Seq[A], encoder: Encoder[A]) extends Update
-  final case class PopFirst(fieldName: String)                                        extends Update
-  final case class PopLast(fieldName: String)                                         extends Update
-  final case class BitwiseAndInt(fieldName: String, value: Int)                       extends Update
-  final case class BitwiseAndLong(fieldName: String, value: Long)                     extends Update
-  final case class BitwiseOrInt(fieldName: String, value: Int)                        extends Update
-  final case class BitwiseOrLong(fieldName: String, value: Long)                      extends Update
-  final case class BitwiseXorInt(fieldName: String, value: Int)                       extends Update
-  final case class BitwiseXorLong(fieldName: String, value: Long)                     extends Update
+  final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
+  final case class PullByFilter(filter: Filter)                              extends Update
+  final case class PullAll[A](fieldName: String, values: Iterable[A], encoder: Encoder[A])
+      extends Update
+  final case class PopFirst(fieldName: String)                    extends Update
+  final case class PopLast(fieldName: String)                     extends Update
+  final case class BitwiseAndInt(fieldName: String, value: Int)   extends Update
+  final case class BitwiseAndLong(fieldName: String, value: Long) extends Update
+  final case class BitwiseOrInt(fieldName: String, value: Int)    extends Update
+  final case class BitwiseOrLong(fieldName: String, value: Long)  extends Update
+  final case class BitwiseXorInt(fieldName: String, value: Int)   extends Update
+  final case class BitwiseXorLong(fieldName: String, value: Long) extends Update
 }

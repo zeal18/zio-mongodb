@@ -178,7 +178,7 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/addToSet/ \$addToSet]]
     */
-  def addEachToSet[A](fieldName: String, values: A*)(implicit
+  def addEachToSet[A](fieldName: String, values: Iterable[A])(implicit
     encoder: Encoder[A],
   ): AddEachToSet[A] =
     AddEachToSet(fieldName, values, encoder)
@@ -202,7 +202,9 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
     */
-  def pushEach[A](fieldName: String, values: A*)(implicit encoder: Encoder[A]): PushEach[A] =
+  def pushEach[A](fieldName: String, values: Iterable[A])(implicit
+    encoder: Encoder[A],
+  ): PushEach[A] =
     PushEach(fieldName, values, encoder)
 
   // /** Creates an update that adds each of the given values to the array value of the field with the given name, applying the given
@@ -247,7 +249,7 @@ package object updates {
     * @return the update
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/pull/ \$pull]]
     */
-  def pullAll[A](fieldName: String, values: A*)(implicit encoder: Encoder[A]): PullAll[A] =
+  def pullAll[A](fieldName: String, values: Iterable[A])(implicit encoder: Encoder[A]): PullAll[A] =
     PullAll(fieldName, values, encoder)
 
   /** Creates an update that pops the first element of an array that is the value of the field with the given name.
