@@ -4,6 +4,7 @@ import scala.annotation.nowarn
 import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
@@ -13,7 +14,6 @@ import org.bson.BsonBoolean
 import org.bson.BsonDocumentWriter
 import org.bson.BsonInt32
 import org.bson.BsonString
-import org.bson.codecs.Codec
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
