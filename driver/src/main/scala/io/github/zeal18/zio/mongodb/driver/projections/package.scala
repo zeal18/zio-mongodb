@@ -1,8 +1,8 @@
 package io.github.zeal18.zio.mongodb.driver
 
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection.*
-import org.bson.codecs.Codec
 
 package object projections {
 

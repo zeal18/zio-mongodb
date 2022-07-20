@@ -4,13 +4,13 @@ import java.util as ju
 import scala.jdk.CollectionConverters.*
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import org.bson.BsonArray
 import org.bson.BsonDocumentWriter
 import org.bson.BsonInt32
 import org.bson.BsonString
 import org.bson.BsonValue
-import org.bson.codecs.Codec
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
