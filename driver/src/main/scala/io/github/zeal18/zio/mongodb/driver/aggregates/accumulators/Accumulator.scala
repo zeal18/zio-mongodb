@@ -4,9 +4,9 @@ import scala.jdk.CollectionConverters.*
 
 import com.mongodb.client.model.BsonField
 import com.mongodb.client.model.Accumulators as JAccumulators
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import org.bson.BsonDocument
 import org.bson.BsonDocumentWriter
-import org.bson.codecs.Codec
 import org.bson.codecs.EncoderContext
 
 sealed trait Accumulator { self =>
