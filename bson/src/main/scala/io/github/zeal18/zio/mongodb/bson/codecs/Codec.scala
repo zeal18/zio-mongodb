@@ -29,4 +29,12 @@ object Codec {
     override def decode(reader: BsonReader, context: DecoderContext): A =
       d.decode(reader, context)
   }
+
+  def apply[A: ClassTag](c: JCodec[A]): Codec[A] = new Codec[A] {
+    override def encode(writer: BsonWriter, value: A, context: EncoderContext): Unit =
+      c.encode(writer, value, context)
+
+    override def decode(reader: BsonReader, context: DecoderContext): A =
+      c.decode(reader, context)
+  }
 }
