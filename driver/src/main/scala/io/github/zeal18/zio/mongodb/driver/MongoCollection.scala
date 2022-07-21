@@ -8,6 +8,7 @@ import scala.reflect.ClassTag
 import com.mongodb.bulk.BulkWriteResult
 import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoCollection as JMongoCollection
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.MongoNamespace
@@ -21,7 +22,6 @@ import io.github.zeal18.zio.mongodb.driver.model.*
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.result.*
 import io.github.zeal18.zio.mongodb.driver.updates.Update
-import org.bson.codecs.Codec
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Task

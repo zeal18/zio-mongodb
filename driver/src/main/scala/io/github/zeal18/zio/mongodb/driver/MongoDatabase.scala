@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import com.mongodb.client.model.CreateCollectionOptions
 import com.mongodb.client.model.CreateViewOptions
 import com.mongodb.reactivestreams.client.MongoDatabase as JMongoDatabase
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.ClientSession
 import io.github.zeal18.zio.mongodb.driver.Document
@@ -15,7 +16,6 @@ import io.github.zeal18.zio.mongodb.driver.WriteConcern
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.classTagToClassOf
 import io.github.zeal18.zio.mongodb.driver.query.*
-import org.bson.codecs.Codec
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Task
