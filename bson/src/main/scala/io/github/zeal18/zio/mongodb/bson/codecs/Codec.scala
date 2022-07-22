@@ -2,6 +2,11 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 
 import scala.reflect.ClassTag
 
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.BsonCodecs
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.CollectionsCodecs
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.OptionCodecs
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.PrimitiveCodecs
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.TemporalCodecs
 import org.bson.BsonReader
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
@@ -21,13 +26,20 @@ abstract class Codec[A: ClassTag] extends Encoder[A] with Decoder[A] with JCodec
   }
 }
 
-object Codec {
-  implicit def apply[A: ClassTag](implicit e: Encoder[A], d: Decoder[A]): Codec[A] = new Codec[A] {
+object Codec
+    extends PrimitiveCodecs
+    with BsonCodecs
+    with TemporalCodecs
+    with CollectionsCodecs
+    with OptionCodecs {
+  def apply[A](implicit codec: Codec[A]): Codec[A] = codec
+
+  def apply[A: ClassTag](encoder: Encoder[A], decoder: Decoder[A]): Codec[A] = new Codec[A] {
     override def encode(writer: BsonWriter, value: A, context: EncoderContext): Unit =
-      e.encode(writer, value, context)
+      encoder.encode(writer, value, context)
 
     override def decode(reader: BsonReader, context: DecoderContext): A =
-      d.decode(reader, context)
+      decoder.decode(reader, context)
   }
 
   def apply[A: ClassTag](c: JCodec[A]): Codec[A] = new Codec[A] {

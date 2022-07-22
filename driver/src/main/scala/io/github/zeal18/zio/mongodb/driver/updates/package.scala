@@ -1,5 +1,6 @@
 package io.github.zeal18.zio.mongodb.driver
 
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.updates.Update.*
@@ -63,7 +64,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Int): Increment[Int] =
-    Increment[Int](fieldName, number, Encoder[Int])
+    Increment[Int](fieldName, number, Codec[Int])
 
   /** Creates an update that increments the value of the field with the given name by the given value.
     *
@@ -73,7 +74,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Long): Increment[Long] =
-    Increment[Long](fieldName, number, Encoder[Long])
+    Increment[Long](fieldName, number, Codec[Long])
 
   /** Creates an update that increments the value of the field with the given name by the given value.
     *
@@ -83,7 +84,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/inc/ \$inc]]
     */
   def inc(fieldName: String, number: Double): Increment[Double] =
-    Increment[Double](fieldName, number, Encoder[Double])
+    Increment[Double](fieldName, number, Codec[Double])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -93,7 +94,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Int): Multiply[Int] =
-    Multiply[Int](fieldName, number, Encoder[Int])
+    Multiply[Int](fieldName, number, Codec[Int])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -103,7 +104,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Long): Multiply[Long] =
-    Multiply[Long](fieldName, number, Encoder[Long])
+    Multiply[Long](fieldName, number, Codec[Long])
 
   /** Creates an update that multiplies the value of the field with the given name by the given number.
     *
@@ -113,7 +114,7 @@ package object updates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/mul/ \$mul]]
     */
   def mul(fieldName: String, number: Double): Multiply[Double] =
-    Multiply[Double](fieldName, number, Encoder[Double])
+    Multiply[Double](fieldName, number, Codec[Double])
 
   /** Creates an update that sets the value of the field to the given value if the given value is less than the current value of the
     * field.

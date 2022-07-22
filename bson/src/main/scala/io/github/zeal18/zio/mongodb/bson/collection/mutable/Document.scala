@@ -21,8 +21,7 @@ import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.*
 
 import io.github.zeal18.zio.mongodb.bson.*
-import io.github.zeal18.zio.mongodb.bson.codecs.Decoder
-import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.MutableDocumentCodec
 import io.github.zeal18.zio.mongodb.bson.collection.BaseDocument
 
@@ -32,9 +31,7 @@ object Document extends SpecificIterableFactory[(String, BsonValue), Document] {
 
   import BsonMagnets.*
 
-  private val jCodec                      = MutableDocumentCodec()
-  implicit val encoder: Encoder[Document] = Encoder(jCodec)
-  implicit val decoder: Decoder[Document] = Decoder(jCodec)
+  implicit val codec: Codec[Document] = Codec(MutableDocumentCodec())
 
   /** Create a new empty Document
     * @return a new Document
