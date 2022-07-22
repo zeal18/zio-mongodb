@@ -5,7 +5,6 @@ import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
-import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
@@ -43,7 +42,7 @@ sealed trait Aggregation { self =>
           writer.writeStartArray()
           facet.pipeline.foreach { p =>
             val document = p.toBson.toBsonDocument(documentClass, codecRegistry)
-            Encoder[BsonDocument].encode(writer, document, context)
+            Codec[BsonDocument].encode(writer, document, context)
           }
           writer.writeEndArray()
 

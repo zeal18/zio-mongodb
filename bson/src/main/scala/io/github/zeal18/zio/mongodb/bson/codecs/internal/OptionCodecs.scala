@@ -1,18 +1,25 @@
-package io.github.zeal18.zio.mongodb.bson.codecs.decoders
+package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Decoder
+import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
 import org.bson.BsonType
+import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
+import org.bson.codecs.EncoderContext
 
-trait OptionDecoders {
-  implicit def nestedOption[A <: Option[?]: Decoder]: Decoder[Option[A]] =
-    new NestedOptionDecoder[A]
-  implicit def option[A: Decoder]: Decoder[Option[A]] = new OptionDecoder[A]
+private[codecs] trait OptionCodecs {
+  implicit def nestedOption[A <: Option[?]: Codec]: Codec[Option[A]] =
+    new NestedOptionCodec[A]
+  implicit def option[A: Codec]: Codec[Option[A]] = new OptionCodec[A]
 }
 
-class OptionDecoder[A: Decoder] extends Decoder[Option[A]] {
+private class OptionCodec[A: Codec] extends Codec[Option[A]] {
+  override def encode(writer: BsonWriter, value: Option[A], encoderContext: EncoderContext): Unit =
+    value.fold(writer.writeNull())(element => Codec[A].encode(writer, element, encoderContext))
+
   override def decode(reader: BsonReader, decoderContext: DecoderContext): Option[A] =
     reader.getCurrentBsonType() match {
       case BsonType.NULL =>
@@ -22,7 +29,19 @@ class OptionDecoder[A: Decoder] extends Decoder[Option[A]] {
     }
 }
 
-class NestedOptionDecoder[A <: Option[?]: Decoder] extends Decoder[Option[A]] {
+private class NestedOptionCodec[A <: Option[?]: Codec] extends Codec[Option[A]] {
+  override def encode(
+    writer: BsonWriter,
+    value: Option[A],
+    encoderContext: EncoderContext,
+  ): Unit =
+    value.fold(writer.writeNull()) { element =>
+      writer.writeStartDocument()
+      writer.writeName("_option")
+      Encoder[A].encode(writer, element, encoderContext)
+      writer.writeEndDocument()
+    }
+
   override def decode(reader: BsonReader, decoderContext: DecoderContext): Option[A] =
     reader.getCurrentBsonType() match {
       case BsonType.NULL =>

@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson
 
-import scala.reflect.ClassTag
-
 import org.bson.BsonDocument
 import org.bson.BsonDocumentReader
 import org.bson.BsonDocumentWriter
@@ -10,7 +8,7 @@ import org.bson.codecs.EncoderContext
 import zio.test.*
 
 package object codecs {
-  private[codecs] def testCodecRoundtrip[A: Codec: ClassTag](
+  private[codecs] def testCodecRoundtrip[A: Codec](
     title: String,
     value: A,
     expected: String,

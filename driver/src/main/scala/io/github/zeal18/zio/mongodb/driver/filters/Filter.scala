@@ -5,6 +5,7 @@ import scala.annotation.nowarn
 import com.mongodb.client.model.TextSearchOptions
 import com.mongodb.client.model.Filters as JFilters
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import org.bson.BsonArray
 import org.bson.BsonDocumentWriter
@@ -126,11 +127,11 @@ sealed trait Filter { self =>
         case Filter.Nor(filters) => combineFilters("$nor", filters)
         case Filter.Not(filter)  => notFilter(filter.toBson)
         case Filter.Exists(fieldName, exists) =>
-          operatorFilter("$exists", fieldName, exists, Encoder[Boolean])
+          operatorFilter("$exists", fieldName, exists, Codec[Boolean])
         case Filter.Type(fieldName, bsonType) =>
-          operatorFilter("$type", fieldName, bsonType.getValue(), Encoder[Int])
+          operatorFilter("$type", fieldName, bsonType.getValue(), Codec[Int])
         case Filter.Mod(fieldName, divisor, remainder) =>
-          operatorFilter[Seq[Long]]("$mod", fieldName, Seq(divisor, remainder), Encoder[Seq[Long]])
+          operatorFilter[Seq[Long]]("$mod", fieldName, Seq(divisor, remainder), Codec[Seq[Long]])
         case Filter.Regex(fieldName, pattern, options) =>
           simpleFilter(fieldName, new BsonRegularExpression(pattern, options))
         case Filter.Text(search, language, caseSensitive, diacriticSensitive) =>
@@ -150,15 +151,15 @@ sealed trait Filter { self =>
             ),
           );
         case Filter.Size(fieldName, size) =>
-          operatorFilter("$size", fieldName, size, Encoder[Int])
+          operatorFilter("$size", fieldName, size, Codec[Int])
         case Filter.BitsAllClear(fieldName, bitmask) =>
-          operatorFilter("$bitsAllClear", fieldName, bitmask, Encoder[Long])
+          operatorFilter("$bitsAllClear", fieldName, bitmask, Codec[Long])
         case Filter.BitsAllSet(fieldName, bitmask) =>
-          operatorFilter("$bitsAllSet", fieldName, bitmask, Encoder[Long])
+          operatorFilter("$bitsAllSet", fieldName, bitmask, Codec[Long])
         case Filter.BitsAnyClear(fieldName, bitmask) =>
-          operatorFilter("$bitsAnyClear", fieldName, bitmask, Encoder[Long])
+          operatorFilter("$bitsAnyClear", fieldName, bitmask, Codec[Long])
         case Filter.BitsAnySet(fieldName, bitmask) =>
-          operatorFilter("$bitsAnySet", fieldName, bitmask, Encoder[Long])
+          operatorFilter("$bitsAnySet", fieldName, bitmask, Codec[Long])
         case Filter.JsonSchema(schema) =>
           simpleFilter("$jsonSchema", schema.toBsonDocument())
       }

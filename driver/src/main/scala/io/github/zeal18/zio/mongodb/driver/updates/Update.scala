@@ -3,6 +3,7 @@ package io.github.zeal18.zio.mongodb.driver.updates
 import scala.jdk.CollectionConverters.*
 
 import com.mongodb.client.model.Updates as JUpdates
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import org.bson.BsonDocument
@@ -123,11 +124,11 @@ sealed trait Update { self =>
         case Update.Set(fieldName, value, encoder) =>
           simpleUpdate("$set", fieldName, value, encoder)
         case Update.Unset(fieldName) =>
-          simpleUpdate("$unset", fieldName, "", Encoder[String])
+          simpleUpdate("$unset", fieldName, "", Codec[String])
         case Update.SetOnInsert(fieldName, value, encoder) =>
           simpleUpdate("$setOnInsert", fieldName, value, encoder)
         case Update.Rename(fieldName, newFieldName) =>
-          simpleUpdate("$rename", fieldName, newFieldName, Encoder[String])
+          simpleUpdate("$rename", fieldName, newFieldName, Codec[String])
         case Update.Increment(fieldName, number, encoder) =>
           simpleUpdate("$inc", fieldName, number, encoder)
         case Update.Multiply(fieldName, number, encoder) =>
@@ -137,14 +138,14 @@ sealed trait Update { self =>
         case Update.Max(fieldName, value, encoder) =>
           simpleUpdate("$max", fieldName, value, encoder)
         case Update.CurrentDate(fieldName) =>
-          simpleUpdate("$currentDate", fieldName, true, Encoder[Boolean])
+          simpleUpdate("$currentDate", fieldName, true, Codec[Boolean])
         case Update.CurrentTimestamp(fieldName) =>
           new BsonDocument()
           simpleUpdate(
             "$currentDate",
             fieldName,
             new BsonDocument("$type", new BsonString("timestamp")),
-            Encoder[BsonDocument],
+            Codec[BsonDocument],
           )
         case Update.AddToSet(fieldName, value, encoder) =>
           simpleUpdate("$addToSet", fieldName, value, encoder)
@@ -160,7 +161,7 @@ sealed trait Update { self =>
           val writer = new BsonDocumentWriter(new BsonDocument())
           writer.writeStartDocument()
           writer.writeName("$pull")
-          Encoder[BsonDocument].encode(
+          Codec[BsonDocument].encode(
             writer,
             filter.toBson.toBsonDocument(documentClass, codecRegistry),
             EncoderContext.builder().build(),
@@ -170,9 +171,9 @@ sealed trait Update { self =>
         case Update.PullAll(fieldName, values, encoder) =>
           pullAllUpdate(fieldName, values, encoder)
         case Update.PopFirst(fieldName) =>
-          simpleUpdate("$pop", fieldName, -1, Encoder[Int])
+          simpleUpdate("$pop", fieldName, -1, Codec[Int])
         case Update.PopLast(fieldName) =>
-          simpleUpdate("$pop", fieldName, 1, Encoder[Int])
+          simpleUpdate("$pop", fieldName, 1, Codec[Int])
         case Update.BitwiseAndInt(fieldName, value) =>
           createBitUpdateDocumentInt(fieldName, "and", value)
         case Update.BitwiseAndLong(fieldName, value) =>

@@ -2,11 +2,6 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 
 import scala.reflect.ClassTag
 
-import io.github.zeal18.zio.mongodb.bson.codecs.encoders.BsonEncoders
-import io.github.zeal18.zio.mongodb.bson.codecs.encoders.CollectionsEncoders
-import io.github.zeal18.zio.mongodb.bson.codecs.encoders.OptionEncoders
-import io.github.zeal18.zio.mongodb.bson.codecs.encoders.PrimitiveEncoders
-import io.github.zeal18.zio.mongodb.bson.codecs.encoders.TemporalEncoders
 import org.bson.BsonWriter
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.Encoder as JEncoder
@@ -32,15 +27,12 @@ abstract class Encoder[A: ClassTag] extends JEncoder[A] { self =>
   }
 }
 
-object Encoder
-    extends PrimitiveEncoders
-    with BsonEncoders
-    with TemporalEncoders
-    with CollectionsEncoders
-    with OptionEncoders {
+object Encoder {
   def apply[A](implicit e: Encoder[A]): Encoder[A] = e
   def apply[A: ClassTag](e: JEncoder[A]): Encoder[A] = new Encoder[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       e.encode(writer, value, encoderContext)
   }
+
+  implicit def fromCodec[A](implicit codec: Codec[A]): Encoder[A] = codec
 }
