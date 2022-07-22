@@ -4,42 +4,23 @@ import zio.test.*
 
 object MagnoliaCodecsSpec extends DefaultRunnableSpec {
   private case class Simple(a: Int, b: String)
-  private object Simple {
-    implicit val codec: Codec[Simple] = MagnoliaCodec.gen[Simple]
-  }
 
   private case class Nested(a: Simple, b: Long)
-  private object Nested {
-    implicit val codec: Codec[Nested] = MagnoliaCodec.gen[Nested]
-  }
 
   private case class SimpleAuto(c: Int, d: String)
   private case class NestedAuto(f: SimpleAuto, e: String)
-  private object NestedAuto {
-    implicit val codec: Codec[NestedAuto] = MagnoliaCodec.autoGen[NestedAuto]
-  }
 
-  private case object CaseObject {
-    implicit val codec: Codec[CaseObject.type] = MagnoliaCodec.gen[CaseObject.type]
-  }
+  private case object CaseObject
 
   private class StringValueClass(val a: String) extends AnyVal
-  private object StringValueClass {
-    implicit val codec: Codec[StringValueClass] = MagnoliaCodec.gen[StringValueClass]
-  }
 
   private class IntValueClass(val number: Int) extends AnyVal
-  private object IntValueClass {
-    implicit val codec: Codec[IntValueClass] = MagnoliaCodec.gen[IntValueClass]
-  }
 
   sealed private trait SimpleEnum
   private object SimpleEnum {
     case object A extends SimpleEnum
     case object B extends SimpleEnum
     case object C extends SimpleEnum
-
-    implicit val codec: Codec[SimpleEnum] = MagnoliaCodec.gen[SimpleEnum]
   }
 
   sealed private trait SimpleCoproduct
@@ -47,8 +28,6 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
     case class A(a: Int)    extends SimpleCoproduct
     case class B(b: String) extends SimpleCoproduct
     case class C(c: Long)   extends SimpleCoproduct
-
-    implicit val codec: Codec[SimpleCoproduct] = MagnoliaCodec.gen[SimpleCoproduct]
   }
 
   sealed private trait ComplexCoproduct
@@ -65,25 +44,32 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
       case object E extends SubEnum
       case object F extends SubEnum
     }
-
-    implicit val codec: Codec[ComplexCoproduct] = MagnoliaCodec.gen[ComplexCoproduct]
   }
 
   sealed private trait Tree[A]
   private object Tree {
     case class Leaf[A](a: A)                          extends Tree[A]
     case class Node[A](left: Tree[A], right: Tree[A]) extends Tree[A]
-
-    implicit val codec: Codec[Tree[Int]] = MagnoliaCodec.gen[Tree[Int]]
   }
 
   sealed private trait ListTree[A]
   private object ListTree {
     case class Leaf[A](a: A)                        extends ListTree[A]
     case class Node[A](elements: List[ListTree[A]]) extends ListTree[A]
-
-    implicit val codec: Codec[ListTree[Int]] = MagnoliaCodec.gen[ListTree[Int]]
   }
+
+  case class WithoutCodec(a: Int)
+  case class CaseClassWithOption(a: Option[WithoutCodec], b: Int)
+
+  case class OverridedChild(a: Int)
+  object OverridedChild {
+    implicit val codec: Codec[OverridedChild] =
+      implicitly[Codec[Int]].bimap(OverridedChild.apply(_), _.a)
+  }
+  case class CaseClassWithOverridedChild(a: Option[OverridedChild], b: Int)
+
+  case class ListChild(a: Int)
+  case class CaseClassWithOptionList(a: Option[List[ListChild]], b: Int)
 
   override def spec: ZSpec[Environment, Failure] =
     suite("MagnoliaCodecsSpec")(
@@ -183,6 +169,47 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
           "Node",
           ListTree.Node(List(ListTree.Leaf(1), ListTree.Leaf(2))),
           """{"_t": "Node", "elements": [{"_t": "Leaf", "a": 1}, {"_t": "Leaf", "a": 2}]}""",
+        ),
+      ),
+      suite("autoderived case class with an option")(
+        testCodecRoundtrip(
+          "Some",
+          CaseClassWithOption(Some(WithoutCodec(1)), 2),
+          """{"a": {"a": 1}, "b": 2}""",
+        ),
+        testCodecRoundtrip(
+          "None",
+          CaseClassWithOption(None, 3),
+          """{"a": null, "b": 3}""",
+        ),
+      ),
+      suite("autoderived case class with overrided child codec")(
+        testCodecRoundtrip(
+          "Some",
+          CaseClassWithOverridedChild(Some(OverridedChild(1)), 2),
+          """{"a": 1, "b": 2}""",
+        ),
+        testCodecRoundtrip(
+          "None",
+          CaseClassWithOverridedChild(None, 3),
+          """{"a": null, "b": 3}""",
+        ),
+      ),
+      suite("autoderived case class with an option list")(
+        testCodecRoundtrip(
+          "None",
+          CaseClassWithOptionList(None, 3),
+          """{"a": null, "b": 3}""",
+        ),
+        testCodecRoundtrip(
+          "Some(List)",
+          CaseClassWithOptionList(Some(List(ListChild(1), ListChild(2))), 3),
+          """{"a": [{"a": 1}, {"a": 2}], "b": 3}""",
+        ),
+        testCodecRoundtrip(
+          "Some(List.empty)",
+          CaseClassWithOptionList(Some(List.empty), 3),
+          """{"a": [], "b": 3}""",
         ),
       ),
     )

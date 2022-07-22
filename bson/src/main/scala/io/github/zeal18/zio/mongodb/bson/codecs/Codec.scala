@@ -27,7 +27,8 @@ abstract class Codec[A: ClassTag] extends Encoder[A] with Decoder[A] with JCodec
 }
 
 object Codec
-    extends PrimitiveCodecs
+    extends MagnoliaCodec
+    with PrimitiveCodecs
     with BsonCodecs
     with TemporalCodecs
     with CollectionsCodecs
