@@ -13,17 +13,17 @@ import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
 
-trait MagnoliaCodec[A] extends Codec[A]
-
-object MagnoliaCodec {
+private[codecs] trait MagnoliaCodec {
   type Typeclass[A] = Codec[A]
 
-  def join[A: ClassTag](ctx: CaseClass[Typeclass, A]): MagnoliaCodec[A] =
-    if (ctx.isObject) CaseObjectCodec(ctx)
-    else if (ctx.isValueClass) ValueClassCodec(ctx)
-    else CaseClassCodec(ctx)
+  implicit def derive[A]: Codec[A] = macro Magnolia.gen[A]
 
-  def split[A: ClassTag](ctx: SealedTrait[Typeclass, A]): MagnoliaCodec[A] = {
+  def join[A: ClassTag](ctx: CaseClass[Typeclass, A]): Codec[A] =
+    if (ctx.isObject) MagnoliaCodec.CaseObjectCodec(ctx)
+    else if (ctx.isValueClass) MagnoliaCodec.ValueClassCodec(ctx)
+    else MagnoliaCodec.CaseClassCodec(ctx)
+
+  def split[A: ClassTag](ctx: SealedTrait[Typeclass, A]): Codec[A] = {
     ctx.subtypes.groupBy(_.typeName.short).filter(_._2.size > 1).toList match {
       case Nil => ()
       case ambiguous :: _ =>
@@ -33,18 +33,17 @@ object MagnoliaCodec {
     }
 
     val isEnum = ctx.subtypes.forall(_.typeclass match {
-      case _: CaseObjectCodec[?] => true
-      case _                     => false
+      case _: MagnoliaCodec.CaseObjectCodec[?] => true
+      case _                                   => false
     })
-    if (isEnum) EnumCodec(ctx)
-    else SealedTraitCodec(ctx)
+    if (isEnum) MagnoliaCodec.EnumCodec(ctx)
+    else MagnoliaCodec.SealedTraitCodec(ctx)
   }
+}
 
-  implicit def autoGen[A]: Typeclass[A] = macro Magnolia.gen[A]
-  def gen[A]: Typeclass[A] = macro Magnolia.gen[A]
-
-  private case class CaseClassCodec[A: ClassTag](ctx: CaseClass[Typeclass, A])
-      extends MagnoliaCodec[A] {
+object MagnoliaCodec {
+  private[codecs] case class CaseClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
+      extends Codec[A] {
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit = {
       writer.writeStartDocument()
       inlined.encode(writer, x, encoderCtx)
@@ -61,10 +60,10 @@ object MagnoliaCodec {
     val inlined: InlinedCaseClassCodec[A] = InlinedCaseClassCodec(ctx)
   }
 
-  private case class InlinedCaseClassCodec[A: ClassTag](ctx: CaseClass[Typeclass, A])
-      extends MagnoliaCodec[A] {
+  private[codecs] case class InlinedCaseClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
+      extends Codec[A] {
 
-    private def getLabel[S](p: Param[Typeclass, S]): String =
+    private def getLabel[S](p: Param[Codec, S]): String =
       p.annotations
         .collectFirst { case BsonProperty(label) =>
           label
@@ -121,8 +120,8 @@ object MagnoliaCodec {
     }
   }
 
-  private case class CaseObjectCodec[A: ClassTag](ctx: CaseClass[Typeclass, A])
-      extends MagnoliaCodec[A] {
+  private[codecs] case class CaseObjectCodec[A: ClassTag](ctx: CaseClass[Codec, A])
+      extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       writer.writeString(ctx.typeName.short)
 
@@ -136,8 +135,8 @@ object MagnoliaCodec {
     }
   }
 
-  private case class ValueClassCodec[A: ClassTag](ctx: CaseClass[Typeclass, A])
-      extends MagnoliaCodec[A] {
+  private[codecs] case class ValueClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
+      extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit = {
       val param      = ctx.parameters.head
       val childValue = param.dereference(value)
@@ -154,8 +153,7 @@ object MagnoliaCodec {
     }
   }
 
-  private case class EnumCodec[A: ClassTag](ctx: SealedTrait[Typeclass, A])
-      extends MagnoliaCodec[A] {
+  private[codecs] case class EnumCodec[A: ClassTag](ctx: SealedTrait[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       ctx.split(value)(subtype =>
         subtype.typeclass
@@ -182,8 +180,8 @@ object MagnoliaCodec {
 
   }
 
-  private case class SealedTraitCodec[A: ClassTag](ctx: SealedTrait[Typeclass, A])
-      extends MagnoliaCodec[A] {
+  private[codecs] case class SealedTraitCodec[A: ClassTag](ctx: SealedTrait[Codec, A])
+      extends Codec[A] {
 
     private val TypeTag = "_t"
 
@@ -233,6 +231,5 @@ object MagnoliaCodec {
 
       result
     }
-
   }
 }

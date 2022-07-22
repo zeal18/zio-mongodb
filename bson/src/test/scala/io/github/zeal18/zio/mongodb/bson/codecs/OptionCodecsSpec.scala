@@ -9,6 +9,12 @@ object OptionsCodecsSpec extends DefaultRunnableSpec {
         testCodecRoundtrip[Option[Int]]("None", None, "null"),
         testCodecRoundtrip[Option[Int]]("Some(1)", Some(1), "1"),
       ),
+      suite("Option List")(
+        testCodecRoundtrip[Option[List[Int]]]("None", None, "null"),
+        testCodecRoundtrip[Option[List[Int]]]("Some(empty)", Some(List.empty), "[]"),
+        testCodecRoundtrip[Option[List[Int]]]("Some(1)", Some(List(1)), "[1]"),
+        testCodecRoundtrip[Option[List[Int]]]("Some(1, 2)", Some(List(1, 2)), "[1, 2]"),
+      ),
       suite("nested options twice")(
         testCodecRoundtrip[Option[Option[Int]]]("None", None, "null"),
         testCodecRoundtrip[Option[Option[Int]]]("Some(None)", Some(None), """{"_option": null}"""),
