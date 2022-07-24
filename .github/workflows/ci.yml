@@ -48,7 +48,7 @@ jobs:
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Run tests
-        run: sbt ++${{ matrix.scala }}! test
+        run: sbt ++${{ matrix.scala }}! test "It / test"
 
   publish:
     runs-on: ubuntu-20.04
