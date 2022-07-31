@@ -10,12 +10,12 @@ import zio.test.environment.Live
 
 object MongoDatabaseTest {
   def withRandomName[A](
-    f: MongoDatabase => ZIO[Live, Throwable, A],
+    f: MongoDatabase => ZIO[Live with Has[MongoClient], Throwable, A],
   ): ZIO[Live with Has[MongoClient], Throwable, A] =
     random.build.use(db => f(db.get))
 
   def withName[A](name: String)(
-    f: MongoDatabase => ZIO[Live, Throwable, A],
+    f: MongoDatabase => ZIO[Live with Has[MongoClient], Throwable, A],
   ): ZIO[Live with Has[MongoClient], Throwable, A] =
     live(name).build.use(db => f(db.get))
 
