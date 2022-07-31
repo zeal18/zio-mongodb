@@ -1,34 +1,6 @@
-/*
- * Copyright 2008-present MongoDB, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package io.github.zeal18.zio.mongodb.driver
 
-package io.github.zeal18.zio.mongodb.driver.model
-
-import scala.jdk.CollectionConverters.*
-
-import com.mongodb.client.model.Indexes as JIndexes
-import io.github.zeal18.zio.mongodb.bson.conversions.Bson
-
-/** A factory for defining index keys. A convenient way to use this class is to statically import all of its methods, which allows usage
-  * like:
-  *
-  * {{{
-  * collection.createIndex(compoundIndex(ascending("x"), descending("y")))
-  * }}}
-  */
-object Indexes {
+package object indexes {
 
   /** Create an index key for an ascending index on the given fields.
     *
@@ -36,7 +8,7 @@ object Indexes {
     * @return the index specification
     * @see [[https://www.mongodb.com/docs/manual/core/indexes indexes]]
     */
-  def ascending(fieldNames: String*): Bson = JIndexes.ascending(fieldNames.asJava)
+  def asc(fieldNames: String*): IndexKey.Asc = IndexKey.Asc(fieldNames)
 
   /** Create an index key for an ascending index on the given fields.
     *
@@ -44,15 +16,15 @@ object Indexes {
     * @return the index specification
     * @see [[https://www.mongodb.com/docs/manual/core/indexes indexes]]
     */
-  def descending(fieldNames: String*): Bson = JIndexes.descending(fieldNames.asJava)
+  def desc(fieldNames: String*): IndexKey.Desc = IndexKey.Desc(fieldNames)
 
   /** Create an index key for an 2dsphere index on the given fields.
     *
     * @param fieldNames the field names, which must contain at least one
     * @return the index specification
-    * @see [[https://www.mongodb.com/docs/manual/core/2dsphere 2dsphere Index]]
+    * @see [[https://www.mongodb.com/docs/manual/core/2dsphere 2dsphere IndexKey]]
     */
-  def geo2dsphere(fieldNames: String*): Bson = JIndexes.geo2dsphere(fieldNames.asJava)
+  def geo2dsphere(fieldNames: String*): IndexKey.Geo2dsphere = IndexKey.Geo2dsphere(fieldNames)
 
   /** Create an index key for a 2d index on the given field.
     *
@@ -65,7 +37,7 @@ object Indexes {
     * @return the index specification
     * @see [[https://www.mongodb.com/docs/manual/core/2d 2d index]]
     */
-  def geo2d(fieldName: String): Bson = JIndexes.geo2d(fieldName)
+  def geo2d(fieldNames: String*): IndexKey.Geo2d = IndexKey.Geo2d(fieldNames)
 
   /** Create an index key for a geohaystack index on the given field.
     *
@@ -81,8 +53,8 @@ object Indexes {
     * @see [[https://www.mongodb.com/docs/manual/core/geohaystack geoHaystack index]]
     */
   @deprecated("geoHaystack is deprecated in MongoDB 4.4", "4.2.1")
-  def geoHaystack(fieldName: String, additional: Bson): Bson =
-    JIndexes.geoHaystack(fieldName, additional)
+  def geoHaystack(fieldName: String, additional: String): IndexKey.GeoHaystack =
+    IndexKey.GeoHaystack(fieldName, additional)
 
   /** Create an index key for a text index on the given field.
     *
@@ -90,7 +62,7 @@ object Indexes {
     * @return the index specification
     * @see [[https://www.mongodb.com/docs/manual/core/text text index]]
     */
-  def text(fieldName: String): Bson = JIndexes.text(fieldName)
+  def text(fieldNames: String*): IndexKey.Text = IndexKey.Text(fieldNames)
 
   /** Create an index key for a hashed index on the given field.
     *
@@ -98,7 +70,7 @@ object Indexes {
     * @return the index specification
     * @see [[https://www.mongodb.com/docs/manual/core/hashed hashed index]]
     */
-  def hashed(fieldName: String): Bson = JIndexes.hashed(fieldName)
+  def hashed(fieldNames: String*): IndexKey.Hashed = IndexKey.Hashed(fieldNames)
 
   /** create a compound index specifications.  If any field names are repeated, the last one takes precedence.
     *
@@ -106,6 +78,5 @@ object Indexes {
     * @return the compound index specification
     * @see [[https://www.mongodb.com/docs/manual/core/index-compound compoundIndex]]
     */
-  def compoundIndex(indexes: Bson*): Bson = JIndexes.compoundIndex(indexes.asJava)
-
+  def compound(indexes: IndexKey*): IndexKey.Compound = IndexKey.Compound(indexes)
 }

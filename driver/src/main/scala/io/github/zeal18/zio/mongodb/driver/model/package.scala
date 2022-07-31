@@ -160,22 +160,6 @@ package object model {
     def apply(): CreateViewOptions = new com.mongodb.client.model.CreateViewOptions()
   }
 
-  /** The default options for a collection to apply on the creation of indexes.
-    *
-    * @note Requires MongoDB 3.2 or greater
-    * @see [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Index options]]
-    */
-  type IndexOptionDefaults = com.mongodb.client.model.IndexOptionDefaults
-
-  /** Options for creating an index
-    */
-  object IndexOptionDefaults {
-
-    /** Construct a new instance.
-      */
-    def apply(): IndexOptionDefaults = new com.mongodb.client.model.IndexOptionDefaults()
-  }
-
   /** The options to apply for delete operations
     */
   type DeleteOptions = com.mongodb.client.model.DeleteOptions
@@ -309,49 +293,6 @@ package object model {
     */
   object InsertManyOptions {
     def apply(): InsertManyOptions = new com.mongodb.client.model.InsertManyOptions()
-  }
-
-  /** The options to apply to the creation of an index.
-    */
-  type IndexOptions = com.mongodb.client.model.IndexOptions
-
-  /** The options to apply to the command when creating indexes.
-    */
-  type CreateIndexOptions = com.mongodb.client.model.CreateIndexOptions
-
-  /** The options to apply to the command when creating indexes.
-    */
-  type DropIndexOptions = com.mongodb.client.model.DropIndexOptions
-
-  /** The options to apply to the creation of an index.
-    */
-  object IndexOptions {
-    def apply(): IndexOptions = new com.mongodb.client.model.IndexOptions()
-  }
-
-  /** A model describing the creation of a single index.
-    */
-  type IndexModel = com.mongodb.client.model.IndexModel
-
-  /** A model describing the creation of a single index.
-    */
-  object IndexModel {
-
-    /** Construct an instance with the given keys.
-      *
-      * @param keys the index keys
-      * @return the IndexModel
-      */
-    def apply(keys: Bson): IndexModel = new com.mongodb.client.model.IndexModel(keys)
-
-    /** Construct an instance with the given keys and options.
-      *
-      * @param keys the index keys
-      * @param indexOptions the index options
-      * @return the IndexModel
-      */
-    def apply(keys: Bson, indexOptions: IndexOptions): IndexModel =
-      new com.mongodb.client.model.IndexModel(keys, indexOptions)
   }
 
   /** The options to apply to an operation that inserts a single document into a collection.

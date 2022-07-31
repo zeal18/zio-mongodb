@@ -10,7 +10,6 @@ import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoCollection as JMongoCollection
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
-import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.MongoNamespace
 import io.github.zeal18.zio.mongodb.driver.ReadConcern
 import io.github.zeal18.zio.mongodb.driver.ReadPreference
@@ -18,14 +17,19 @@ import io.github.zeal18.zio.mongodb.driver.WriteConcern
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
+import io.github.zeal18.zio.mongodb.driver.indexes.CreateIndexOptions
+import io.github.zeal18.zio.mongodb.driver.indexes.DropIndexOptions
+import io.github.zeal18.zio.mongodb.driver.indexes.Index
+import io.github.zeal18.zio.mongodb.driver.indexes.IndexKey
+import io.github.zeal18.zio.mongodb.driver.indexes.IndexOptions
 import io.github.zeal18.zio.mongodb.driver.model.*
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.result.*
 import io.github.zeal18.zio.mongodb.driver.updates.Update
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
+import zio.Chunk
 import zio.Task
-import zio.stream.ZStream
 
 /** The MongoCollection representation.
   *
@@ -1243,98 +1247,108 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     */
   def drop(clientSession: ClientSession): Task[Unit] = wrapped.drop(clientSession).getOne.unit
 
-  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
-    * @param key     an object describing the index key(s), which may not be null. This can be of any type for which a `Codec` is
-    *                registered
-    * @return an empty Observable that indicates when the operation has completed
+  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
+    * @param key an object describing the index key(s)
+    * @return created index name
     */
-  def createIndex(key: Bson): Task[String] = wrapped.createIndex(key).getOne
+  def createIndex(key: IndexKey): Task[String] = wrapped.createIndex(key.toBson).getOne
 
-  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
-    * @param key     an object describing the index key(s), which may not be null. This can be of any type for which a `Codec` is
-    *                registered
+  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
+    * @param key     an object describing the index key(s)
     * @param options the options for the index
-    * @return an empty Observable that indicates when the operation has completed
+    * @return created index name
     */
-  def createIndex(key: Bson, options: IndexOptions): Task[String] =
-    wrapped.createIndex(key, options).getOne
+  def createIndex(key: IndexKey, options: IndexOptions): Task[String] =
+    wrapped.createIndex(key.toBson, options.toJava).getOne
 
-  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
+  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
     * @param key     an object describing the index key(s), which may not be null. This can be of any type for which a `Codec` is
     *                registered
-    * @return an empty Observable that indicates when the operation has completed
+    * @return created index name
     * @note Requires MongoDB 3.6 or greater
     */
-  def createIndex(clientSession: ClientSession, key: Bson): Task[String] =
-    wrapped.createIndex(clientSession, key).getOne
+  def createIndex(clientSession: ClientSession, key: IndexKey): Task[String] =
+    wrapped.createIndex(clientSession, key.toBson).getOne
 
-  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
+  /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
     * @param key     an object describing the index key(s), which may not be null. This can be of any type for which a `Codec` is
     *                registered
     * @param options the options for the index
-    * @return an empty Observable that indicates when the operation has completed
+    * @return created index name
     * @note Requires MongoDB 3.6 or greater
     */
   def createIndex(
     clientSession: ClientSession,
-    key: Bson,
+    key: IndexKey,
     options: IndexOptions,
   ): Task[String] =
-    wrapped.createIndex(clientSession, key, options).getOne
+    wrapped.createIndex(clientSession, key.toBson, options.toJava).getOne
 
   /** Create multiple indexes.
     *
-    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
-    * @param models the list of indexes to create
-    * @return a Observable with the names of the indexes
+    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
+    * @param indexes the list of indexes to create
+    * @return names of the indexes
     */
-  def createIndexes(models: Seq[IndexModel]): ZStream[Any, Throwable, String] =
-    wrapped.createIndexes(models.asJava).stream
+  def createIndexes(indexes: Index*): Task[Chunk[String]] = {
+    val models = indexes.map(_.toJava).asJava
+
+    wrapped.createIndexes(models).stream.runCollect
+  }
 
   /** Create multiple indexes.
     *
-    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
-    * @param models the list of indexes to create
+    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
+    * @param indexes the list of indexes to create
     * @param createIndexOptions options to use when creating indexes
-    * @return a Observable with the names of the indexes
+    * @return names of the indexes
     */
   def createIndexes(
-    models: Seq[IndexModel],
+    indexes: Seq[Index],
     createIndexOptions: CreateIndexOptions,
-  ): ZStream[Any, Throwable, String] =
-    wrapped.createIndexes(models.asJava, createIndexOptions).stream
+  ): Task[Chunk[String]] = {
+    val models = indexes.map(_.toJava).asJava
+
+    wrapped.createIndexes(models, createIndexOptions.toJava).stream.runCollect
+  }
 
   /** Create multiple indexes.
     *
-    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
+    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
-    * @param models the list of indexes to create
-    * @return a Observable with the names of the indexes
+    * @param indexes the list of indexes to create
+    * @return names of the indexes
     * @note Requires MongoDB 3.6 or greater
     */
   def createIndexes(
     clientSession: ClientSession,
-    models: Seq[IndexModel],
-  ): ZStream[Any, Throwable, String] =
-    wrapped.createIndexes(clientSession, models.asJava).stream
+    indexes: Index*,
+  ): Task[Chunk[String]] = {
+    val models = indexes.map(_.toJava).asJava
+
+    wrapped.createIndexes(clientSession, models).stream.runCollect
+  }
 
   /** Create multiple indexes.
     *
-    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create Index]]
+    * [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
-    * @param models the list of indexes to create
+    * @param indexes the list of indexes to create
     * @param createIndexOptions options to use when creating indexes
-    * @return a Observable with the names of the indexes
+    * @return names of the indexes
     * @note Requires MongoDB 3.6 or greater
     */
   def createIndexes(
     clientSession: ClientSession,
-    models: Seq[IndexModel],
+    indexes: Seq[Index],
     createIndexOptions: CreateIndexOptions,
-  ): ZStream[Any, Throwable, String] =
-    wrapped.createIndexes(clientSession, models.asJava, createIndexOptions).stream
+  ): Task[Chunk[String]] = {
+    val models = indexes.map(_.toJava).asJava
+
+    wrapped.createIndexes(clientSession, models, createIndexOptions.toJava).stream.runCollect
+  }
 
   /** Get all the indexes in this collection.
     *
@@ -1362,7 +1376,7 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param indexName the name of the index to remove
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
   def dropIndex(indexName: String): Task[Unit] = wrapped.dropIndex(indexName).getOneOpt.unit
 
@@ -1371,33 +1385,33 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param indexName the name of the index to remove
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
   def dropIndex(indexName: String, dropIndexOptions: DropIndexOptions): Task[Unit] =
-    wrapped.dropIndex(indexName, dropIndexOptions).getOneOpt.unit
+    wrapped.dropIndex(indexName, dropIndexOptions.toJava).getOneOpt.unit
 
   /** Drops the index given the keys used to create it.
     *
     * @param keys the keys of the index to remove
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
-  def dropIndex(keys: Bson): Task[Unit] = wrapped.dropIndex(keys).getOneOpt.unit
+  def dropIndex(keys: IndexKey): Task[Unit] = wrapped.dropIndex(keys.toBson).getOneOpt.unit
 
   /** Drops the index given the keys used to create it.
     *
     * @param keys the keys of the index to remove
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
-  def dropIndex(keys: Bson, dropIndexOptions: DropIndexOptions): Task[Unit] =
-    wrapped.dropIndex(keys, dropIndexOptions).getOneOpt.unit
+  def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions): Task[Unit] =
+    wrapped.dropIndex(keys.toBson, dropIndexOptions.toJava).getOneOpt.unit
 
   /** Drops the given index.
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param clientSession the client session with which to associate this operation
     * @param indexName the name of the index to remove
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
   def dropIndex(clientSession: ClientSession, indexName: String): Task[Unit] =
@@ -1409,7 +1423,7 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     * @param clientSession the client session with which to associate this operation
     * @param indexName the name of the index to remove
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
   def dropIndex(
@@ -1417,37 +1431,37 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     indexName: String,
     dropIndexOptions: DropIndexOptions,
   ): Task[Unit] =
-    wrapped.dropIndex(clientSession, indexName, dropIndexOptions).getOneOpt.unit
+    wrapped.dropIndex(clientSession, indexName, dropIndexOptions.toJava).getOneOpt.unit
 
   /** Drops the index given the keys used to create it.
     *
     * @param clientSession the client session with which to associate this operation
     * @param keys the keys of the index to remove
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
-  def dropIndex(clientSession: ClientSession, keys: Bson): Task[Unit] =
-    wrapped.dropIndex(clientSession, keys).getOneOpt.unit
+  def dropIndex(clientSession: ClientSession, keys: IndexKey): Task[Unit] =
+    wrapped.dropIndex(clientSession, keys.toBson).getOneOpt.unit
 
   /** Drops the index given the keys used to create it.
     *
     * @param clientSession the client session with which to associate this operation
     * @param keys the keys of the index to remove
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
   def dropIndex(
     clientSession: ClientSession,
-    keys: Bson,
+    keys: IndexKey,
     dropIndexOptions: DropIndexOptions,
   ): Task[Unit] =
-    wrapped.dropIndex(clientSession, keys, dropIndexOptions).getOneOpt.unit
+    wrapped.dropIndex(clientSession, keys.toBson, dropIndexOptions.toJava).getOneOpt.unit
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
   def dropIndexes(): Task[Unit] = wrapped.dropIndexes().getOneOpt.unit
 
@@ -1455,16 +1469,16 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     */
   def dropIndexes(dropIndexOptions: DropIndexOptions): Task[Unit] =
-    wrapped.dropIndexes(dropIndexOptions).getOneOpt.unit
+    wrapped.dropIndexes(dropIndexOptions.toJava).getOneOpt.unit
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param clientSession the client session with which to associate this operation
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
   def dropIndexes(clientSession: ClientSession): Task[Unit] =
@@ -1475,14 +1489,14 @@ case class MongoCollection[TResult](private val wrapped: JMongoCollection[TResul
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @param clientSession the client session with which to associate this operation
     * @param dropIndexOptions options to use when dropping indexes
-    * @return an empty Observable that indicates when the operation has completed
+    * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
   def dropIndexes(
     clientSession: ClientSession,
     dropIndexOptions: DropIndexOptions,
   ): Task[Unit] =
-    wrapped.dropIndexes(clientSession, dropIndexOptions).getOneOpt.unit
+    wrapped.dropIndexes(clientSession, dropIndexOptions.toJava).getOneOpt.unit
 
   /** Rename the collection with oldCollectionName to the newCollectionName.
     *
