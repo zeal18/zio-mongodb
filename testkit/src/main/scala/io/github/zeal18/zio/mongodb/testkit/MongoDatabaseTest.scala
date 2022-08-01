@@ -23,7 +23,7 @@ object MongoDatabaseTest {
     ZLayer
       .fromEffect(for {
         random <- Live.live(ZIO.service[Random.Service])
-        name   <- random.nextString(10)
+        name   <- random.nextUUID.map(_.toString)
       } yield name)
       .flatMap(name => live(name.get))
 
