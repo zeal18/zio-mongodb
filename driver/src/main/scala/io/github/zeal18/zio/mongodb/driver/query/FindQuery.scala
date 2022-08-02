@@ -12,6 +12,7 @@ import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.model.Collation
+import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import zio.Task
 import zio.stream.ZStream
 
@@ -108,11 +109,11 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
   /** Sets the sort criteria to apply to the query.
     *
     * [[https://www.mongodb.com/docs/manual/reference/method/cursor.sort/ Sort]]
-    * @param sort the sort criteria, which may be null.
+    * @param sort the sort criteria.
     * @return this
     */
-  def sort(sort: Bson): FindQuery[TResult] = {
-    wrapped.sort(sort)
+  def sort(sorts: Sort*): FindQuery[TResult] = {
+    wrapped.sort(Sort.Compound(sorts).toBson)
     this
   }
 
