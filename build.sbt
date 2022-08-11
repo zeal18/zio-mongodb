@@ -15,7 +15,7 @@ val flapdoodleVersion = "3.4.8"
 val immutablesVersion = "2.9.0"
 
 val magnolia2Version = "1.1.2"
-val magnolia3Version = "1.1.4"
+val magnolia3Version = "1.1.5"
 
 val scalatestVersion = "3.2.13"
 
