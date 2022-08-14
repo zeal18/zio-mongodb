@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.reflect.ClassTag
 import scala.util.Try
 
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
 import magnolia1.*
@@ -65,7 +66,12 @@ object MagnoliaCodec {
       extends Codec[A] {
 
     private def getLabel[S](p: Param[Codec, S]): String =
-      p.annotations.collectFirst { case BsonProperty(label) => label }.getOrElse(p.label)
+      p.annotations
+        .collectFirst {
+          case BsonId()            => "_id"
+          case BsonProperty(label) => label
+        }
+        .getOrElse(p.label)
 
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit =
       ctx.parameters

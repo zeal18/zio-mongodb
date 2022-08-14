@@ -1,5 +1,6 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
 import zio.test.*
@@ -75,6 +76,7 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
 
   case class PropertyAnnotation(@BsonProperty("b") a: Int)
   case class IgnoreAnnotation(a: Int, @BsonIgnore b: Int = 0)
+  case class IdAnnotation(@BsonId a: Int)
 
   override def spec: ZSpec[Environment, Failure] =
     suite("MagnoliaCodecsSpec")(
@@ -221,6 +223,7 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
         testCodecRoundtrip("property", PropertyAnnotation(1), """{"b": 1}"""),
         testCodecRoundtrip("ignore", IgnoreAnnotation(2), """{"a": 2}"""),
         testCodecDecode("ignore value", """{"a": 4, "b": 9}""", IgnoreAnnotation(a = 4, b = 0)),
+        testCodecRoundtrip("id", IdAnnotation(42), """{"_id": 42}"""),
       ),
     )
 }
