@@ -8,13 +8,13 @@ object MongoClientSpec extends DefaultRunnableSpec {
   override def spec: ZSpec[Environment, Failure] = suite("MongoClientSpec")(
     testM("getDatabase") {
       for {
-        client <- ZIO.service[MongoClient]
+        client <- ZIO.service[MongoClient.Service]
         db = client.getDatabase("db-test")
       } yield assertTrue(db.name == "db-test")
     },
     testM("listDatabaseNames") {
       for {
-        client <- ZIO.service[MongoClient]
+        client <- ZIO.service[MongoClient.Service]
         db = client.getDatabase("db-test")
         _   <- db.createCollection("collection-test") // create collection to create the database
         dbs <- client.listDatabaseNames().runCollect

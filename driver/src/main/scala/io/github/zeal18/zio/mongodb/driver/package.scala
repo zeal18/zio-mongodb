@@ -7,6 +7,7 @@ import org.bson.BsonDocumentReader
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.DocumentCodec
 import org.reactivestreams.Publisher
+import zio.Has
 import zio.Task
 import zio.interop.reactivestreams.*
 import zio.stream.ZStream
@@ -18,6 +19,10 @@ package object driver {
     def getOne: Task[A] =
       getOneOpt.someOrFail(new IllegalStateException("Expected one value but received nothing"))
   }
+
+  type MongoClient        = Has[MongoClient.Service]
+  type MongoDatabase      = Has[MongoDatabase.Service]
+  type MongoCollection[A] = Has[MongoCollection.Service[A]]
 
   /** An immutable Document implementation.
     *
