@@ -37,4 +37,19 @@ package object codecs {
       assertTrue(doc == value, resultDoc.toString() == s"""{"test-value": $expected}""")
     }
 
+  private[codecs] def testCodecDecode[A: Codec](
+    title: String,
+    bson: String,
+    expected: A,
+  ) =
+    test(title) {
+      val codec = Codec[A]
+
+      val reader = new BsonDocumentReader(org.bson.BsonDocument.parse(bson))
+      val decCtx = DecoderContext.builder().build()
+
+      val doc = codec.decode(reader, decCtx)
+
+      assertTrue(doc == expected)
+    }
 }

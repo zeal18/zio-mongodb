@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.reflect.ClassTag
 import scala.util.Try
 
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
 import magnolia1.*
 import org.bson.BsonReader
@@ -64,19 +65,20 @@ object MagnoliaCodec {
       extends Codec[A] {
 
     private def getLabel[S](p: Param[Codec, S]): String =
-      p.annotations
-        .collectFirst { case BsonProperty(label) =>
-          label
-        }
-        .getOrElse(p.label)
+      p.annotations.collectFirst { case BsonProperty(label) => label }.getOrElse(p.label)
 
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit =
-      ctx.parameters.foreach { param =>
-        val value      = param.dereference(x)
-        val childCodec = param.typeclass
-        writer.writeName(getLabel(param))
-        childCodec.encode(writer, value, encoderCtx)
-      }
+      ctx.parameters
+        .filterNot(_.annotations.exists {
+          case BsonIgnore() => true
+          case _            => false
+        })
+        .foreach { param =>
+          val value      = param.dereference(x)
+          val childCodec = param.typeclass
+          writer.writeName(getLabel(param))
+          childCodec.encode(writer, value, encoderCtx)
+        }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A = {
       @tailrec
@@ -101,11 +103,25 @@ object MagnoliaCodec {
                 reader.skipValue()
                 step(values, errors)
               case Some(param) =>
-                val codec = param.typeclass
-                val (maybeValue, additionalErrors) =
-                  Try(codec.decode(reader, decoderCtx))
-                    .fold(e => (None, List(e.getMessage)), v => (Some(param.label -> v), Nil))
-                step(values ++ maybeValue, additionalErrors ::: errors)
+                val ignored = param.annotations.exists {
+                  case BsonIgnore() => true
+                  case _            => false
+                }
+
+                if (ignored && param.default.isEmpty)
+                  throw new BsonSerializationException(
+                    s"Field '$name' is ignored but doesn't have a default value",
+                  ) // scalafix:ok
+                else if (ignored) {
+                  reader.skipValue()
+                  step(values, errors)
+                } else {
+                  val codec = param.typeclass
+                  val (maybeValue, additionalErrors) =
+                    Try(codec.decode(reader, decoderCtx))
+                      .fold(e => (None, List(e.getMessage)), v => (Some(param.label -> v), Nil))
+                  step(values ++ maybeValue, additionalErrors ::: errors)
+                }
             }
         }
       }
