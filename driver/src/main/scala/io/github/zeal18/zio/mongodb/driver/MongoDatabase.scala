@@ -14,382 +14,540 @@ import io.github.zeal18.zio.mongodb.driver.ReadConcern
 import io.github.zeal18.zio.mongodb.driver.ReadPreference
 import io.github.zeal18.zio.mongodb.driver.WriteConcern
 import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.classTagToClassOf
 import io.github.zeal18.zio.mongodb.driver.query.*
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Task
+import zio.ZLayer
+import zio.ZManaged
 import zio.stream.ZStream
 
-/** The MongoDatabase representation.
-  *
-  * @param wrapped the underlying java MongoDatabase
-  */
-case class MongoDatabase(private[driver] val wrapped: JMongoDatabase) {
+object MongoDatabase {
+  trait Service {
 
-  /** Gets the name of the database.
-    *
-    * @return the database name
-    */
-  lazy val name: String = wrapped.getName
+    /** Gets the name of the database.
+      *
+      * @return the database name
+      */
+    def name: String
 
-  /** Get the codec registry for the MongoDatabase.
-    *
-    * @return the { @link org.bson.codecs.configuration.CodecRegistry}
-    */
-  lazy val codecRegistry: CodecRegistry = wrapped.getCodecRegistry
+    /** Get the codec registry for the MongoDatabase.
+      *
+      * @return the { @link org.bson.codecs.configuration.CodecRegistry}
+      */
+    def codecRegistry: CodecRegistry
 
-  /** Get the read preference for the MongoDatabase.
-    *
-    * @return the { @link com.mongodb.ReadPreference}
-    */
-  lazy val readPreference: ReadPreference = wrapped.getReadPreference
+    /** Get the read preference for the MongoDatabase.
+      *
+      * @return the { @link com.mongodb.ReadPreference}
+      */
+    def readPreference: ReadPreference
 
-  /** Get the write concern for the MongoDatabase.
-    *
-    * @return the { @link com.mongodb.WriteConcern}
-    */
-  lazy val writeConcern: WriteConcern = wrapped.getWriteConcern
+    /** Get the write concern for the MongoDatabase.
+      *
+      * @return the { @link com.mongodb.WriteConcern}
+      */
+    def writeConcern: WriteConcern
 
-  /** Get the read concern for the MongoDatabase.
-    *
-    * @return the [[ReadConcern]]
-    */
-  lazy val readConcern: ReadConcern = wrapped.getReadConcern
+    /** Get the read concern for the MongoDatabase.
+      *
+      * @return the [[ReadConcern]]
+      */
+    def readConcern: ReadConcern
 
-  /** Create a new MongoDatabase instance with a different codec registry.
-    *
-    * @param codecRegistry the new { @link org.bson.codecs.configuration.CodecRegistry} for the collection
-    * @return a new MongoDatabase instance with the different codec registry
-    */
-  def withCodecRegistry(codecRegistry: CodecRegistry): MongoDatabase =
-    MongoDatabase(wrapped.withCodecRegistry(codecRegistry))
+    /** Create a new MongoDatabase instance with a different codec registry.
+      *
+      * @param codecRegistry the new { @link org.bson.codecs.configuration.CodecRegistry} for the collection
+      * @return a new MongoDatabase instance with the different codec registry
+      */
+    def withCodecRegistry(codecRegistry: CodecRegistry): MongoDatabase.Service
 
-  /** Create a new MongoDatabase instance with a different read preference.
-    *
-    * @param readPreference the new { @link com.mongodb.ReadPreference} for the collection
-    * @return a new MongoDatabase instance with the different readPreference
-    */
-  def withReadPreference(readPreference: ReadPreference): MongoDatabase =
-    MongoDatabase(wrapped.withReadPreference(readPreference))
+    /** Create a new MongoDatabase instance with a different read preference.
+      *
+      * @param readPreference the new { @link com.mongodb.ReadPreference} for the collection
+      * @return a new MongoDatabase instance with the different readPreference
+      */
+    def withReadPreference(readPreference: ReadPreference): MongoDatabase.Service
 
-  /** Create a new MongoDatabase instance with a different write concern.
-    *
-    * @param writeConcern the new { @link com.mongodb.WriteConcern} for the collection
-    * @return a new MongoDatabase instance with the different writeConcern
-    */
-  def withWriteConcern(writeConcern: WriteConcern): MongoDatabase =
-    MongoDatabase(wrapped.withWriteConcern(writeConcern))
+    /** Create a new MongoDatabase instance with a different write concern.
+      *
+      * @param writeConcern the new { @link com.mongodb.WriteConcern} for the collection
+      * @return a new MongoDatabase instance with the different writeConcern
+      */
+    def withWriteConcern(writeConcern: WriteConcern): MongoDatabase.Service
 
-  /** Create a new MongoDatabase instance with a different read concern.
-    *
-    * @param readConcern the new [[ReadConcern]] for the collection
-    * @return a new MongoDatabase instance with the different ReadConcern
-    */
-  def withReadConcern(readConcern: ReadConcern): MongoDatabase =
-    MongoDatabase(wrapped.withReadConcern(readConcern))
+    /** Create a new MongoDatabase instance with a different read concern.
+      *
+      * @param readConcern the new [[ReadConcern]] for the collection
+      * @return a new MongoDatabase instance with the different ReadConcern
+      */
+    def withReadConcern(readConcern: ReadConcern): MongoDatabase.Service
 
-  /** Gets a collection, with a specific default document class.
+    /** Creates a client session.
+      *
+      * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
+      *
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def startSession(): ZManaged[Any, Throwable, ClientSession]
+
+    /** Creates a client session.
+      *
+      * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
+      *
+      * @param options  the options for the client session
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def startSession(options: ClientSessionOptions): ZManaged[Any, Throwable, ClientSession]
+
+    /** Gets a collection, with a specific default document class.
+      *
+      * @param collectionName the name of the collection to return
+      * @tparam TResult       the type of the class to use instead of [[Document]].
+      * @return the collection
+      */
+    def getCollection[A](collectionName: String)(implicit
+      codec: Codec[A],
+    ): MongoCollection.Service[A]
+
+    /** Executes command in the context of the current database using the primary server.
+      *
+      * @param command  the command to be run
+      * @return a Observable containing the command result
+      */
+    def runCommand(command: Bson): Task[Option[Document]]
+
+    /** Executes command in the context of the current database.
+      *
+      * @param command        the command to be run
+      * @param readPreference the [[ReadPreference]] to be used when executing the command
+      * @return a Observable containing the command result
+      */
+    def runCommand(command: Bson, readPreference: ReadPreference): Task[Option[Document]]
+
+    /** Executes command in the context of the current database using the primary server.
+      *
+      * @param clientSession the client session with which to associate this operation
+      * @param command  the command to be run
+      * @return a Observable containing the command result
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]]
+
+    /** Executes command in the context of the current database.
+      *
+      * @param command        the command to be run
+      * @param readPreference the [[ReadPreference]] to be used when executing the command
+      * @tparam TResult       the type of the class to use instead of [[Document]].
+      * @return a Observable containing the command result
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def runCommand(
+      clientSession: ClientSession,
+      command: Bson,
+      readPreference: ReadPreference,
+    ): Task[Option[Document]]
+
+    /** Drops this database.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/dropDatabase/#dbcmd.dropDatabase Drop database]]
+      * @return a Observable identifying when the database has been dropped
+      */
+    def drop(): Task[Unit]
+
+    /** Drops this database.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/dropDatabase/#dbcmd.dropDatabase Drop database]]
+      * @param clientSession the client session with which to associate this operation
+      * @return a Observable identifying when the database has been dropped
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def drop(clientSession: ClientSession): Task[Unit]
+
+    /** Gets the names of all the collections in this database.
+      *
+      * @return a Observable with all the names of all the collections in this database
+      */
+    def listCollectionNames(): ZStream[Any, Throwable, String]
+
+    /** Finds all the collections in this database.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/command/listCollections listCollections]]
+      * @return the fluent list collections interface
+      */
+    def listCollections(): ListCollectionsQuery[Document]
+
+    /** Gets the names of all the collections in this database.
+      *
+      * @param clientSession the client session with which to associate this operation
+      * @return a Observable with all the names of all the collections in this database
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def listCollectionNames(clientSession: ClientSession): ZStream[Any, Throwable, String]
+
+    /** Finds all the collections in this database.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/command/listCollections listCollections]]
+      * @param clientSession the client session with which to associate this operation
+      * @return the fluent list collections interface
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def listCollections(clientSession: ClientSession): ListCollectionsQuery[Document]
+
+    /** Create a new collection with the given name.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param collectionName the name for the new collection to create
+      * @return a Observable identifying when the collection has been created
+      */
+    def createCollection(collectionName: String): Task[Unit]
+
+    /** Create a new collection with the selected options
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param collectionName the name for the new collection to create
+      * @param options        various options for creating the collection
+      * @return a Observable identifying when the collection has been created
+      */
+    def createCollection(collectionName: String, options: CreateCollectionOptions): Task[Unit]
+
+    /** Create a new collection with the given name.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param clientSession the client session with which to associate this operation
+      * @param collectionName the name for the new collection to create
+      * @return a Observable identifying when the collection has been created
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def createCollection(clientSession: ClientSession, collectionName: String): Task[Unit]
+
+    /** Create a new collection with the selected options
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param clientSession the client session with which to associate this operation
+      * @param collectionName the name for the new collection to create
+      * @param options        various options for creating the collection
+      * @return a Observable identifying when the collection has been created
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def createCollection(
+      clientSession: ClientSession,
+      collectionName: String,
+      options: CreateCollectionOptions,
+    ): Task[Unit]
+
+    /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param viewName the name of the view to create
+      * @param viewOn   the backing collection/view for the view
+      * @param pipeline the pipeline that defines the view
+      * @note Requires MongoDB 3.4 or greater
+      */
+    def createView(viewName: String, viewOn: String, pipeline: Seq[Aggregation]): Task[Unit]
+
+    /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param viewName          the name of the view to create
+      * @param viewOn            the backing collection/view for the view
+      * @param pipeline          the pipeline that defines the view
+      * @param createViewOptions various options for creating the view
+      * @note Requires MongoDB 3.4 or greater
+      */
+    def createView(
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+      createViewOptions: CreateViewOptions,
+    ): Task[Unit]
+
+    /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param clientSession the client session with which to associate this operation
+      * @param viewName the name of the view to create
+      * @param viewOn   the backing collection/view for the view
+      * @param pipeline the pipeline that defines the view
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def createView(
+      clientSession: ClientSession,
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+    ): Task[Unit]
+
+    /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
+      *
+      * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
+      * @param clientSession the client session with which to associate this operation
+      * @param viewName          the name of the view to create
+      * @param viewOn            the backing collection/view for the view
+      * @param pipeline          the pipeline that defines the view
+      * @param createViewOptions various options for creating the view
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def createView(
+      clientSession: ClientSession,
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+      createViewOptions: CreateViewOptions,
+    ): Task[Unit]
+
+    /** Creates a change stream for this collection.
+      *
+      * @return the change stream observable
+      * @note Requires MongoDB 4.0 or greater
+      */
+    def watch(): ChangeStreamQuery[Document]
+
+    /** Creates a change stream for this collection.
+      *
+      * @param pipeline the aggregation pipeline to apply to the change stream
+      * @return the change stream observable
+      * @note Requires MongoDB 4.0 or greater
+      */
+    def watch(pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
+
+    /** Creates a change stream for this collection.
+      *
+      * @param clientSession the client session with which to associate this operation
+      * @return the change stream observable
+      * @note Requires MongoDB 4.0 or greater
+      */
+    def watch(clientSession: ClientSession): ChangeStreamQuery[Document]
+
+    /** Creates a change stream for this collection.
+      *
+      * @param clientSession the client session with which to associate this operation
+      * @param pipeline the aggregation pipeline to apply to the change stream
+      * @return the change stream observable
+      * @note Requires MongoDB 4.0 or greater
+      */
+    def watch(clientSession: ClientSession, pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
+
+    /** Aggregates documents according to the specified aggregation pipeline.
+      *
+      * @param pipeline the aggregate pipeline
+      * @return a Observable containing the result of the aggregation operation
+      *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[Document]
+
+    /** Aggregates documents according to the specified aggregation pipeline.
+      *
+      * @param clientSession the client session with which to associate this operation
+      * @param pipeline the aggregate pipeline
+      * @return a Observable containing the result of the aggregation operation
+      *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
+      * @note Requires MongoDB 3.6 or greater
+      */
+    def aggregate(
+      clientSession: ClientSession,
+      pipeline: Seq[Aggregation],
+    ): AggregateQuery[Document]
+  }
+
+  /** Gets the database with the given name.
     *
-    * @param collectionName the name of the collection to return
-    * @tparam TResult       the type of the class to use instead of [[Document]].
-    * @return the collection
+    * @param name the name of the database
+    * @return the database
     */
-  def getCollection[A](
-    collectionName: String,
-  )(implicit codec: Codec[A]): MongoCollection[A] =
-    MongoCollection(
+  def live(name: String): ZLayer[MongoClient, Nothing, MongoDatabase] =
+    ZLayer.fromFunction[MongoClient, MongoDatabase.Service](_.get.getDatabase(name))
+
+  final private[driver] case class Live(client: MongoClient.Service, wrapped: JMongoDatabase)
+      extends Service {
+    override lazy val name: String = wrapped.getName
+
+    override lazy val codecRegistry: CodecRegistry = wrapped.getCodecRegistry
+
+    override lazy val readPreference: ReadPreference = wrapped.getReadPreference
+
+    override lazy val writeConcern: WriteConcern = wrapped.getWriteConcern
+
+    override lazy val readConcern: ReadConcern = wrapped.getReadConcern
+
+    override def withCodecRegistry(codecRegistry: CodecRegistry): MongoDatabase.Service =
+      Live(client, wrapped.withCodecRegistry(codecRegistry))
+
+    override def withReadPreference(readPreference: ReadPreference): MongoDatabase.Service =
+      Live(client, wrapped.withReadPreference(readPreference))
+
+    override def withWriteConcern(writeConcern: WriteConcern): MongoDatabase.Service =
+      Live(client, wrapped.withWriteConcern(writeConcern))
+
+    override def withReadConcern(readConcern: ReadConcern): MongoDatabase.Service =
+      Live(client, wrapped.withReadConcern(readConcern))
+
+    override def startSession(): ZManaged[Any, Throwable, ClientSession] = client.startSession()
+
+    override def startSession(
+      options: ClientSessionOptions,
+    ): ZManaged[Any, Throwable, ClientSession] =
+      client.startSession(options)
+
+    override def getCollection[A](
+      collectionName: String,
+    )(implicit codec: Codec[A]): MongoCollection.Service[A] =
+      MongoCollection.Live[A](
+        this,
+        wrapped
+          .getCollection(collectionName, codec.getEncoderClass())
+          .withCodecRegistry(fromRegistries(fromCodecs(codec), MongoClient.DEFAULT_CODEC_REGISTRY)),
+      )
+
+    override def runCommand(command: Bson): Task[Option[Document]] =
+      wrapped.runCommand[Document](command, implicitly[ClassTag[Document]]).getOneOpt
+
+    override def runCommand(command: Bson, readPreference: ReadPreference): Task[Option[Document]] =
       wrapped
-        .getCollection(collectionName, codec.getEncoderClass())
-        .withCodecRegistry(fromRegistries(fromCodecs(codec), MongoClient.DEFAULT_CODEC_REGISTRY)),
-    )
+        .runCommand[Document](command, readPreference, implicitly[ClassTag[Document]])
+        .getOneOpt
 
-  /** Executes command in the context of the current database using the primary server.
-    *
-    * @param command  the command to be run
-    * @return a Observable containing the command result
-    */
-  def runCommand(command: Bson)(implicit ct: ClassTag[Document]): Task[Option[Document]] =
-    wrapped.runCommand[Document](command, ct).getOneOpt
+    override def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]] =
+      wrapped.runCommand[Document](clientSession, command, implicitly[ClassTag[Document]]).getOneOpt
 
-  /** Executes command in the context of the current database.
-    *
-    * @param command        the command to be run
-    * @param readPreference the [[ReadPreference]] to be used when executing the command
-    * @return a Observable containing the command result
-    */
-  def runCommand(command: Bson, readPreference: ReadPreference)(implicit
-    ct: ClassTag[Document],
-  ): Task[Option[Document]] =
-    wrapped.runCommand[Document](command, readPreference, ct).getOneOpt
+    override def runCommand(
+      clientSession: ClientSession,
+      command: Bson,
+      readPreference: ReadPreference,
+    ): Task[Option[Document]] =
+      wrapped
+        .runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]])
+        .getOneOpt
 
-  /** Executes command in the context of the current database using the primary server.
-    *
-    * @param clientSession the client session with which to associate this operation
-    * @param command  the command to be run
-    * @return a Observable containing the command result
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def runCommand(clientSession: ClientSession, command: Bson)(implicit
-    ct: ClassTag[Document],
-  ): Task[Option[Document]] =
-    wrapped.runCommand[Document](clientSession, command, ct).getOneOpt
+    override def drop(): Task[Unit] = wrapped.drop().getOne.unit
 
-  /** Executes command in the context of the current database.
-    *
-    * @param command        the command to be run
-    * @param readPreference the [[ReadPreference]] to be used when executing the command
-    * @tparam TResult       the type of the class to use instead of [[Document]].
-    * @return a Observable containing the command result
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def runCommand(
-    clientSession: ClientSession,
-    command: Bson,
-    readPreference: ReadPreference,
-  )(implicit
-    ct: ClassTag[Document],
-  ): Task[Option[Document]] =
-    wrapped.runCommand(clientSession, command, readPreference, ct).getOneOpt
+    override def drop(clientSession: ClientSession): Task[Unit] =
+      wrapped.drop(clientSession).getOne.unit
 
-  /** Drops this database.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/dropDatabase/#dbcmd.dropDatabase Drop database]]
-    * @return a Observable identifying when the database has been dropped
-    */
-  def drop(): Task[Unit] = wrapped.drop().getOne.unit
+    override def listCollectionNames(): ZStream[Any, Throwable, String] =
+      wrapped.listCollectionNames().stream
 
-  /** Drops this database.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/dropDatabase/#dbcmd.dropDatabase Drop database]]
-    * @param clientSession the client session with which to associate this operation
-    * @return a Observable identifying when the database has been dropped
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def drop(clientSession: ClientSession): Task[Unit] = wrapped.drop(clientSession).getOne.unit
+    override def listCollections(): ListCollectionsQuery[Document] =
+      ListCollectionsQuery(wrapped.listCollections(implicitly[ClassTag[Document]]))
 
-  /** Gets the names of all the collections in this database.
-    *
-    * @return a Observable with all the names of all the collections in this database
-    */
-  def listCollectionNames(): ZStream[Any, Throwable, String] = wrapped.listCollectionNames().stream
+    override def listCollectionNames(
+      clientSession: ClientSession,
+    ): ZStream[Any, Throwable, String] =
+      wrapped.listCollectionNames(clientSession).stream
 
-  /** Finds all the collections in this database.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/command/listCollections listCollections]]
-    * @return the fluent list collections interface
-    */
-  def listCollections()(implicit
-    ct: ClassTag[Document],
-  ): ListCollectionsQuery[Document] =
-    ListCollectionsQuery(wrapped.listCollections(ct))
+    override def listCollections(clientSession: ClientSession): ListCollectionsQuery[Document] =
+      ListCollectionsQuery(wrapped.listCollections(clientSession, implicitly[ClassTag[Document]]))
 
-  /** Gets the names of all the collections in this database.
-    *
-    * @param clientSession the client session with which to associate this operation
-    * @return a Observable with all the names of all the collections in this database
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def listCollectionNames(clientSession: ClientSession): ZStream[Any, Throwable, String] =
-    wrapped.listCollectionNames(clientSession).stream
+    override def createCollection(collectionName: String): Task[Unit] =
+      wrapped.createCollection(collectionName).getOneOpt.unit
 
-  /** Finds all the collections in this database.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/command/listCollections listCollections]]
-    * @param clientSession the client session with which to associate this operation
-    * @return the fluent list collections interface
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def listCollections(clientSession: ClientSession)(implicit
-    ct: ClassTag[Document],
-  ): ListCollectionsQuery[Document] =
-    ListCollectionsQuery(wrapped.listCollections(clientSession, ct))
+    override def createCollection(
+      collectionName: String,
+      options: CreateCollectionOptions,
+    ): Task[Unit] =
+      wrapped.createCollection(collectionName, options).getOneOpt.unit
 
-  /** Create a new collection with the given name.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param collectionName the name for the new collection to create
-    * @return a Observable identifying when the collection has been created
-    */
-  def createCollection(collectionName: String): Task[Unit] =
-    wrapped.createCollection(collectionName).getOneOpt.unit
+    override def createCollection(
+      clientSession: ClientSession,
+      collectionName: String,
+    ): Task[Unit] =
+      wrapped.createCollection(clientSession, collectionName).getOneOpt.unit
 
-  /** Create a new collection with the selected options
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param collectionName the name for the new collection to create
-    * @param options        various options for creating the collection
-    * @return a Observable identifying when the collection has been created
-    */
-  def createCollection(
-    collectionName: String,
-    options: CreateCollectionOptions,
-  ): Task[Unit] =
-    wrapped.createCollection(collectionName, options).getOneOpt.unit
+    override def createCollection(
+      clientSession: ClientSession,
+      collectionName: String,
+      options: CreateCollectionOptions,
+    ): Task[Unit] =
+      wrapped.createCollection(clientSession, collectionName, options).getOneOpt.unit
 
-  /** Create a new collection with the given name.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param clientSession the client session with which to associate this operation
-    * @param collectionName the name for the new collection to create
-    * @return a Observable identifying when the collection has been created
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def createCollection(
-    clientSession: ClientSession,
-    collectionName: String,
-  ): Task[Unit] =
-    wrapped.createCollection(clientSession, collectionName).getOneOpt.unit
+    override def createView(
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+    ): Task[Unit] =
+      wrapped.createView(viewName, viewOn, pipeline.map(_.toBson).asJava).getOneOpt.unit
 
-  /** Create a new collection with the selected options
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param clientSession the client session with which to associate this operation
-    * @param collectionName the name for the new collection to create
-    * @param options        various options for creating the collection
-    * @return a Observable identifying when the collection has been created
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def createCollection(
-    clientSession: ClientSession,
-    collectionName: String,
-    options: CreateCollectionOptions,
-  ): Task[Unit] =
-    wrapped.createCollection(clientSession, collectionName, options).getOneOpt.unit
+    override def createView(
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+      createViewOptions: CreateViewOptions,
+    ): Task[Unit] =
+      wrapped
+        .createView(viewName, viewOn, pipeline.map(_.toBson).asJava, createViewOptions)
+        .getOneOpt
+        .unit
 
-  /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param viewName the name of the view to create
-    * @param viewOn   the backing collection/view for the view
-    * @param pipeline the pipeline that defines the view
-    * @note Requires MongoDB 3.4 or greater
-    */
-  def createView(viewName: String, viewOn: String, pipeline: Seq[Bson]): Task[Unit] =
-    wrapped.createView(viewName, viewOn, pipeline.asJava).getOneOpt.unit
+    override def createView(
+      clientSession: ClientSession,
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+    ): Task[Unit] =
+      wrapped
+        .createView(clientSession, viewName, viewOn, pipeline.map(_.toBson).asJava)
+        .getOneOpt
+        .unit
 
-  /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param viewName          the name of the view to create
-    * @param viewOn            the backing collection/view for the view
-    * @param pipeline          the pipeline that defines the view
-    * @param createViewOptions various options for creating the view
-    * @note Requires MongoDB 3.4 or greater
-    */
-  def createView(
-    viewName: String,
-    viewOn: String,
-    pipeline: Seq[Bson],
-    createViewOptions: CreateViewOptions,
-  ): Task[Unit] =
-    wrapped.createView(viewName, viewOn, pipeline.asJava, createViewOptions).getOneOpt.unit
+    override def createView(
+      clientSession: ClientSession,
+      viewName: String,
+      viewOn: String,
+      pipeline: Seq[Aggregation],
+      createViewOptions: CreateViewOptions,
+    ): Task[Unit] =
+      wrapped
+        .createView(
+          clientSession,
+          viewName,
+          viewOn,
+          pipeline.map(_.toBson).asJava,
+          createViewOptions,
+        )
+        .getOneOpt
+        .unit
 
-  /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param clientSession the client session with which to associate this operation
-    * @param viewName the name of the view to create
-    * @param viewOn   the backing collection/view for the view
-    * @param pipeline the pipeline that defines the view
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def createView(
-    clientSession: ClientSession,
-    viewName: String,
-    viewOn: String,
-    pipeline: Seq[Bson],
-  ): Task[Unit] =
-    wrapped.createView(clientSession, viewName, viewOn, pipeline.asJava).getOneOpt.unit
+    override def watch(): ChangeStreamQuery[Document] =
+      ChangeStreamQuery(wrapped.watch(implicitly[ClassTag[Document]]))
 
-  /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
-    *
-    * [[https://www.mongodb.com/docs/manual/reference/commands/create Create Command]]
-    * @param clientSession the client session with which to associate this operation
-    * @param viewName          the name of the view to create
-    * @param viewOn            the backing collection/view for the view
-    * @param pipeline          the pipeline that defines the view
-    * @param createViewOptions various options for creating the view
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def createView(
-    clientSession: ClientSession,
-    viewName: String,
-    viewOn: String,
-    pipeline: Seq[Bson],
-    createViewOptions: CreateViewOptions,
-  ): Task[Unit] =
-    wrapped
-      .createView(clientSession, viewName, viewOn, pipeline.asJava, createViewOptions)
-      .getOneOpt
-      .unit
+    override def watch(
+      pipeline: Seq[Aggregation],
+    ): ChangeStreamQuery[Document] =
+      ChangeStreamQuery(
+        wrapped.watch(pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+      )
 
-  /** Creates a change stream for this collection.
-    *
-    * @return the change stream observable
-    * @note Requires MongoDB 4.0 or greater
-    */
-  def watch()(implicit ct: ClassTag[Document]): ChangeStreamQuery[Document] =
-    ChangeStreamQuery(wrapped.watch(ct))
+    override def watch(
+      clientSession: ClientSession,
+    ): ChangeStreamQuery[Document] =
+      ChangeStreamQuery(wrapped.watch(clientSession, implicitly[ClassTag[Document]]))
 
-  /** Creates a change stream for this collection.
-    *
-    * @param pipeline the aggregation pipeline to apply to the change stream
-    * @return the change stream observable
-    * @note Requires MongoDB 4.0 or greater
-    */
-  def watch(
-    pipeline: Seq[Bson],
-  )(implicit ct: ClassTag[Document]): ChangeStreamQuery[Document] =
-    ChangeStreamQuery(wrapped.watch(pipeline.asJava, ct))
+    override def watch(
+      clientSession: ClientSession,
+      pipeline: Seq[Aggregation],
+    ): ChangeStreamQuery[Document] =
+      ChangeStreamQuery(
+        wrapped.watch(clientSession, pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+      )
 
-  /** Creates a change stream for this collection.
-    *
-    * @param clientSession the client session with which to associate this operation
-    * @return the change stream observable
-    * @note Requires MongoDB 4.0 or greater
-    */
-  def watch(
-    clientSession: ClientSession,
-  )(implicit ct: ClassTag[Document]): ChangeStreamQuery[Document] =
-    ChangeStreamQuery(wrapped.watch(clientSession, ct))
+    override def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[Document] =
+      AggregateQuery(
+        wrapped.aggregate[Document](pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+      )
 
-  /** Creates a change stream for this collection.
-    *
-    * @param clientSession the client session with which to associate this operation
-    * @param pipeline the aggregation pipeline to apply to the change stream
-    * @return the change stream observable
-    * @note Requires MongoDB 4.0 or greater
-    */
-  def watch(
-    clientSession: ClientSession,
-    pipeline: Seq[Bson],
-  )(implicit ct: ClassTag[Document]): ChangeStreamQuery[Document] =
-    ChangeStreamQuery(wrapped.watch(clientSession, pipeline.asJava, ct))
-
-  /** Aggregates documents according to the specified aggregation pipeline.
-    *
-    * @param pipeline the aggregate pipeline
-    * @return a Observable containing the result of the aggregation operation
-    *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def aggregate(
-    pipeline: Seq[Bson],
-  )(implicit ct: ClassTag[Document]): AggregateQuery[Document] =
-    AggregateQuery(wrapped.aggregate[Document](pipeline.asJava, ct))
-
-  /** Aggregates documents according to the specified aggregation pipeline.
-    *
-    * @param clientSession the client session with which to associate this operation
-    * @param pipeline the aggregate pipeline
-    * @return a Observable containing the result of the aggregation operation
-    *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def aggregate(
-    clientSession: ClientSession,
-    pipeline: Seq[Bson],
-  )(implicit ct: ClassTag[Document]): AggregateQuery[Document] =
-    AggregateQuery(wrapped.aggregate[Document](clientSession, pipeline.asJava, ct))
+    override def aggregate(
+      clientSession: ClientSession,
+      pipeline: Seq[Aggregation],
+    ): AggregateQuery[Document] =
+      AggregateQuery(
+        wrapped.aggregate[Document](
+          clientSession,
+          pipeline.map(_.toBson).asJava,
+          implicitly[ClassTag[Document]],
+        ),
+      )
+  }
 }
