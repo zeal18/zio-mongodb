@@ -1,5 +1,8 @@
 package io.github.zeal18.zio.mongodb.bson
 
+import scala.util.Try
+
+import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import org.bson.BsonDocument
 import org.bson.BsonDocumentReader
 import org.bson.BsonDocumentWriter
@@ -51,5 +54,30 @@ package object codecs {
       val doc = codec.decode(reader, decCtx)
 
       assertTrue(doc == expected)
+    }
+
+  private[codecs] def testCodecDecodeError[A: Codec](
+    title: String,
+    bson: String,
+    assertion: BsonError => Assert,
+  ) =
+    test(title) {
+      val codec = Codec[A]
+
+      val reader = new BsonDocumentReader(org.bson.BsonDocument.parse(bson))
+      val decCtx = DecoderContext.builder().build()
+
+      val result = Try(codec.decode(reader, decCtx))
+
+      assertTrue(result.isFailure) && {
+        result.fold[Assert](
+          {
+            case e: BsonError.CodecError => assertion(e.underlying)
+            case e =>
+              Assert(TestArrow.make((_: Any) => Trace.fail("Unexpected error: " + e)))
+          },
+          _ => Assert(TestArrow.make((_: Any) => Trace.fail("Unexpected success"))),
+        )
+      }
     }
 }
