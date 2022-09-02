@@ -12,6 +12,7 @@ import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.model.Collation
+import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import zio.Task
 import zio.stream.ZStream
@@ -101,8 +102,8 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @param projection the project document, which may be null.
     * @return this
     */
-  def projection(projection: Bson): FindQuery[TResult] = {
-    wrapped.projection(projection)
+  def projection(projection: Projection): FindQuery[TResult] = {
+    wrapped.projection(projection.toBson)
     this
   }
 
