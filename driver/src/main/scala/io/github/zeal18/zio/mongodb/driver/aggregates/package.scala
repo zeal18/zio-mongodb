@@ -4,7 +4,6 @@ import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
-import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 
 package object aggregates {
@@ -133,7 +132,7 @@ package object aggregates {
     * @return the `\$unwind` pipeline stage
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/ \$unwind]]
     */
-  def unwind(fieldName: String): Unwind = Unwind(fieldName, new UnwindOptions())
+  def unwind(fieldName: String): Unwind = Unwind(fieldName, UnwindOptions())
 
   /** Creates a `\$unwind` pipeline stage for the specified field name, which must be prefixed by a `\$` sign.
     *

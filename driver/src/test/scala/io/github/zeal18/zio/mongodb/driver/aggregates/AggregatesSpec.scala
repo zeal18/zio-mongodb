@@ -3,9 +3,9 @@ package io.github.zeal18.zio.mongodb.driver.aggregates
 import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.driver.aggregates
+import io.github.zeal18.zio.mongodb.driver.aggregates.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.filters
-import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.projections
 import zio.test.*
 
@@ -59,8 +59,10 @@ object AggregatesSpec extends DefaultRunnableSpec {
     testAggregate("unwind", aggregates.unwind("a"), """{"$unwind": {"path": "a"}}"""),
     testAggregate(
       "unwind with options",
-      aggregates
-        .unwind("a", UnwindOptions().preserveNullAndEmptyArrays(true).includeArrayIndex("b")),
+      aggregates.unwind(
+        "a",
+        UnwindOptions(Some(true), Some("b")),
+      ),
       """{"$unwind": {"path": "a", "preserveNullAndEmptyArrays": true, "includeArrayIndex": "b"}}""",
     ),
   )

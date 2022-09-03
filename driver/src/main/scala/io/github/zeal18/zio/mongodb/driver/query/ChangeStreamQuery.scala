@@ -107,7 +107,7 @@ case class ChangeStreamQuery[TResult](private val wrapped: ChangeStreamPublisher
     * @return this
     */
   def collation(collation: Collation): ChangeStreamQuery[TResult] = {
-    wrapped.collation(collation)
+    wrapped.collation(collation.toJava)
     this
   }
 

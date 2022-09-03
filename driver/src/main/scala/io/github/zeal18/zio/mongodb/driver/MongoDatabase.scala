@@ -3,7 +3,6 @@ package io.github.zeal18.zio.mongodb.driver
 import scala.jdk.CollectionConverters.*
 import scala.reflect.ClassTag
 
-import com.mongodb.client.model.CreateCollectionOptions
 import com.mongodb.client.model.CreateViewOptions
 import com.mongodb.reactivestreams.client.MongoDatabase as JMongoDatabase
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
@@ -16,6 +15,7 @@ import io.github.zeal18.zio.mongodb.driver.WriteConcern
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.classTagToClassOf
+import io.github.zeal18.zio.mongodb.driver.model.CreateCollectionOptions
 import io.github.zeal18.zio.mongodb.driver.query.*
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
@@ -448,7 +448,7 @@ object MongoDatabase {
       collectionName: String,
       options: CreateCollectionOptions,
     ): Task[Unit] =
-      wrapped.createCollection(collectionName, options).getOneOpt.unit
+      wrapped.createCollection(collectionName, options.toJava).getOneOpt.unit
 
     override def createCollection(
       clientSession: ClientSession,
@@ -461,7 +461,7 @@ object MongoDatabase {
       collectionName: String,
       options: CreateCollectionOptions,
     ): Task[Unit] =
-      wrapped.createCollection(clientSession, collectionName, options).getOneOpt.unit
+      wrapped.createCollection(clientSession, collectionName, options.toJava).getOneOpt.unit
 
     override def createView(
       viewName: String,

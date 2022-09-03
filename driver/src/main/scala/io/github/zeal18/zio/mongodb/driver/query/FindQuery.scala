@@ -11,6 +11,7 @@ import com.mongodb.reactivestreams.client.FindPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
@@ -39,8 +40,8 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @param filter the filter, which may be null.
     * @return this
     */
-  def filter(filter: Bson): FindQuery[TResult] = {
-    wrapped.filter(filter)
+  def filter(filter: Filter): FindQuery[TResult] = {
+    wrapped.filter(filter.toBson)
     this
   }
 
@@ -158,7 +159,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @note Requires MongoDB 3.4 or greater
     */
   def collation(collation: Collation): FindQuery[TResult] = {
-    wrapped.collation(collation)
+    wrapped.collation(collation.toJava)
     this
   }
 

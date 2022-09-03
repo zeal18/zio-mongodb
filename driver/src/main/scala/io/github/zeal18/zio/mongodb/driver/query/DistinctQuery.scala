@@ -6,8 +6,8 @@ import scala.concurrent.duration.Duration
 
 import com.mongodb.reactivestreams.client.DistinctPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
-import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import zio.Task
 import zio.stream.ZStream
@@ -26,8 +26,8 @@ case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult
     * @param filter the filter, which may be null.
     * @return this
     */
-  def filter(filter: Bson): DistinctQuery[TResult] = {
-    wrapped.filter(filter)
+  def filter(filter: Filter): DistinctQuery[TResult] = {
+    wrapped.filter(filter.toBson)
     this
   }
 
@@ -50,7 +50,7 @@ case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult
     * @note Requires MongoDB 3.4 or greater
     */
   def collation(collation: Collation): DistinctQuery[TResult] = {
-    wrapped.collation(collation)
+    wrapped.collation(collation.toJava)
     this
   }
 

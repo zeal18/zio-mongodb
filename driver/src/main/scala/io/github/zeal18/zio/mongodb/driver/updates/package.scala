@@ -206,22 +206,22 @@ package object updates {
   def pushEach[A](fieldName: String, values: Iterable[A])(implicit
     encoder: Encoder[A],
   ): PushEach[A] =
-    PushEach(fieldName, values, encoder)
+    PushEach(fieldName, values, options = None, encoder)
 
-  // /** Creates an update that adds each of the given values to the array value of the field with the given name, applying the given
-  //   * options for positioning the pushed values, and then slicing and/or sorting the array.
-  //   *
-  //   * @param fieldName the non-null field name
-  //   * @param values    the values
-  //   * @param options   the non-null push options
-  //   * @tparam A   the value type
-  //   * @return the update
-  //   * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
-  //   */
-  // def pushEach[A](fieldName: String, options: JPushOptions, values: A*)(implicit
-  //   encoder: Encoder[A],
-  // ): Bson =
-  //   JUpdates.pushEach(fieldName, values.asJava, options)
+  /** Creates an update that adds each of the given values to the array value of the field with the given name, applying the given
+    * options for positioning the pushed values, and then slicing and/or sorting the array.
+    *
+    * @param fieldName the field name
+    * @param values    the values
+    * @param options   the push options
+    * @tparam A   the value type
+    * @return the update
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/push/ \$push]]
+    */
+  def pushEach[A](fieldName: String, values: Iterable[A], options: PushOptions)(implicit
+    encoder: Encoder[A],
+  ): PushEach[A] =
+    PushEach(fieldName, values, Some(options), encoder)
 
   /** Creates an update that removes all instances of the given value from the array value of the field with the given name.
     *

@@ -72,6 +72,53 @@ sealed trait Update { self =>
         writer.getDocument()
       }
 
+      def pushUpdate[A](
+        operator: String,
+        fieldName: String,
+        values: Iterable[A],
+        options: Option[PushOptions],
+        encoder: Encoder[A],
+      ): BsonDocument = {
+        val writer  = new BsonDocumentWriter(new BsonDocument())
+        val context = EncoderContext.builder().build()
+
+        writer.writeStartDocument()
+        writer.writeName(operator)
+
+        writer.writeStartDocument()
+        writer.writeName(fieldName)
+        writer.writeStartDocument()
+
+        writer.writeStartArray("$each")
+        values.foreach { value =>
+          encoder.encode(writer, value, context)
+        }
+        writer.writeEndArray()
+
+        options.foreach { options =>
+          options.position.foreach { position =>
+            writer.writeInt32(s"$$position", position)
+          }
+          options.slice.foreach { slice =>
+            writer.writeInt32(s"$$slice", slice)
+          }
+          options.sort.foreach {
+            case Left(sort) => writer.writeInt32(s"$$sort", if (sort) 1 else -1)
+            case Right(sort) =>
+              writer.writeName(s"$$sort")
+              val codec        = codecRegistry.get(classOf[BsonDocument])
+              val sortDocument = sort.toBson.toBsonDocument(classOf[BsonDocument], codecRegistry)
+              codec.encode(writer, sortDocument, EncoderContext.builder().build())
+          }
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
+      }
+
       def pullAllUpdate[A](
         fieldName: String,
         values: Iterable[A],
@@ -153,8 +200,8 @@ sealed trait Update { self =>
           withEachUpdate("$addToSet", fieldName, values, encoder)
         case Update.Push(fieldName, value, encoder) =>
           simpleUpdate("$push", fieldName, value, encoder)
-        case Update.PushEach(fieldName, values, encoder) =>
-          withEachUpdate("$push", fieldName, values, encoder)
+        case Update.PushEach(fieldName, values, options, encoder) =>
+          pushUpdate("$push", fieldName, values, options, encoder)
         case Update.Pull(fieldName, value, encoder) =>
           simpleUpdate("$pull", fieldName, value, encoder)
         case Update.PullByFilter(filter) =>
@@ -207,8 +254,12 @@ object Update {
   final case class AddEachToSet[A](fieldName: String, value: Iterable[A], encoder: Encoder[A])
       extends Update
   final case class Push[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
-  final case class PushEach[A](fieldName: String, values: Iterable[A], encoder: Encoder[A])
-      extends Update
+  final case class PushEach[A](
+    fieldName: String,
+    values: Iterable[A],
+    options: Option[PushOptions],
+    encoder: Encoder[A],
+  ) extends Update
   final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
   final case class PullByFilter(filter: Filter)                              extends Update
   final case class PullAll[A](fieldName: String, values: Iterable[A], encoder: Encoder[A])

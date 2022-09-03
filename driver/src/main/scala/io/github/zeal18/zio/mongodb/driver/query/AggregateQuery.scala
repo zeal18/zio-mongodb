@@ -80,7 +80,7 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * @note Requires MongoDB 3.4 or greater
     */
   def collation(collation: Collation): AggregateQuery[TResult] = {
-    wrapped.collation(collation)
+    wrapped.collation(collation.toJava)
     this
   }
 

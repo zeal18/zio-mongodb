@@ -7,7 +7,6 @@ import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
-import io.github.zeal18.zio.mongodb.driver.model.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import org.bson.BsonBoolean
 import org.bson.BsonDocumentWriter
@@ -54,18 +53,18 @@ sealed trait Aggregation { self =>
       }
 
       def unwind(fieldName: String, unwindOptions: UnwindOptions): BsonDocument = {
-        val options                    = new BsonDocument("path", new BsonString(fieldName))
-        val preserveNullAndEmptyArrays = unwindOptions.isPreserveNullAndEmptyArrays();
-        if (preserveNullAndEmptyArrays != null) {
+        val options = new BsonDocument("path", new BsonString(fieldName))
+
+        unwindOptions.preserveNullAndEmptyArrays.foreach { preserveNullAndEmptyArrays =>
           options.append(
             "preserveNullAndEmptyArrays",
             BsonBoolean.valueOf(preserveNullAndEmptyArrays),
-          );
-        } // scalafix:ok
-        val includeArrayIndex = unwindOptions.getIncludeArrayIndex();
-        if (includeArrayIndex != null) {
-          options.append("includeArrayIndex", new BsonString(includeArrayIndex));
-        } // scalafix:ok
+          )
+        }
+
+        unwindOptions.includeArrayIndex.foreach { includeArrayIndex =>
+          options.append("includeArrayIndex", new BsonString(includeArrayIndex))
+        }
 
         new BsonDocument("$unwind", options);
       }
