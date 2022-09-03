@@ -1,6 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.updates
 
 import io.github.zeal18.zio.mongodb.driver.filters
+import io.github.zeal18.zio.mongodb.driver.sorts
 import io.github.zeal18.zio.mongodb.driver.updates
 import zio.test.DefaultRunnableSpec
 import zio.test.ZSpec
@@ -56,10 +57,27 @@ object UpdatesSpec extends DefaultRunnableSpec {
         """{"$addToSet": {"a": {"$each": [1, 2]}}}""",
       ),
       testUpdate("push", updates.push("a", 1), """{"$push": {"a": 1}}"""),
-      testUpdate(
-        "pushEach",
-        updates.pushEach("a", Seq(1, 2)),
-        """{"$push": {"a": {"$each": [1, 2]}}}""",
+      suite("pushEach")(
+        testUpdate(
+          "without options",
+          updates.pushEach("a", Seq(1, 2)),
+          """{"$push": {"a": {"$each": [1, 2]}}}""",
+        ),
+        testUpdate(
+          "with non-document sorting options",
+          updates
+            .pushEach("a", Seq(1, 2, 4), updates.PushOptions(Some(1), Some(2), Some(Left(false)))),
+          """{"$push": {"a": {"$each": [1, 2, 4], "$position": 1, "$slice": 2, "$sort": -1}}}""",
+        ),
+        testUpdate(
+          "with document sorting options",
+          updates.pushEach(
+            "a",
+            Seq(1, 2, 4),
+            updates.PushOptions(Some(5), Some(6), Some(Right(sorts.desc("a")))),
+          ),
+          """{"$push": {"a": {"$each": [1, 2, 4], "$position": 5, "$slice": 6, "$sort": {"a": -1}}}}""",
+        ),
       ),
       testUpdate("pull", updates.pull("a", 1), """{"$pull": {"a": 1}}"""),
       testUpdate(
