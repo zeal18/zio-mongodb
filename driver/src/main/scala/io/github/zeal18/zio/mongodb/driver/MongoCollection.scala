@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import java.util
-
 import scala.annotation.nowarn
 import scala.jdk.CollectionConverters.*
 import scala.reflect.ClassTag
@@ -24,6 +22,7 @@ import io.github.zeal18.zio.mongodb.driver.indexes.Index
 import io.github.zeal18.zio.mongodb.driver.indexes.IndexKey
 import io.github.zeal18.zio.mongodb.driver.indexes.IndexOptions
 import io.github.zeal18.zio.mongodb.driver.model.*
+import io.github.zeal18.zio.mongodb.driver.model.bulk.BulkWrite
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.result.*
 import io.github.zeal18.zio.mongodb.driver.updates.Update
@@ -388,7 +387,7 @@ object MongoCollection {
       * @param requests the writes to execute
       * @return a Observable with a single element the BulkWriteResult
       */
-    def bulkWrite(requests: Seq[? <: WriteModel[? <: A]]): Task[BulkWriteResult]
+    def bulkWrite(requests: Seq[BulkWrite[A]]): Task[BulkWriteResult]
 
     /** Executes a mix of inserts, updates, replaces, and deletes.
       *
@@ -397,7 +396,7 @@ object MongoCollection {
       * @return a Observable with a single element the BulkWriteResult
       */
     def bulkWrite(
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
     ): Task[BulkWriteResult]
 
@@ -410,7 +409,7 @@ object MongoCollection {
       */
     def bulkWrite(
       clientSession: ClientSession,
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
     ): Task[BulkWriteResult]
 
     /** Executes a mix of inserts, updates, replaces, and deletes.
@@ -423,7 +422,7 @@ object MongoCollection {
       */
     def bulkWrite(
       clientSession: ClientSession,
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
     ): Task[BulkWriteResult]
 
@@ -1573,45 +1572,27 @@ object MongoCollection {
         wrapped.aggregate[A](clientSession, pipeline.map(_.toBson).asJava, documentClass),
       )
 
-    override def bulkWrite(requests: Seq[? <: WriteModel[? <: A]]): Task[BulkWriteResult] =
-      wrapped
-        .bulkWrite(requests.asJava.asInstanceOf[util.List[? <: WriteModel[? <: A]]])
-        .getOne // scalafix:ok
+    override def bulkWrite(requests: Seq[BulkWrite[A]]): Task[BulkWriteResult] =
+      wrapped.bulkWrite(requests.map(_.toJava).asJava).getOne
 
     override def bulkWrite(
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
     ): Task[BulkWriteResult] =
-      wrapped
-        .bulkWrite(
-          requests.asJava.asInstanceOf[util.List[? <: WriteModel[? <: A]]],
-          options.toJava,
-        )
-        .getOne // scalafix:ok
+      wrapped.bulkWrite(requests.map(_.toJava).asJava, options.toJava).getOne
 
     override def bulkWrite(
       clientSession: ClientSession,
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
     ): Task[BulkWriteResult] =
-      wrapped
-        .bulkWrite(
-          clientSession,
-          requests.asJava.asInstanceOf[util.List[? <: WriteModel[? <: A]]],
-        )
-        .getOne // scalafix:ok
+      wrapped.bulkWrite(clientSession, requests.map(_.toJava).asJava).getOne
 
     override def bulkWrite(
       clientSession: ClientSession,
-      requests: Seq[? <: WriteModel[? <: A]],
+      requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
     ): Task[BulkWriteResult] =
-      wrapped
-        .bulkWrite(
-          clientSession,
-          requests.asJava.asInstanceOf[util.List[? <: WriteModel[? <: A]]],
-          options.toJava,
-        )
-        .getOne // scalafix:ok
+      wrapped.bulkWrite(clientSession, requests.map(_.toJava).asJava, options.toJava).getOne
 
     override def insertOne(document: A): Task[InsertOneResult] = wrapped.insertOne(document).getOne
 
