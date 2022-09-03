@@ -11,6 +11,7 @@ import com.mongodb.reactivestreams.client.FindPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
@@ -189,19 +190,11 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @param hint the hint
     * @return this
     */
-  def hint(hint: Bson): FindQuery[TResult] = {
-    wrapped.hint(hint)
-    this
-  }
-
-  /** Sets the hint for which index to use. A null value means no hint is set.
-    *
-    * @param hint the name of the index which should be used for the operation
-    * @return this
-    * @note if [[hint]] is set that will be used instead of any hint string.
-    */
-  def hintString(hint: String): FindQuery[TResult] = {
-    wrapped.hintString(hint)
+  def hint(hint: Hint): FindQuery[TResult] = {
+    hint.toBson match {
+      case Left(string) => wrapped.hintString(string)
+      case Right(bson)  => wrapped.hint(bson)
+    }
     this
   }
 

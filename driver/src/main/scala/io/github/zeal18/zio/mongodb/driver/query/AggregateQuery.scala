@@ -10,6 +10,7 @@ import com.mongodb.reactivestreams.client.AggregatePublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import zio.Task
 import zio.stream.ZStream
@@ -129,19 +130,11 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * @return this
     * @note Requires MongoDB 3.6 or greater
     */
-  def hint(hint: Bson): AggregateQuery[TResult] = {
-    wrapped.hint(hint)
-    this
-  }
-
-  /** Sets the hint for which index to use. A null value means no hint is set.
-    *
-    * @param hint the hint
-    * @return this
-    * @note Requires MongoDB 3.6 or greater
-    */
-  def hintString(hint: String): AggregateQuery[TResult] = {
-    wrapped.hintString(hint)
+  def hint(hint: Hint): AggregateQuery[TResult] = {
+    hint.toBson match {
+      case Left(string) => wrapped.hintString(string)
+      case Right(bson)  => wrapped.hint(bson)
+    }
     this
   }
 
