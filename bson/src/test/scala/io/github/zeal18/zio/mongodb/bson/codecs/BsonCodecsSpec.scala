@@ -22,6 +22,7 @@ import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.bson.BsonSymbol
 import io.github.zeal18.zio.mongodb.bson.BsonTimestamp
 import io.github.zeal18.zio.mongodb.bson.BsonUndefined
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import org.bson.BsonBinary
 import org.bson.BsonValue
 import org.bson.types.Decimal128

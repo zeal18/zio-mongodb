@@ -18,7 +18,7 @@ import org.bson.codecs.EncoderContext
 private[codecs] trait MagnoliaCodec {
   type Typeclass[A] = Codec[A]
 
-  implicit def derive[A]: Codec[A] = macro Magnolia.gen[A]
+  implicit def derived[A]: Codec[A] = macro Magnolia.gen[A]
 
   def join[A](ctx: CaseClass[Typeclass, A]): Codec[A] =
     if (ctx.isObject) MagnoliaCodec.CaseObjectCodec(ctx)

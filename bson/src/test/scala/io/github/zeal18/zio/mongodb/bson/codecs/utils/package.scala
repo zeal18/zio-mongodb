@@ -1,4 +1,4 @@
-package io.github.zeal18.zio.mongodb.bson
+package io.github.zeal18.zio.mongodb.bson.codecs
 
 import scala.util.Try
 
@@ -10,8 +10,7 @@ import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
 import zio.test.*
 
-package object codecs {
-
+package object utils {
   private[codecs] def testCodecRoundtrip[A: Codec](
     title: String,
     value: A,

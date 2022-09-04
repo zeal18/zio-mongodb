@@ -3,8 +3,8 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
-import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 
 object MagnoliaCodecsSpec extends DefaultRunnableSpec {
   private case class Simple(a: Int, b: String)
@@ -16,9 +16,14 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
 
   private case object CaseObject
 
-  private class StringValueClass(val a: String) extends AnyVal
-
-  private class IntValueClass(val number: Int) extends AnyVal
+  private opaque type StringOpaqueType = String
+  private object StringOpaqueType {
+    def apply(value: String): StringOpaqueType = value
+  }
+  private opaque type IntOpaqueType = Int
+  private object IntOpaqueType {
+    def apply(value: Int): IntOpaqueType = value
+  }
 
   sealed private trait SimpleEnum
   private object SimpleEnum {
@@ -54,12 +59,16 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
   private object Tree {
     case class Leaf[A](a: A)                          extends Tree[A]
     case class Node[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
+    implicit def codec[A: Codec]: Codec[Tree[A]] = Codec.derived[Tree[A]]
   }
 
   sealed private trait ListTree[A]
   private object ListTree {
     case class Leaf[A](a: A)                        extends ListTree[A]
     case class Node[A](elements: List[ListTree[A]]) extends ListTree[A]
+
+    implicit def codec[A: Codec]: Codec[ListTree[A]] = Codec.derived[ListTree[A]]
   }
 
   case class WithoutCodec(a: Int)
@@ -97,11 +106,11 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
       suite("case object")(
         testCodecRoundtrip("case object", CaseObject, """"CaseObject""""),
       ),
-      suite("value class")(
-        testCodecRoundtrip("string value class", new StringValueClass("2"), """"2""""),
-        testCodecRoundtrip("int value class", new IntValueClass(42), """42"""),
+      suite("opaque type")(
+        testCodecRoundtrip("string opaque type", StringOpaqueType("2"), """"2""""),
+        testCodecRoundtrip("int opaque type", IntOpaqueType(42), """42"""),
       ),
-      suite("simple enum")(
+      suite("simple sealed trait enum")(
         testCodecRoundtrip[SimpleEnum]("A", SimpleEnum.A, """"A""""),
         testCodecRoundtrip[SimpleEnum]("B", SimpleEnum.B, """"B""""),
         testCodecRoundtrip[SimpleEnum]("C", SimpleEnum.C, """"C""""),
@@ -158,7 +167,7 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
       suite("recursive type")(
         testCodecRoundtrip[Tree[Int]](
           "Leaf",
-          Tree.Leaf(1),
+          Tree.Leaf(1).asInstanceOf[Tree[Int]],
           """{"_t": "Leaf", "a": 1}""",
         ),
         testCodecRoundtrip[Tree[Int]](
