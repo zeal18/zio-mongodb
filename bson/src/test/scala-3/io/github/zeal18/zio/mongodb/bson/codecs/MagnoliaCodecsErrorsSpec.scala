@@ -3,10 +3,9 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
-import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 
-@nowarn("cat=unused")
 object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
   private case class Simple(a: Int)
 

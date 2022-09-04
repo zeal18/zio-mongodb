@@ -63,6 +63,8 @@ val commonSettings =
       case Some((3, _)) =>
         Seq(
           "-source:3.0-migration",
+          "-Yretain-trees", // to enable default values for magnolia
+          "-Xmax-inlines:64",
         )
       case _ =>
         Seq(

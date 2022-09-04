@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
 
 object TemporalCodecsSpec extends DefaultRunnableSpec {

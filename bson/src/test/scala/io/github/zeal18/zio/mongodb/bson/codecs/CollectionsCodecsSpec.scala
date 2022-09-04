@@ -1,5 +1,6 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
 
 object CollectionsCodecsSpec extends DefaultRunnableSpec {
