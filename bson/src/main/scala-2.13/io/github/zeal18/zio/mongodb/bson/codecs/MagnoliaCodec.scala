@@ -1,7 +1,6 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
 import scala.annotation.tailrec
-import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
@@ -21,17 +20,17 @@ private[codecs] trait MagnoliaCodec {
 
   implicit def derive[A]: Codec[A] = macro Magnolia.gen[A]
 
-  def join[A: ClassTag](ctx: CaseClass[Typeclass, A]): Codec[A] =
+  def join[A](ctx: CaseClass[Typeclass, A]): Codec[A] =
     if (ctx.isObject) MagnoliaCodec.CaseObjectCodec(ctx)
     else if (ctx.isValueClass) MagnoliaCodec.ValueClassCodec(ctx)
     else MagnoliaCodec.CaseClassCodec(ctx)
 
-  def split[A: ClassTag](ctx: SealedTrait[Typeclass, A]): Codec[A] = {
+  def split[A](ctx: SealedTrait[Typeclass, A]): Codec[A] = {
     ctx.subtypes.groupBy(_.typeName.short).filter(_._2.size > 1).toList match {
       case Nil => ()
       case ambiguous :: _ =>
         throw BsonError.CodecError(
-          implicitly[ClassTag[A]].toString(),
+          ctx.typeName.full,
           BsonError.GeneralError(
             s"Ambiguous subtypes: ${ambiguous._2.map(_.typeName.full).mkString(", ")}",
           ),
@@ -48,8 +47,7 @@ private[codecs] trait MagnoliaCodec {
 }
 
 object MagnoliaCodec {
-  private[codecs] case class CaseClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
-      extends Codec[A] {
+  private[codecs] case class CaseClassCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit = try {
       writer.writeStartDocument()
       inlined.encode(writer, x, encoderCtx)
@@ -57,16 +55,16 @@ object MagnoliaCodec {
     } catch {
       case e: BsonSerializationException =>
         throw BsonError.CodecError(
-          implicitly[ClassTag[A]].toString(),
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
-          implicitly[ClassTag[A]].toString(),
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonError =>
-        throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
     }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A = try {
@@ -77,23 +75,22 @@ object MagnoliaCodec {
     } catch {
       case e: BsonSerializationException =>
         throw BsonError.CodecError(
-          implicitly[ClassTag[A]].toString(),
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
-          implicitly[ClassTag[A]].toString(),
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonError =>
-        throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
     }
 
     val inlined: InlinedCaseClassCodec[A] = InlinedCaseClassCodec(ctx)
   }
 
-  private[codecs] case class InlinedCaseClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
-      extends Codec[A] {
+  private[codecs] case class InlinedCaseClassCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
 
     private def getLabel[S](p: Param[Codec, S]): String =
       p.annotations
@@ -196,19 +193,18 @@ object MagnoliaCodec {
     }
   }
 
-  private[codecs] case class CaseObjectCodec[A: ClassTag](ctx: CaseClass[Codec, A])
-      extends Codec[A] {
+  private[codecs] case class CaseObjectCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try writer.writeString(ctx.typeName.short)
       catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
       }
@@ -224,21 +220,20 @@ object MagnoliaCodec {
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
-  private[codecs] case class ValueClassCodec[A: ClassTag](ctx: CaseClass[Codec, A])
-      extends Codec[A] {
+  private[codecs] case class ValueClassCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try {
         val param      = ctx.parameters.head
@@ -247,7 +242,7 @@ object MagnoliaCodec {
         param.typeclass.encode(writer, childValue, encoderContext)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -259,11 +254,11 @@ object MagnoliaCodec {
         ctx.construct(_ => value)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
-  private[codecs] case class EnumCodec[A: ClassTag](ctx: SealedTrait[Codec, A]) extends Codec[A] {
+  private[codecs] case class EnumCodec[A](ctx: SealedTrait[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try
         ctx.split(value)(subtype =>
@@ -272,7 +267,7 @@ object MagnoliaCodec {
         )
       catch {
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -297,21 +292,20 @@ object MagnoliaCodec {
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
-  private[codecs] case class SealedTraitCodec[A: ClassTag](ctx: SealedTrait[Codec, A])
-      extends Codec[A] {
+  private[codecs] case class SealedTraitCodec[A](ctx: SealedTrait[Codec, A]) extends Codec[A] {
 
     private val TypeTag = "_t"
 
@@ -354,16 +348,16 @@ object MagnoliaCodec {
       catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
@@ -400,16 +394,16 @@ object MagnoliaCodec {
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            implicitly[ClassTag[A]].toString(),
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(implicitly[ClassTag[A]].toString(), e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 }
