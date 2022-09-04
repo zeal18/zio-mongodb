@@ -16,11 +16,11 @@ import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.Codec as JCodec
 
-abstract class Codec[A: ClassTag] extends Encoder[A] with Decoder[A] with JCodec[A] { self =>
+abstract class Codec[A] extends Encoder[A] with Decoder[A] { self =>
 
   /** Returns a new [[Codec]] that encodes and decodes values of type `B` using this codec.
     */
-  def bimap[B: ClassTag](mapF: A => B, contramapF: B => A): Codec[B] = new Codec[B] {
+  def bimap[B](mapF: A => B, contramapF: B => A): Codec[B] = new Codec[B] {
     override def encode(writer: BsonWriter, value: B, context: EncoderContext): Unit =
       self.encode(writer, contramapF(value), context)
 

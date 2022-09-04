@@ -11,6 +11,7 @@ import org.bson.codecs.EncoderContext
 import zio.test.*
 
 package object codecs {
+
   private[codecs] def testCodecRoundtrip[A: Codec](
     title: String,
     value: A,

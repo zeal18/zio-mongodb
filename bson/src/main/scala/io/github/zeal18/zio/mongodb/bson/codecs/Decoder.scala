@@ -4,7 +4,9 @@ import org.bson.BsonReader
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.Decoder as JDecoder
 
-trait Decoder[A] extends JDecoder[A] { self =>
+trait Decoder[A] { self =>
+
+  def decode(reader: BsonReader, decoderContext: DecoderContext): A
 
   /** Returns a new [[Decoder]] by applying a function that maps an A
     * to a B, after decoding as an A using this decoder.

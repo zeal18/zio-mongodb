@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import com.mongodb.client.model.CreateViewOptions
 import com.mongodb.reactivestreams.client.MongoDatabase as JMongoDatabase
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.CodecAdapter
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.ClientSession
 import io.github.zeal18.zio.mongodb.driver.Document
@@ -108,7 +109,7 @@ object MongoDatabase {
       * @tparam TResult       the type of the class to use instead of [[Document]].
       * @return the collection
       */
-    def getCollection[A](collectionName: String)(implicit
+    def getCollection[A: ClassTag](collectionName: String)(implicit
       codec: Codec[A],
     ): MongoCollection.Service[A]
 
@@ -392,15 +393,20 @@ object MongoDatabase {
     ): ZManaged[Any, Throwable, ClientSession] =
       client.startSession(options)
 
-    override def getCollection[A](
+    override def getCollection[A: ClassTag](
       collectionName: String,
-    )(implicit codec: Codec[A]): MongoCollection.Service[A] =
+    )(implicit codec: Codec[A]): MongoCollection.Service[A] = {
+      val adaptedCodec = CodecAdapter(codec)
+
       MongoCollection.Live[A](
         this,
         wrapped
-          .getCollection(collectionName, codec.getEncoderClass())
-          .withCodecRegistry(fromRegistries(fromCodecs(codec), MongoClient.DEFAULT_CODEC_REGISTRY)),
+          .getCollection(collectionName, adaptedCodec.getEncoderClass())
+          .withCodecRegistry(
+            fromRegistries(fromCodecs(adaptedCodec), MongoClient.DEFAULT_CODEC_REGISTRY),
+          ),
       )
+    }
 
     override def runCommand(command: Bson): Task[Option[Document]] =
       wrapped.runCommand[Document](command, implicitly[ClassTag[Document]]).getOneOpt

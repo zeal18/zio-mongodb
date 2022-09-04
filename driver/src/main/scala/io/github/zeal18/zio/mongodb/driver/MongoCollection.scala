@@ -8,6 +8,7 @@ import com.mongodb.bulk.BulkWriteResult
 import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoCollection as JMongoCollection
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.CodecAdapter
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.MongoNamespace
 import io.github.zeal18.zio.mongodb.driver.ReadConcern
@@ -82,7 +83,7 @@ object MongoCollection {
       * @tparam C   The type that the new collection will encode documents from and decode documents to
       * @return a new MongoCollection instance with the different default class
       */
-    def withDocumentClass[C](implicit codec: Codec[C]): MongoCollection.Service[C]
+    def withDocumentClass[C: ClassTag](implicit codec: Codec[C]): MongoCollection.Service[C]
 
     /** Create a new MongoCollection instance with a different read preference.
       *
@@ -1457,7 +1458,7 @@ object MongoCollection {
   }
 
   @nowarn("cat=unused")
-  def live[A: izumi.reflect.Tag](name: String)(implicit
+  def live[A: izumi.reflect.Tag: ClassTag](name: String)(implicit
     codec: Codec[A],
   ): ZLayer[MongoDatabase, Nothing, MongoCollection[A]] =
     ZLayer.fromFunction[MongoDatabase, MongoCollection.Service[A]](_.get.getCollection[A](name))
@@ -1478,13 +1479,19 @@ object MongoCollection {
 
     override lazy val readConcern: ReadConcern = wrapped.getReadConcern
 
-    override def withDocumentClass[C](implicit codec: Codec[C]): MongoCollection.Service[C] =
+    override def withDocumentClass[C: ClassTag](implicit
+      codec: Codec[C],
+    ): MongoCollection.Service[C] = {
+      val adaptedCodec = CodecAdapter(codec)
       Live[C](
         database,
         wrapped
-          .withDocumentClass(codec.getEncoderClass())
-          .withCodecRegistry(fromRegistries(fromCodecs(codec), MongoClient.DEFAULT_CODEC_REGISTRY)),
+          .withDocumentClass(adaptedCodec.getEncoderClass())
+          .withCodecRegistry(
+            fromRegistries(fromCodecs(adaptedCodec), MongoClient.DEFAULT_CODEC_REGISTRY),
+          ),
       )
+    }
 
     override def withReadPreference(readPreference: ReadPreference): MongoCollection.Service[A] =
       Live[A](database, wrapped.withReadPreference(readPreference))

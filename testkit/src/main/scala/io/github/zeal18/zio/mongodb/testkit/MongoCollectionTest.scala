@@ -1,5 +1,7 @@
 package io.github.zeal18.zio.mongodb.testkit
 
+import scala.reflect.ClassTag
+
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.MongoClient
 import io.github.zeal18.zio.mongodb.driver.MongoCollection
@@ -10,18 +12,18 @@ import zio.random.Random
 import zio.test.environment.Live
 
 object MongoCollectionTest {
-  def withRandomName[A: Tag, B](
+  def withRandomName[A: Tag: ClassTag, B](
     f: MongoCollection.Service[A] => ZIO[Live with MongoClient, Throwable, B],
   )(implicit c: Codec[A]): ZIO[Live with MongoClient, Throwable, B] =
     random.build.use(db => f(db.get))
 
-  def withName[A: Tag, B](name: String)(
+  def withName[A: Tag: ClassTag, B](name: String)(
     f: MongoCollection.Service[A] => ZIO[Live with MongoClient, Throwable, B],
   )(implicit c: Codec[A]): ZIO[Live with MongoClient, Throwable, B] =
     (ZLayer.requires[Live with MongoClient] ++ MongoDatabaseTest.random >>>
       MongoCollection.live(name)).build.use(db => f(db.get))
 
-  def random[A: Tag](implicit
+  def random[A: Tag: ClassTag](implicit
     c: Codec[A],
   ): ZLayer[Live with MongoClient, Throwable, MongoCollection[A]] =
     ZLayer.requires[Live with MongoClient] ++ MongoDatabaseTest.random >>>

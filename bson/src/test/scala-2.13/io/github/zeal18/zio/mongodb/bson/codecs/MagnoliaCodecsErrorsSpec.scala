@@ -53,7 +53,7 @@ object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec$SimpleEnum",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleEnum",
               ) &&
               assertTrue(
                 result
@@ -88,7 +88,7 @@ object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec$SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
@@ -111,7 +111,7 @@ object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec$SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
@@ -144,7 +144,7 @@ object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec$SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
