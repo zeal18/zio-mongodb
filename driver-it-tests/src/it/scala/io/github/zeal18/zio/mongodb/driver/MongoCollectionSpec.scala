@@ -1,11 +1,14 @@
 package io.github.zeal18.zio.mongodb.driver
 
+import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.indexes
 import io.github.zeal18.zio.mongodb.driver.indexes.CreateIndexOptions
 import io.github.zeal18.zio.mongodb.driver.indexes.DropIndexOptions
 import io.github.zeal18.zio.mongodb.driver.indexes.Index
 import io.github.zeal18.zio.mongodb.driver.indexes.IndexOptions
+import io.github.zeal18.zio.mongodb.driver.model.InsertManyOptions
+import io.github.zeal18.zio.mongodb.driver.model.InsertOneOptions
 import io.github.zeal18.zio.mongodb.testkit.MongoClientTest
 import io.github.zeal18.zio.mongodb.testkit.MongoCollectionTest
 import zio.Chunk
@@ -261,6 +264,187 @@ object MongoCollectionSpec extends DefaultRunnableSpec {
 
               indexes <- collection.listIndexes().execute.runCollect
             } yield assertTrue(indexes.size == 1) // only the _id index remains
+          }
+        },
+      ),
+      suite("insertOne")(
+        testM("insertOne") {
+          case class Model(a: Int, b: String)
+          val model = Model(a = 42, b = "foo")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertOne(model)
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model))
+          }
+        },
+        testM("insertOne with options") {
+          case class Model(a: Int, b: String)
+          val model = Model(a = 42, b = "foo")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertOne(
+                model,
+                InsertOneOptions()
+                  .withBypassDocumentValidation(true)
+                  .withComment(new BsonString("foo")),
+              )
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model))
+          }
+        },
+        testM("insertOne in session") {
+          case class Model(a: Int, b: String)
+          val model = Model(a = 42, b = "foo")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.startSession().use { session =>
+                collection.insertOne(session, model)
+              }
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model))
+          }
+        },
+        testM("insertOne in session with options") {
+          case class Model(a: Int, b: String)
+          val model = Model(a = 42, b = "foo")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.startSession().use { session =>
+                collection.insertOne(
+                  session,
+                  model,
+                  InsertOneOptions()
+                    .withBypassDocumentValidation(true)
+                    .withComment(new BsonString("foo")),
+                )
+              }
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model))
+          }
+        },
+      ),
+      suite("insertMany")(
+        testM("insertMany") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(model1, model2))
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model1, model2))
+          }
+        },
+        testM("insertMany with options") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(
+                Chunk(model1, model2),
+                InsertManyOptions()
+                  .withOrdered(true)
+                  .withBypassDocumentValidation(true)
+                  .withComment(new BsonString("foo")),
+              )
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model1, model2))
+          }
+        },
+        testM("insertMany in session") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.startSession().use { session =>
+                collection.insertMany(session, Chunk(model1, model2))
+              }
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model1, model2))
+          }
+        },
+        testM("insertMany in session with options") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.startSession().use { session =>
+                collection.insertMany(
+                  session,
+                  Chunk(model1, model2),
+                  InsertManyOptions()
+                    .withOrdered(true)
+                    .withBypassDocumentValidation(true)
+                    .withComment(new BsonString("foo")),
+                )
+              }
+
+              result <- collection.find().execute.runCollect
+            } yield assertTrue(result == Chunk(model1, model2))
+          }
+        },
+      ),
+      suite("find")(
+        testM("find with filter") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(model1, model2))
+
+              result <- collection.find(filters.eq("a", 43)).execute.runCollect
+            } yield assertTrue(result == Chunk(model2))
+          }
+        },
+        testM("find in session") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(model1, model2))
+
+              result <- collection.startSession().use { session =>
+                collection.find(session).execute.runCollect
+              }
+            } yield assertTrue(result == Chunk(model1, model2))
+          }
+        },
+        testM("find in session with filter") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(model1, model2))
+
+              result <- collection.startSession().use { session =>
+                collection.find(session, filters.eq("a", 43)).execute.runCollect
+              }
+            } yield assertTrue(result == Chunk(model2))
           }
         },
       ),
