@@ -8,29 +8,29 @@ import io.github.zeal18.zio.mongodb.driver.MongoCollection
 import izumi.reflect.Tag
 import zio.ZIO
 import zio.ZLayer
-import zio.random.Random
-import zio.test.environment.Live
+import zio.test.Live
 
 object MongoCollectionTest {
   def withRandomName[A: Tag: ClassTag, B](
-    f: MongoCollection.Service[A] => ZIO[Live with MongoClient, Throwable, B],
-  )(implicit c: Codec[A]): ZIO[Live with MongoClient, Throwable, B] =
-    random.build.use(db => f(db.get))
+    f: MongoCollection[A] => ZIO[MongoClient, Throwable, B],
+  )(implicit c: Codec[A]): ZIO[MongoClient, Throwable, B] =
+    ZIO.scoped {
+      random.build.flatMap(db => f(db.get))
+    }
 
   def withName[A: Tag: ClassTag, B](name: String)(
-    f: MongoCollection.Service[A] => ZIO[Live with MongoClient, Throwable, B],
-  )(implicit c: Codec[A]): ZIO[Live with MongoClient, Throwable, B] =
-    (ZLayer.requires[Live with MongoClient] ++ MongoDatabaseTest.random >>>
-      MongoCollection.live(name)).build.use(db => f(db.get))
+    f: MongoCollection[A] => ZIO[MongoClient, Throwable, B],
+  )(implicit c: Codec[A]): ZIO[MongoClient, Throwable, B] =
+    ZIO.scoped {
+      (ZLayer.environment[MongoClient] ++ MongoDatabaseTest.random >>>
+        MongoCollection.live(name)).build.flatMap(db => f(db.get))
+    }
 
   def random[A: Tag: ClassTag](implicit
     c: Codec[A],
-  ): ZLayer[Live with MongoClient, Throwable, MongoCollection[A]] =
-    ZLayer.requires[Live with MongoClient] ++ MongoDatabaseTest.random >>>
+  ): ZLayer[MongoClient, Throwable, MongoCollection[A]] =
+    ZLayer.environment[MongoClient] ++ MongoDatabaseTest.random >>>
       ZLayer
-        .fromEffect(for {
-          random <- Live.live(ZIO.service[Random.Service])
-          name   <- random.nextUUID.map(_.toString)
-        } yield name)
+        .fromZIO(Live.live(ZIO.random.flatMap(_.nextUUID.map(_.toString))))
         .flatMap(name => MongoCollection.live(name.get))
 }

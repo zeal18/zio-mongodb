@@ -11,22 +11,16 @@ import de.flapdoodle.embed.process.config.process.ProcessOutput
 import de.flapdoodle.embed.process.io.directories.Directory
 import de.flapdoodle.embed.process.io.directories.FixedPath
 import de.flapdoodle.embed.process.runtime.Network
-import zio.Has
-import zio.RIO
 import zio.Task
-import zio.UIO
 import zio.ZIO
 import zio.ZLayer
-import zio.blocking.Blocking
-import zio.blocking.effectBlocking
-import zio.system.System
-import zio.test.environment.Live
+import zio.test.Live
 
 object EmbeddedMongo {
 
-  private val artifactStorePath: RIO[System, FixedPath] =
+  private val artifactStorePath: Task[FixedPath] =
     for {
-      system    <- ZIO.service[System.Service]
+      system    <- ZIO.system
       gitlabDir <- system.env("CI_PROJECT_DIR")
       githubDir <- system.env("GITHUB_WORKSPACE")
       homeDir   <- system.property("user.home")
@@ -35,14 +29,14 @@ object EmbeddedMongo {
       baseDir = gitlabDir orElse githubDir orElse homeDir orElse tmpDir
 
       path <- baseDir.fold[Task[FixedPath]](
-        Task.fail(new Throwable("Could not resolve base directory")),
-      )(p => Task.succeed(new FixedPath(s"$p/.embedmongo")))
+        ZIO.fail(new Throwable("Could not resolve base directory")),
+      )(p => ZIO.succeed(new FixedPath(s"$p/.embedmongo")))
     } yield path
 
   private def runtimeConfig(artifactStorePath: Directory): Task[RuntimeConfig] = {
     val command = Command.MongoD
 
-    Task(
+    ZIO.attempt(
       RuntimeConfig.builder
         .processOutput(ProcessOutput.silent())
         .artifactStore(
@@ -56,7 +50,7 @@ object EmbeddedMongo {
     )
   }
 
-  private def mongodConfig(version: IFeatureAwareVersion): Task[MongodConfig] = Task(
+  private def mongodConfig(version: IFeatureAwareVersion): Task[MongodConfig] = ZIO.attempt(
     MongodConfig
       .builder()
       .version(version)
@@ -73,17 +67,14 @@ object EmbeddedMongo {
 
   def live(
     version: IFeatureAwareVersion = Version.Main.PRODUCTION,
-  ): ZLayer[Live, Throwable, Has[MongodProcess]] =
-    ZLayer.fromManaged(
-      (for {
-        liveEnv       <- Live.live(ZIO.environment[System with Blocking])
-        asp           <- artifactStorePath.provide(liveEnv)
-        runtimeConfig <- runtimeConfig(asp)
-        mongodConfig  <- mongodConfig(version)
+  ): ZLayer[Any, Throwable, MongodProcess] =
+    ZLayer.scoped(ZIO.acquireRelease((for {
+      asp           <- Live.live(artifactStorePath)
+      runtimeConfig <- runtimeConfig(asp)
+      mongodConfig  <- mongodConfig(version)
 
-        mongodProcess <- effectBlocking(
-          MongodStarter.getInstance(runtimeConfig).prepare(mongodConfig).start(),
-        ).provide(liveEnv)
-      } yield mongodProcess).toManaged(p => UIO(p.stop())),
-    )
+      mongodProcess <- ZIO.attemptBlocking(
+        MongodStarter.getInstance(runtimeConfig).prepare(mongodConfig).start(),
+      )
+    } yield mongodProcess))(p => ZIO.succeed(p.stop())))
 }

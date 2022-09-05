@@ -4,7 +4,7 @@ import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion
 import de.flapdoodle.embed.mongo.distribution.Version
 import io.github.zeal18.zio.mongodb.driver.MongoClient
 import zio.ZLayer
-import zio.test.environment.Live
+import zio.test.Live
 
 object MongoClientTest {
   def live(

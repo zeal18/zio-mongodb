@@ -3,10 +3,10 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
-import zio.test.*
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
+import zio.test.*
 
-object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
+object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
   private case class Simple(a: Int)
 
   sealed private trait SimpleEnum
@@ -25,7 +25,7 @@ object MagnoliaCodecsErrorsSpec extends DefaultRunnableSpec {
 
   private case class WrappedList[A](e: List[A])
 
-  override def spec: ZSpec[Environment, Failure] =
+  override def spec =
     suite("MagnoliaCodecsErrorsSpec")(
       suite("case class")(
         testCodecDecodeError[Simple](

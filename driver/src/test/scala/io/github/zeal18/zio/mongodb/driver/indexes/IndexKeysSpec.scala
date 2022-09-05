@@ -3,17 +3,17 @@ package io.github.zeal18.zio.mongodb.driver.indexes
 import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.driver.indexes
-import zio.test.ZSpec
+import zio.test.ZIOSpecDefault
 import zio.test.*
 
-object IndexKeysSpec extends DefaultRunnableSpec {
+object IndexKeysSpec extends ZIOSpecDefault {
   private def testKey(title: String, index: indexes.IndexKey, expected: String) =
     test(title) {
       assertTrue(index.toBson.toBsonDocument.toString == expected)
     }
 
   @nowarn("cat=deprecation")
-  override def spec: ZSpec[Environment, Failure] = suite("IndexKeysSpec")(
+  override def spec = suite("IndexKeysSpec")(
     testKey("ascending", indexes.asc("a", "b"), """{"a": 1, "b": 1}"""),
     testKey("descending", indexes.desc("a", "b"), """{"a": -1, "b": -1}"""),
     testKey(

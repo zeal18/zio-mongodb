@@ -4,25 +4,25 @@ import io.github.zeal18.zio.mongodb.driver.MongoClient
 import io.github.zeal18.zio.mongodb.driver.MongoDatabase
 import zio.ZIO
 import zio.ZLayer
-import zio.random.Random
-import zio.test.environment.Live
+import zio.test.Live
 
 object MongoDatabaseTest {
   def withRandomName[A](
-    f: MongoDatabase.Service => ZIO[Live with MongoClient, Throwable, A],
-  ): ZIO[Live with MongoClient, Throwable, A] =
-    random.build.use(db => f(db.get))
+    f: MongoDatabase => ZIO[MongoClient, Throwable, A],
+  ): ZIO[MongoClient, Throwable, A] =
+    ZIO.scoped {
+      random.build.flatMap(db => f(db.get))
+    }
 
   def withName[A](name: String)(
-    f: MongoDatabase.Service => ZIO[Live with MongoClient, Throwable, A],
-  ): ZIO[Live with MongoClient, Throwable, A] =
-    MongoDatabase.live(name).build.use(db => f(db.get))
+    f: MongoDatabase => ZIO[MongoClient, Throwable, A],
+  ): ZIO[MongoClient, Throwable, A] =
+    ZIO.scoped {
+      MongoDatabase.live(name).build.flatMap(db => f(db.get))
+    }
 
-  val random: ZLayer[Live with MongoClient, Throwable, MongoDatabase] =
+  val random: ZLayer[MongoClient, Throwable, MongoDatabase] =
     ZLayer
-      .fromEffect(for {
-        random <- Live.live(ZIO.service[Random.Service])
-        name   <- random.nextUUID.map(_.toString)
-      } yield name)
+      .fromZIO(Live.live(ZIO.random.flatMap(_.nextUUID.map(_.toString))))
       .flatMap(name => MongoDatabase.live(name.get))
 }

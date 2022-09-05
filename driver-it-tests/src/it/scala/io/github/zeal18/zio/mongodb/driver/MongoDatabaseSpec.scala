@@ -5,9 +5,9 @@ import io.github.zeal18.zio.mongodb.testkit.MongoClientTest
 import io.github.zeal18.zio.mongodb.testkit.MongoDatabaseTest
 import zio.test.*
 
-object MongoDatabaseSpec extends DefaultRunnableSpec {
-  override def spec: ZSpec[Environment, Failure] = suite("MongoDatabaseSpec")(
-    testM("createCollection") {
+object MongoDatabaseSpec extends ZIOSpecDefault {
+  override def spec = suite("MongoDatabaseSpec")(
+    test("createCollection") {
       MongoDatabaseTest.withRandomName { db =>
         for {
           _           <- db.createCollection("test-collection")
@@ -15,5 +15,5 @@ object MongoDatabaseSpec extends DefaultRunnableSpec {
         } yield assertTrue(collections.contains(BsonString("test-collection")))
       }
     },
-  ).provideCustomLayerShared(MongoClientTest.live().orDie)
+  ).provideLayerShared(MongoClientTest.live())
 }

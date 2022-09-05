@@ -2,15 +2,16 @@ package io.github.zeal18.zio.mongodb.driver.projections
 
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
+import zio.test.ZIOSpecDefault
 import zio.test.*
 
-object ProjectionsSpec extends DefaultRunnableSpec {
+object ProjectionsSpec extends ZIOSpecDefault {
   private def testProjection(title: String, proj: projections.Projection, expected: String) =
     test(title) {
       assertTrue(proj.toBson.toBsonDocument.toString == expected)
     }
 
-  override def spec: ZSpec[Environment, Failure] = suite("ProjectionsSpec")(
+  override def spec = suite("ProjectionsSpec")(
     testProjection("computed", projections.computed("a", "b"), """{"a": "b"}"""),
     testProjection("include", projections.include("a", "b"), """{"a": 1, "b": 1}"""),
     testProjection("exclude", projections.exclude("a", "b"), """{"a": 0, "b": 0}"""),
