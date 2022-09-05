@@ -20,121 +20,121 @@ import io.github.zeal18.zio.mongodb.driver.query.*
 import org.bson.codecs.configuration.CodecRegistries.fromProviders
 import org.bson.codecs.configuration.CodecRegistries.fromRegistries
 import org.bson.codecs.configuration.CodecRegistry
-import zio.Has
-import zio.UIO
+import zio.Scope
+import zio.ZIO
 import zio.ZLayer
-import zio.ZManaged
 import zio.stream.ZStream
 
 /** A client-side representation of a MongoDB cluster.  Instances can represent either a standalone MongoDB instance, a replica set,
   * or a sharded cluster.  Instance of this class are responsible for maintaining an up-to-date state of the cluster,
   * and possibly cache resources related to this, including background threads for monitoring, and connection pools.
   */
+trait MongoClient {
+
+  /** Creates a client session.
+    *
+    * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
+    *
+    * @note Requires MongoDB 3.6 or greater
+    */
+  def startSession(): ZIO[Scope, Throwable, ClientSession]
+
+  /** Creates a client session.
+    *
+    * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
+    *
+    * @param options  the options for the client session
+    * @note Requires MongoDB 3.6 or greater
+    */
+  def startSession(options: ClientSessionOptions): ZIO[Scope, Throwable, ClientSession]
+
+  /** Gets the database with the given name.
+    *
+    * @param name the name of the database
+    * @return the database
+    */
+  def getDatabase(name: String): MongoDatabase
+
+  /** Get a list of the database names
+    *
+    * [[https://www.mongodb.com/docs/manual/reference/commands/listDatabases List Databases]]
+    * @return an iterable containing all the names of all the databases
+    */
+  def listDatabaseNames(): ZStream[Any, Throwable, String]
+
+  /** Get a list of the database names
+    *
+    * [[https://www.mongodb.com/docs/manual/reference/commands/listDatabases List Databases]]
+    *
+    * @param clientSession the client session with which to associate this operation
+    * @return an iterable containing all the names of all the databases
+    * @note Requires MongoDB 3.6 or greater
+    */
+  def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String]
+
+  /** Gets the list of databases
+    *
+    * @return the fluent list databases interface
+    */
+  def listDatabases(): ListDatabasesQuery[Document]
+
+  /** Gets the list of databases
+    *
+    * @param clientSession the client session with which to associate this operation
+    * @return the fluent list databases interface
+    * @note Requires MongoDB 3.6 or greater
+    */
+  def listDatabases(clientSession: ClientSession): ListDatabasesQuery[Document]
+
+  /** Creates a change stream for this collection.
+    *
+    * @return the change stream observable
+    * @note Requires MongoDB 4.0 or greater
+    */
+  def watch(): ChangeStreamQuery[Document]
+
+  /** Creates a change stream for this collection.
+    *
+    * @param pipeline the aggregation pipeline to apply to the change stream
+    * @return the change stream observable
+    * @note Requires MongoDB 4.0 or greater
+    */
+  def watch(pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
+
+  /** Creates a change stream for this collection.
+    *
+    * @param clientSession the client session with which to associate this operation
+    * @return the change stream observable
+    * @note Requires MongoDB 4.0 or greater
+    */
+  def watch(clientSession: ClientSession): ChangeStreamQuery[Document]
+
+  /** Creates a change stream for this collection.
+    *
+    * @param clientSession the client session with which to associate this operation
+    * @param pipeline the aggregation pipeline to apply to the change stream
+    * @return the change stream observable
+    * @note Requires MongoDB 4.0 or greater
+    */
+  def watch(clientSession: ClientSession, pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
+
+  /** Gets the current cluster description.
+    *
+    * <p>
+    * This method will not block, meaning that it may return a { @link ClusterDescription} whose { @code clusterType} is unknown
+    * and whose { @link com.mongodb.connection.ServerDescription}s are all in the connecting state.  If the application requires
+    * notifications after the driver has connected to a member of the cluster, it should register a { @link ClusterListener} via
+    * the { @link ClusterSettings} in { @link com.mongodb.MongoClientSettings}.
+    * </p>
+    *
+    * @return the current cluster description
+    * @see ClusterSettings.Builder#addClusterListener(ClusterListener)
+    * @see com.mongodb.MongoClientSettings.Builder#applyToClusterSettings(com.mongodb.Block)
+    */
+  def getClusterDescription: ClusterDescription
+}
+
 object MongoClient {
-  trait Service {
-
-    /** Creates a client session.
-      *
-      * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
-      *
-      * @note Requires MongoDB 3.6 or greater
-      */
-    def startSession(): ZManaged[Any, Throwable, ClientSession]
-
-    /** Creates a client session.
-      *
-      * '''Note:''' A ClientSession instance can not be used concurrently in multiple asynchronous operations.
-      *
-      * @param options  the options for the client session
-      * @note Requires MongoDB 3.6 or greater
-      */
-    def startSession(options: ClientSessionOptions): ZManaged[Any, Throwable, ClientSession]
-
-    /** Gets the database with the given name.
-      *
-      * @param name the name of the database
-      * @return the database
-      */
-    def getDatabase(name: String): MongoDatabase.Service
-
-    /** Get a list of the database names
-      *
-      * [[https://www.mongodb.com/docs/manual/reference/commands/listDatabases List Databases]]
-      * @return an iterable containing all the names of all the databases
-      */
-    def listDatabaseNames(): ZStream[Any, Throwable, String]
-
-    /** Get a list of the database names
-      *
-      * [[https://www.mongodb.com/docs/manual/reference/commands/listDatabases List Databases]]
-      *
-      * @param clientSession the client session with which to associate this operation
-      * @return an iterable containing all the names of all the databases
-      * @note Requires MongoDB 3.6 or greater
-      */
-    def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String]
-
-    /** Gets the list of databases
-      *
-      * @return the fluent list databases interface
-      */
-    def listDatabases(): ListDatabasesQuery[Document]
-
-    /** Gets the list of databases
-      *
-      * @param clientSession the client session with which to associate this operation
-      * @return the fluent list databases interface
-      * @note Requires MongoDB 3.6 or greater
-      */
-    def listDatabases(clientSession: ClientSession): ListDatabasesQuery[Document]
-
-    /** Creates a change stream for this collection.
-      *
-      * @return the change stream observable
-      * @note Requires MongoDB 4.0 or greater
-      */
-    def watch(): ChangeStreamQuery[Document]
-
-    /** Creates a change stream for this collection.
-      *
-      * @param pipeline the aggregation pipeline to apply to the change stream
-      * @return the change stream observable
-      * @note Requires MongoDB 4.0 or greater
-      */
-    def watch(pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
-
-    /** Creates a change stream for this collection.
-      *
-      * @param clientSession the client session with which to associate this operation
-      * @return the change stream observable
-      * @note Requires MongoDB 4.0 or greater
-      */
-    def watch(clientSession: ClientSession): ChangeStreamQuery[Document]
-
-    /** Creates a change stream for this collection.
-      *
-      * @param clientSession the client session with which to associate this operation
-      * @param pipeline the aggregation pipeline to apply to the change stream
-      * @return the change stream observable
-      * @note Requires MongoDB 4.0 or greater
-      */
-    def watch(clientSession: ClientSession, pipeline: Seq[Aggregation]): ChangeStreamQuery[Document]
-
-    /** Gets the current cluster description.
-      *
-      * <p>
-      * This method will not block, meaning that it may return a { @link ClusterDescription} whose { @code clusterType} is unknown
-      * and whose { @link com.mongodb.connection.ServerDescription}s are all in the connecting state.  If the application requires
-      * notifications after the driver has connected to a member of the cluster, it should register a { @link ClusterListener} via
-      * the { @link ClusterSettings} in { @link com.mongodb.MongoClientSettings}.
-      * </p>
-      *
-      * @return the current cluster description
-      * @see ClusterSettings.Builder#addClusterListener(ClusterListener)
-      * @see com.mongodb.MongoClientSettings.Builder#applyToClusterSettings(com.mongodb.Block)
-      */
-    def getClusterDescription: ClusterDescription
-  }
 
   /** Create a default MongoClient at localhost:27017
     *
@@ -152,9 +152,9 @@ object MongoClient {
 
   /** Create a MongoClient instance from the MongoClientSettings
     */
-  val live: ZLayer[Has[MongoClientSettings], Throwable, MongoClient] =
-    ZLayer.fromManaged((for {
-      clientSettings <- ZManaged.service[MongoClientSettings]
+  val live: ZLayer[MongoClientSettings, Throwable, MongoClient] =
+    ZLayer.scoped((for {
+      clientSettings <- ZIO.service[MongoClientSettings]
 
       driverInfo = MongoDriverInformation
         .builder()
@@ -162,8 +162,9 @@ object MongoClient {
         .driverPlatform(s"Scala/${scala.util.Properties.versionString}")
         .build()
 
-      mongoClient <- ZManaged
-        .makeEffect(Live(MongoClients.create(clientSettings, driverInfo)))(_.close())
+      mongoClient <- ZIO.acquireRelease(
+        ZIO.succeed(Live(MongoClients.create(clientSettings, driverInfo))),
+      )(client => ZIO.succeed(client.close()))
     } yield mongoClient))
 
   private[driver] val DEFAULT_CODEC_REGISTRY: CodecRegistry = fromRegistries(
@@ -171,16 +172,16 @@ object MongoClient {
     com.mongodb.MongoClientSettings.getDefaultCodecRegistry,
   )
 
-  final private case class Live(wrapped: JMongoClient) extends Service with Closeable {
-    override def startSession(): ZManaged[Any, Throwable, ClientSession] =
-      wrapped.startSession().getOne.toManaged(s => UIO(s.close()))
+  final private case class Live(wrapped: JMongoClient) extends MongoClient with Closeable {
+    override def startSession(): ZIO[Scope, Throwable, ClientSession] =
+      ZIO.acquireRelease(wrapped.startSession().getOne)(s => ZIO.succeed(s.close()))
 
     override def startSession(
       options: ClientSessionOptions,
-    ): ZManaged[Any, Throwable, ClientSession] =
-      wrapped.startSession(options).getOne.toManaged(s => UIO(s.close()))
+    ): ZIO[Scope, Throwable, ClientSession] =
+      ZIO.acquireRelease(wrapped.startSession(options).getOne)(s => ZIO.succeed(s.close()))
 
-    override def getDatabase(name: String): MongoDatabase.Service =
+    override def getDatabase(name: String): MongoDatabase =
       MongoDatabase.Live(this, wrapped.getDatabase(name))
 
     override def close(): Unit = wrapped.close()

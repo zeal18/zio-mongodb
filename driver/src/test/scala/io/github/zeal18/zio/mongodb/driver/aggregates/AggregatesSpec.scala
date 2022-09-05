@@ -7,9 +7,10 @@ import io.github.zeal18.zio.mongodb.driver.aggregates.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
+import zio.test.ZIOSpecDefault
 import zio.test.*
 
-object AggregatesSpec extends DefaultRunnableSpec {
+object AggregatesSpec extends ZIOSpecDefault {
   private def testAggregate(
     name: String,
     aggregate: aggregates.Aggregation,
@@ -20,7 +21,7 @@ object AggregatesSpec extends DefaultRunnableSpec {
     }
 
   @nowarn("msg=possible missing interpolator")
-  override def spec: ZSpec[Environment, Failure] = suite("AggregatesSpec")(
+  override def spec = suite("AggregatesSpec")(
     testAggregate("count", aggregates.count(), """{"$count": "count"}"""),
     testAggregate("count with field", aggregates.count("field"), """{"$count": "field"}"""),
     testAggregate(

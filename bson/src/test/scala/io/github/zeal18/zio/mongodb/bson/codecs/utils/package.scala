@@ -59,7 +59,7 @@ package object utils {
   private[codecs] def testCodecDecodeError[A: Codec](
     title: String,
     bson: String,
-    assertion: BsonError => Assert,
+    assertion: BsonError => TestResult,
   ) =
     test(title) {
       val codec = Codec[A]
@@ -69,14 +69,15 @@ package object utils {
 
       val result = Try(codec.decode(reader, decCtx))
 
-      assertTrue(result.isFailure) && {
-        result.fold[Assert](
+      assertTrue(result.isFailure)
+      && {
+        result.fold[TestResult](
           {
             case e: BsonError.CodecError => assertion(e.underlying)
             case e =>
-              Assert(TestArrow.make((_: Any) => Trace.fail("Unexpected error: " + e)))
+              TestResult(TestArrow.make((_: Any) => TestTrace.fail("Unexpected error: " + e)))
           },
-          _ => Assert(TestArrow.make((_: Any) => Trace.fail("Unexpected success"))),
+          _ => TestResult(TestArrow.make((_: Any) => TestTrace.fail("Unexpected success"))),
         )
       }
     }

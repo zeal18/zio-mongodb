@@ -1,9 +1,10 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
+import zio.test.ZIOSpecDefault
 import zio.test.*
 
-object AccumulatorsSpec extends DefaultRunnableSpec {
+object AccumulatorsSpec extends ZIOSpecDefault {
   private def testAccumulator(
     title: String,
     acc: accumulators.Accumulator,
@@ -17,7 +18,7 @@ object AccumulatorsSpec extends DefaultRunnableSpec {
       )
     }
 
-  override def spec: ZSpec[Environment, Failure] = suite("AccumulatorsSpec")(
+  override def spec = suite("AccumulatorsSpec")(
     testAccumulator("sum", accumulators.sum("a", 1), "a", """{"$sum": 1}"""),
     testAccumulator("avg", accumulators.avg("a", 2), "a", """{"$avg": 2}"""),
     testAccumulator("first", accumulators.first("a", 3), "a", """{"$first": 3}"""),

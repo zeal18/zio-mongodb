@@ -3,10 +3,10 @@ package io.github.zeal18.zio.mongodb.bson.codecs
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
-import zio.test.*
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
+import zio.test.*
 
-object MagnoliaCodecsSpec extends DefaultRunnableSpec {
+object MagnoliaCodecsSpec extends ZIOSpecDefault {
   private case class Simple(a: Int, b: String)
 
   private case class Nested(a: Simple, b: Long)
@@ -88,7 +88,7 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
   case class IgnoreAnnotation(a: Int, @BsonIgnore b: Int = 0)
   case class IdAnnotation(@BsonId a: Int)
 
-  override def spec: ZSpec[Environment, Failure] =
+  override def spec =
     suite("MagnoliaCodecsSpec")(
       suite("case class")(
         testCodecRoundtrip("simple case class", Simple(1, "2"), """{"a": 1, "b": "2"}"""),

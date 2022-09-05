@@ -7,22 +7,17 @@ import org.bson.BsonDocumentReader
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.DocumentCodec
 import org.reactivestreams.Publisher
-import zio.Has
 import zio.Task
 import zio.interop.reactivestreams.*
 import zio.stream.ZStream
 
 package object driver {
   implicit class PublisherOps[A](private val publisher: Publisher[A]) extends AnyVal {
-    def stream: ZStream[Any, Throwable, A] = publisher.toStream()
-    def getOneOpt: Task[Option[A]]         = publisher.toStream(qSize = 2).runHead
+    def stream: ZStream[Any, Throwable, A] = publisher.toZIOStream()
+    def getOneOpt: Task[Option[A]]         = publisher.toZIOStream(qSize = 2).runHead
     def getOne: Task[A] =
       getOneOpt.someOrFail(new IllegalStateException("Expected one value but received nothing"))
   }
-
-  type MongoClient        = Has[MongoClient.Service]
-  type MongoDatabase      = Has[MongoDatabase.Service]
-  type MongoCollection[A] = Has[MongoCollection.Service[A]]
 
   /** An immutable Document implementation.
     *
