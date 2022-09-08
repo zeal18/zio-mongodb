@@ -22,15 +22,17 @@ object MongoCollectionTest {
     f: MongoCollection[A] => ZIO[MongoClient, Throwable, B],
   )(implicit c: Codec[A]): ZIO[MongoClient, Throwable, B] =
     ZIO.scoped {
-      (ZLayer.environment[MongoClient] ++ MongoDatabaseTest.random >>>
-        MongoCollection.live(name)).build.flatMap(db => f(db.get))
+      (MongoDatabaseTest.random >>>
+        MongoCollection.live(name)).build.map(_.get).withFinalizer(_.drop().orDie).flatMap(f)
     }
 
   def random[A: Tag: ClassTag](implicit
     c: Codec[A],
   ): ZLayer[MongoClient, Throwable, MongoCollection[A]] =
-    ZLayer.environment[MongoClient] ++ MongoDatabaseTest.random >>>
-      ZLayer
-        .fromZIO(Live.live(ZIO.random.flatMap(_.nextUUID.map(_.toString))))
-        .flatMap(name => MongoCollection.live(name.get))
+    MongoDatabaseTest.random >>>
+      ZLayer.scoped(for {
+        name <- Live.live(ZIO.randomWith(_.nextUUID.map(_.toString)))
+        db   <- MongoCollection.live(name).build.map(_.get)
+        _    <- ZIO.addFinalizer(db.drop().orDie)
+      } yield db)
 }
