@@ -18,11 +18,13 @@ object MongoDatabaseTest {
     f: MongoDatabase => ZIO[MongoClient, Throwable, A],
   ): ZIO[MongoClient, Throwable, A] =
     ZIO.scoped {
-      MongoDatabase.live(name).build.flatMap(db => f(db.get))
+      MongoDatabase.live(name).build.map(_.get).withFinalizer(_.drop().orDie).flatMap(f)
     }
 
   val random: ZLayer[MongoClient, Throwable, MongoDatabase] =
-    ZLayer
-      .fromZIO(Live.live(ZIO.random.flatMap(_.nextUUID.map(_.toString))))
-      .flatMap(name => MongoDatabase.live(name.get))
+    ZLayer.scoped(for {
+      name <- Live.live(ZIO.randomWith(_.nextUUID.map(_.toString)))
+      db   <- MongoDatabase.live(name).build.map(_.get)
+      _    <- ZIO.addFinalizer(db.drop().orDie)
+    } yield db)
 }
