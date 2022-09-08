@@ -430,10 +430,10 @@ object MongoDatabase {
         .runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]])
         .getOneOpt
 
-    override def drop(): Task[Unit] = wrapped.drop().getOne.unit
+    override def drop(): Task[Unit] = wrapped.drop().getOneOpt.unit
 
     override def drop(clientSession: ClientSession): Task[Unit] =
-      wrapped.drop(clientSession).getOne.unit
+      wrapped.drop(clientSession).getOneOpt.unit
 
     override def listCollectionNames(): ZStream[Any, Throwable, String] =
       wrapped.listCollectionNames().stream
