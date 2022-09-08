@@ -1900,10 +1900,10 @@ object MongoCollection {
         .findOneAndUpdate(clientSession, filter.toBson, update.map(_.toBson).asJava, options.toJava)
         .getOneOpt
 
-    override def drop(): Task[Unit] = wrapped.drop().getOne.unit
+    override def drop(): Task[Unit] = wrapped.drop().getOneOpt.unit
 
     override def drop(clientSession: ClientSession): Task[Unit] =
-      wrapped.drop(clientSession).getOne.unit
+      wrapped.drop(clientSession).getOneOpt.unit
 
     override def createIndex(key: IndexKey): Task[String] = wrapped.createIndex(key.toBson).getOne
 
