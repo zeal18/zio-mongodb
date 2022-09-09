@@ -12,7 +12,7 @@ val zioInteropRSVersion = "2.0.0"
 val mongoVersion = "4.6.1"
 
 val flapdoodleVersion = "3.4.8"
-val immutablesVersion = "2.9.1"
+val immutablesVersion = "2.9.2"
 
 val magnolia2Version = "1.1.2"
 val magnolia3Version = "1.1.5"
