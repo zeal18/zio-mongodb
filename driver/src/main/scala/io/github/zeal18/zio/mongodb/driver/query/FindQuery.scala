@@ -41,7 +41,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @return this
     */
   def filter(filter: Filter): FindQuery[TResult] = {
-    wrapped.filter(filter.toBson)
+    wrapped.filter(filter)
     this
   }
 
@@ -105,7 +105,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @return this
     */
   def projection(projection: Projection): FindQuery[TResult] = {
-    wrapped.projection(projection.toBson)
+    wrapped.projection(projection)
     this
   }
 
@@ -116,7 +116,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @return this
     */
   def sort(sorts: Sort*): FindQuery[TResult] = {
-    wrapped.sort(Sort.Compound(sorts).toBson)
+    wrapped.sort(Sort.Compound(sorts))
     this
   }
 

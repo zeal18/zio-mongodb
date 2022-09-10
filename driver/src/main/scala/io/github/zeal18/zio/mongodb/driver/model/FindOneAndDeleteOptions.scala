@@ -78,8 +78,8 @@ final case class FindOneAndDeleteOptions(
   private[driver] def toJava: JFindOneAndDeleteOptions = {
     val options = new JFindOneAndDeleteOptions()
 
-    projection.foreach(p => options.projection(p.toBson))
-    sort.foreach(s => options.sort(s.toBson))
+    projection.foreach(p => options.projection(p))
+    sort.foreach(s => options.sort(s))
     maxTime.foreach(t => options.maxTime(t.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS))
     collation.foreach(c => options.collation(c.toJava))
     hint.map(_.toBson).foreach {

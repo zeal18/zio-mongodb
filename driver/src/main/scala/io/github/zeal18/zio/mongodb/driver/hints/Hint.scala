@@ -9,7 +9,7 @@ sealed trait Hint { self =>
   def toBson: Either[String, BsonDocument] =
     self match {
       case Hint.IndexName(name) => Left(name)
-      case Hint.Index(key)      => Right(key.toBson.toBsonDocument())
+      case Hint.Index(key)      => Right(key.toBsonDocument())
       case Hint.ForwardScan     => Right(new BsonDocument("$natural", new BsonInt32(1)))
       case Hint.ReverseScan     => Right(new BsonDocument("$natural", new BsonInt32(-1)))
       case Hint.Raw(hint)       => Right(hint.toBsonDocument())

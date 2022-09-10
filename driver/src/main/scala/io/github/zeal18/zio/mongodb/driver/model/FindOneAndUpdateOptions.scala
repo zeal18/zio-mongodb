@@ -113,14 +113,14 @@ final case class FindOneAndUpdateOptions(
   private[driver] def toJava: JFindOneAndUpdateOptions = {
     val options = new JFindOneAndUpdateOptions()
 
-    projection.foreach(p => options.projection(p.toBson))
-    sort.foreach(s => options.sort(s.toBson))
+    projection.foreach(p => options.projection(p))
+    sort.foreach(s => options.sort(s))
     options.upsert(upsert)
     options.returnDocument(returnDocument.toJava)
     maxTime.foreach(t => options.maxTime(t.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS))
     bypassDocumentValidation.foreach(options.bypassDocumentValidation(_))
     collation.foreach(c => options.collation(c.toJava))
-    arrayFilters.foreach(f => options.arrayFilters(f.map(_.toBson).asJava))
+    arrayFilters.foreach(f => options.arrayFilters(f.asJava))
     hint.map(_.toBson).foreach {
       case Left(string) => options.hintString(string)
       case Right(bson)  => options.hint(bson)

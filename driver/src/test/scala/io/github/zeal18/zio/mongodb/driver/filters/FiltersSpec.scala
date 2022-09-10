@@ -11,7 +11,7 @@ import zio.test.assertTrue
 object FiltersSpec extends DefaultRunnableSpec {
   private def testFilter(title: String, filter: filters.Filter, expected: String) =
     test(title) {
-      assertTrue(filter.toBson.toBsonDocument.toString == expected)
+      assertTrue(filter.toBsonDocument().toString == expected)
     }
 
   override def spec: ZSpec[Environment, Failure] =

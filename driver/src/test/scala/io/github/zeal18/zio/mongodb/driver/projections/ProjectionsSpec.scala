@@ -9,7 +9,7 @@ import zio.test.*
 object ProjectionsSpec extends DefaultRunnableSpec {
   private def testProjection(title: String, proj: projections.Projection, expected: String) =
     test(title) {
-      assertTrue(proj.toBson.toBsonDocument.toString == expected)
+      assertTrue(proj.toBsonDocument().toString == expected)
     }
 
   override def spec: ZSpec[Environment, Failure] = suite("ProjectionsSpec")(

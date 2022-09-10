@@ -204,7 +204,7 @@ object MongoClient {
 
     override def watch(pipeline: Seq[Aggregation]): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def watch(clientSession: ClientSession): ChangeStreamQuery[Document] =
@@ -215,7 +215,7 @@ object MongoClient {
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(clientSession, pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(clientSession, pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def getClusterDescription: ClusterDescription = wrapped.getClusterDescription
