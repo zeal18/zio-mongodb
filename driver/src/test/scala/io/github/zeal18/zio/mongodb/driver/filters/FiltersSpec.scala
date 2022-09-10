@@ -2,6 +2,7 @@ package io.github.zeal18.zio.mongodb.driver.filters
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonString
+import io.github.zeal18.zio.mongodb.driver.aggregates
 import io.github.zeal18.zio.mongodb.driver.filters
 import org.bson.BsonType
 import zio.test.ZIOSpecDefault
@@ -175,7 +176,11 @@ object FiltersSpec extends ZIOSpecDefault {
       filters.where("expression"),
       """{"$where": "expression"}""",
     ),
-    testFilter("expr", filters.expr("expression"), """{"$expr": "expression"}"""),
+    testFilter(
+      "expr",
+      filters.expr(aggregates.raw("""{"$gt": ["$spent", "$budget"]}""")),
+      """{"$expr": {"$gt": ["$spent", "$budget"]}}""",
+    ),
     suite("all")(
       testFilter(
         "all set",

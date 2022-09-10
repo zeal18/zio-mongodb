@@ -7,6 +7,7 @@ import com.mongodb.client.model.Filters as JFilters
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
+import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import org.bson.BsonArray
 import org.bson.BsonDocumentWriter
 import org.bson.BsonRegularExpression
@@ -197,7 +198,7 @@ object Filter {
     diacriticSensitive: Option[Boolean],
   ) extends Filter
   final case class Where(javaScriptExpression: String)                            extends Filter
-  final case class Expr(expression: String)                                       extends Filter
+  final case class Expr(expression: Aggregation)                                  extends Filter
   final case class All[A](fieldName: String, values: Set[A], encoder: Encoder[A]) extends Filter
   final case class ElemMatch(fieldName: String, filter: Filter)                   extends Filter
   final case class Size(fieldName: String, size: Int)                             extends Filter
