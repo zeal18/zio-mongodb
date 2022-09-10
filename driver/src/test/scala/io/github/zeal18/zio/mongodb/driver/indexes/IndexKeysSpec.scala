@@ -11,7 +11,7 @@ import zio.test.*
 object IndexKeysSpec extends ZIOSpecDefault {
   private def testKey(title: String, index: indexes.IndexKey, expected: String) =
     test(title) {
-      assertTrue(index.toBson.toBsonDocument.toString == expected)
+      assertTrue(index.toBsonDocument().toString == expected)
     }
 
   @nowarn("cat=deprecation")

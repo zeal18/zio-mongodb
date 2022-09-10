@@ -18,7 +18,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     expected: String,
   ) =
     test(name) {
-      assertTrue(aggregate.toBson.toBsonDocument.toString == expected)
+      assertTrue(aggregate.toBsonDocument().toString == expected)
     }
 
   @nowarn("msg=possible missing interpolator")

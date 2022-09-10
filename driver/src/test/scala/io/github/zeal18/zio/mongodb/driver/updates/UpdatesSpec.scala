@@ -11,7 +11,7 @@ import zio.test.assertTrue
 object UpdatesSpec extends ZIOSpecDefault {
   private def testUpdate(title: String, update: updates.Update, expected: String) =
     test(title) {
-      assertTrue(update.toBson.toBsonDocument.toString == expected)
+      assertTrue(update.toBsonDocument().toString == expected)
     }
 
   override def spec = suite("UpdatesSpec")(

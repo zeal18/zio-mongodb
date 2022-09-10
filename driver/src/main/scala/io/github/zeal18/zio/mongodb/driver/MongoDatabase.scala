@@ -476,7 +476,7 @@ object MongoDatabase {
       viewOn: String,
       pipeline: Seq[Aggregation],
     ): Task[Unit] =
-      wrapped.createView(viewName, viewOn, pipeline.map(_.toBson).asJava).getOneOpt.unit
+      wrapped.createView(viewName, viewOn, pipeline.asJava).getOneOpt.unit
 
     override def createView(
       viewName: String,
@@ -484,10 +484,7 @@ object MongoDatabase {
       pipeline: Seq[Aggregation],
       createViewOptions: CreateViewOptions,
     ): Task[Unit] =
-      wrapped
-        .createView(viewName, viewOn, pipeline.map(_.toBson).asJava, createViewOptions)
-        .getOneOpt
-        .unit
+      wrapped.createView(viewName, viewOn, pipeline.asJava, createViewOptions).getOneOpt.unit
 
     override def createView(
       clientSession: ClientSession,
@@ -495,10 +492,7 @@ object MongoDatabase {
       viewOn: String,
       pipeline: Seq[Aggregation],
     ): Task[Unit] =
-      wrapped
-        .createView(clientSession, viewName, viewOn, pipeline.map(_.toBson).asJava)
-        .getOneOpt
-        .unit
+      wrapped.createView(clientSession, viewName, viewOn, pipeline.asJava).getOneOpt.unit
 
     override def createView(
       clientSession: ClientSession,
@@ -512,7 +506,7 @@ object MongoDatabase {
           clientSession,
           viewName,
           viewOn,
-          pipeline.map(_.toBson).asJava,
+          pipeline.asJava,
           createViewOptions,
         )
         .getOneOpt
@@ -525,7 +519,7 @@ object MongoDatabase {
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def watch(
@@ -538,12 +532,12 @@ object MongoDatabase {
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(clientSession, pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(clientSession, pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[Document] =
       AggregateQuery(
-        wrapped.aggregate[Document](pipeline.map(_.toBson).asJava, implicitly[ClassTag[Document]]),
+        wrapped.aggregate[Document](pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def aggregate(
@@ -553,7 +547,7 @@ object MongoDatabase {
       AggregateQuery(
         wrapped.aggregate[Document](
           clientSession,
-          pipeline.map(_.toBson).asJava,
+          pipeline.asJava,
           implicitly[ClassTag[Document]],
         ),
       )

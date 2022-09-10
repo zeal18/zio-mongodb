@@ -1521,32 +1521,29 @@ object MongoCollection {
       wrapped.countDocuments().getOne.map(identity[Long](_))
 
     override def countDocuments(filter: Filter): Task[Long] =
-      wrapped.countDocuments(filter.toBson).getOne.map(identity[Long](_))
+      wrapped.countDocuments(filter).getOne.map(identity[Long](_))
 
     override def countDocuments(filter: Filter, options: CountOptions): Task[Long] =
-      wrapped.countDocuments(filter.toBson, options.toJava).getOne.map(identity[Long](_))
+      wrapped.countDocuments(filter, options.toJava).getOne.map(identity[Long](_))
 
     override def countDocuments(clientSession: ClientSession): Task[Long] =
       wrapped.countDocuments(clientSession).getOne.map(identity[Long](_))
 
     override def countDocuments(clientSession: ClientSession, filter: Filter): Task[Long] =
-      wrapped.countDocuments(clientSession, filter.toBson).getOne.map(identity[Long](_))
+      wrapped.countDocuments(clientSession, filter).getOne.map(identity[Long](_))
 
     override def countDocuments(
       clientSession: ClientSession,
       filter: Filter,
       options: CountOptions,
     ): Task[Long] =
-      wrapped
-        .countDocuments(clientSession, filter.toBson, options.toJava)
-        .getOne
-        .map(identity[Long](_))
+      wrapped.countDocuments(clientSession, filter, options.toJava).getOne.map(identity[Long](_))
 
     override def distinct(fieldName: String): DistinctQuery[A] =
       DistinctQuery(wrapped.distinct(fieldName, documentClass))
 
     override def distinct(fieldName: String, filter: Filter): DistinctQuery[A] =
-      DistinctQuery(wrapped.distinct(fieldName, filter.toBson, documentClass))
+      DistinctQuery(wrapped.distinct(fieldName, filter, documentClass))
 
     override def distinct(clientSession: ClientSession, fieldName: String): DistinctQuery[A] =
       DistinctQuery(wrapped.distinct(clientSession, fieldName, documentClass))
@@ -1556,29 +1553,29 @@ object MongoCollection {
       fieldName: String,
       filter: Filter,
     ): DistinctQuery[A] =
-      DistinctQuery(wrapped.distinct(clientSession, fieldName, filter.toBson, documentClass))
+      DistinctQuery(wrapped.distinct(clientSession, fieldName, filter, documentClass))
 
     override def find(): FindQuery[A] =
       FindQuery(wrapped.find[A](documentClass))
 
     override def find(filter: Filter): FindQuery[A] =
-      FindQuery(wrapped.find(filter.toBson, documentClass))
+      FindQuery(wrapped.find(filter, documentClass))
 
     override def find(clientSession: ClientSession): FindQuery[A] =
       FindQuery(wrapped.find(clientSession, documentClass))
 
     override def find(clientSession: ClientSession, filter: Filter): FindQuery[A] =
-      FindQuery(wrapped.find(clientSession, filter.toBson, documentClass))
+      FindQuery(wrapped.find(clientSession, filter, documentClass))
 
     override def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[A] =
-      AggregateQuery(wrapped.aggregate[A](pipeline.map(_.toBson).asJava, documentClass))
+      AggregateQuery(wrapped.aggregate[A](pipeline.asJava, documentClass))
 
     override def aggregate(
       clientSession: ClientSession,
       pipeline: Seq[Aggregation],
     ): AggregateQuery[A] =
       AggregateQuery(
-        wrapped.aggregate[A](clientSession, pipeline.map(_.toBson).asJava, documentClass),
+        wrapped.aggregate[A](clientSession, pipeline.asJava, documentClass),
       )
 
     override def bulkWrite(requests: Seq[BulkWrite[A]]): Task[BulkWriteResult] =
@@ -1644,53 +1641,53 @@ object MongoCollection {
       wrapped.insertMany(clientSession, documents.asJava, options.toJava).getOne
 
     override def deleteOne(filter: Filter): Task[DeleteResult] =
-      wrapped.deleteOne(filter.toBson).getOne
+      wrapped.deleteOne(filter).getOne
 
     override def deleteOne(filter: Filter, options: DeleteOptions): Task[DeleteResult] =
-      wrapped.deleteOne(filter.toBson, options.toJava).getOne
+      wrapped.deleteOne(filter, options.toJava).getOne
 
     override def deleteOne(clientSession: ClientSession, filter: Filter): Task[DeleteResult] =
-      wrapped.deleteOne(clientSession, filter.toBson).getOne
+      wrapped.deleteOne(clientSession, filter).getOne
 
     override def deleteOne(
       clientSession: ClientSession,
       filter: Filter,
       options: DeleteOptions,
     ): Task[DeleteResult] =
-      wrapped.deleteOne(clientSession, filter.toBson, options.toJava).getOne
+      wrapped.deleteOne(clientSession, filter, options.toJava).getOne
 
     override def deleteMany(filter: Filter): Task[DeleteResult] =
-      wrapped.deleteMany(filter.toBson).getOne
+      wrapped.deleteMany(filter).getOne
 
     override def deleteMany(filter: Filter, options: DeleteOptions): Task[DeleteResult] =
-      wrapped.deleteMany(filter.toBson, options.toJava).getOne
+      wrapped.deleteMany(filter, options.toJava).getOne
 
     override def deleteMany(clientSession: ClientSession, filter: Filter): Task[DeleteResult] =
-      wrapped.deleteMany(clientSession, filter.toBson).getOne
+      wrapped.deleteMany(clientSession, filter).getOne
 
     override def deleteMany(
       clientSession: ClientSession,
       filter: Filter,
       options: DeleteOptions,
     ): Task[DeleteResult] =
-      wrapped.deleteMany(clientSession, filter.toBson, options.toJava).getOne
+      wrapped.deleteMany(clientSession, filter, options.toJava).getOne
 
     override def replaceOne(filter: Filter, replacement: A): Task[UpdateResult] =
-      wrapped.replaceOne(filter.toBson, replacement).getOne
+      wrapped.replaceOne(filter, replacement).getOne
 
     override def replaceOne(
       clientSession: ClientSession,
       filter: Filter,
       replacement: A,
     ): Task[UpdateResult] =
-      wrapped.replaceOne(clientSession, filter.toBson, replacement).getOne
+      wrapped.replaceOne(clientSession, filter, replacement).getOne
 
     override def replaceOne(
       filter: Filter,
       replacement: A,
       options: ReplaceOptions,
     ): Task[UpdateResult] =
-      wrapped.replaceOne(filter.toBson, replacement, options.toJava).getOne
+      wrapped.replaceOne(filter, replacement, options.toJava).getOne
 
     override def replaceOne(
       clientSession: ClientSession,
@@ -1698,24 +1695,24 @@ object MongoCollection {
       replacement: A,
       options: ReplaceOptions,
     ): Task[UpdateResult] =
-      wrapped.replaceOne(clientSession, filter.toBson, replacement, options.toJava).getOne
+      wrapped.replaceOne(clientSession, filter, replacement, options.toJava).getOne
 
     override def updateOne(filter: Filter, update: Update): Task[UpdateResult] =
-      wrapped.updateOne(filter.toBson, update.toBson).getOne
+      wrapped.updateOne(filter, update).getOne
 
     override def updateOne(
       filter: Filter,
       update: Update,
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateOne(filter.toBson, update.toBson, options.toJava).getOne
+      wrapped.updateOne(filter, update, options.toJava).getOne
 
     override def updateOne(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
     ): Task[UpdateResult] =
-      wrapped.updateOne(clientSession, filter.toBson, update.toBson).getOne
+      wrapped.updateOne(clientSession, filter, update).getOne
 
     override def updateOne(
       clientSession: ClientSession,
@@ -1723,24 +1720,24 @@ object MongoCollection {
       update: Update,
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateOne(clientSession, filter.toBson, update.toBson, options.toJava).getOne
+      wrapped.updateOne(clientSession, filter, update, options.toJava).getOne
 
     override def updateOne(filter: Filter, update: Seq[Update]): Task[UpdateResult] =
-      wrapped.updateOne(filter.toBson, update.map(_.toBson).asJava).getOne
+      wrapped.updateOne(filter, update.asJava).getOne
 
     override def updateOne(
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateOne(filter.toBson, update.map(_.toBson).asJava, options.toJava).getOne
+      wrapped.updateOne(filter, update.asJava, options.toJava).getOne
 
     override def updateOne(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
     ): Task[UpdateResult] =
-      wrapped.updateOne(clientSession, filter.toBson, update.map(_.toBson).asJava).getOne
+      wrapped.updateOne(clientSession, filter, update.asJava).getOne
 
     override def updateOne(
       clientSession: ClientSession,
@@ -1748,26 +1745,24 @@ object MongoCollection {
       update: Seq[Update],
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped
-        .updateOne(clientSession, filter.toBson, update.map(_.toBson).asJava, options.toJava)
-        .getOne
+      wrapped.updateOne(clientSession, filter, update.asJava, options.toJava).getOne
 
     override def updateMany(filter: Filter, update: Update): Task[UpdateResult] =
-      wrapped.updateMany(filter.toBson, update.toBson).getOne
+      wrapped.updateMany(filter, update).getOne
 
     override def updateMany(
       filter: Filter,
       update: Update,
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateMany(filter.toBson, update.toBson, options.toJava).getOne
+      wrapped.updateMany(filter, update, options.toJava).getOne
 
     override def updateMany(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
     ): Task[UpdateResult] =
-      wrapped.updateMany(clientSession, filter.toBson, update.toBson).getOne
+      wrapped.updateMany(clientSession, filter, update).getOne
 
     override def updateMany(
       clientSession: ClientSession,
@@ -1775,24 +1770,24 @@ object MongoCollection {
       update: Update,
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateMany(clientSession, filter.toBson, update.toBson, options.toJava).getOne
+      wrapped.updateMany(clientSession, filter, update, options.toJava).getOne
 
     override def updateMany(filter: Filter, update: Seq[Update]): Task[UpdateResult] =
-      wrapped.updateMany(filter.toBson, update.map(_.toBson).asJava).getOne
+      wrapped.updateMany(filter, update.asJava).getOne
 
     override def updateMany(
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped.updateMany(filter.toBson, update.map(_.toBson).asJava, options.toJava).getOne
+      wrapped.updateMany(filter, update.asJava, options.toJava).getOne
 
     override def updateMany(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
     ): Task[UpdateResult] =
-      wrapped.updateMany(clientSession, filter.toBson, update.map(_.toBson).asJava).getOne
+      wrapped.updateMany(clientSession, filter, update.asJava).getOne
 
     override def updateMany(
       clientSession: ClientSession,
@@ -1800,45 +1795,43 @@ object MongoCollection {
       update: Seq[Update],
       options: UpdateOptions,
     ): Task[UpdateResult] =
-      wrapped
-        .updateMany(clientSession, filter.toBson, update.map(_.toBson).asJava, options.toJava)
-        .getOne
+      wrapped.updateMany(clientSession, filter, update.asJava, options.toJava).getOne
 
     override def findOneAndDelete(filter: Filter): Task[Option[A]] =
-      wrapped.findOneAndDelete(filter.toBson).getOneOpt
+      wrapped.findOneAndDelete(filter).getOneOpt
 
     override def findOneAndDelete(
       filter: Filter,
       options: FindOneAndDeleteOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndDelete(filter.toBson, options.toJava).getOneOpt
+      wrapped.findOneAndDelete(filter, options.toJava).getOneOpt
 
     override def findOneAndDelete(clientSession: ClientSession, filter: Filter): Task[Option[A]] =
-      wrapped.findOneAndDelete(clientSession, filter.toBson).getOneOpt
+      wrapped.findOneAndDelete(clientSession, filter).getOneOpt
 
     override def findOneAndDelete(
       clientSession: ClientSession,
       filter: Filter,
       options: FindOneAndDeleteOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndDelete(clientSession, filter.toBson, options.toJava).getOneOpt
+      wrapped.findOneAndDelete(clientSession, filter, options.toJava).getOneOpt
 
     override def findOneAndReplace(filter: Filter, replacement: A): Task[Option[A]] =
-      wrapped.findOneAndReplace(filter.toBson, replacement).getOneOpt
+      wrapped.findOneAndReplace(filter, replacement).getOneOpt
 
     override def findOneAndReplace(
       filter: Filter,
       replacement: A,
       options: FindOneAndReplaceOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndReplace(filter.toBson, replacement, options.toJava).getOneOpt
+      wrapped.findOneAndReplace(filter, replacement, options.toJava).getOneOpt
 
     override def findOneAndReplace(
       clientSession: ClientSession,
       filter: Filter,
       replacement: A,
     ): Task[Option[A]] =
-      wrapped.findOneAndReplace(clientSession, filter.toBson, replacement).getOneOpt
+      wrapped.findOneAndReplace(clientSession, filter, replacement).getOneOpt
 
     override def findOneAndReplace(
       clientSession: ClientSession,
@@ -1846,24 +1839,24 @@ object MongoCollection {
       replacement: A,
       options: FindOneAndReplaceOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndReplace(clientSession, filter.toBson, replacement, options.toJava).getOneOpt
+      wrapped.findOneAndReplace(clientSession, filter, replacement, options.toJava).getOneOpt
 
     override def findOneAndUpdate(filter: Filter, update: Update): Task[Option[A]] =
-      wrapped.findOneAndUpdate(filter.toBson, update.toBson).getOneOpt
+      wrapped.findOneAndUpdate(filter, update).getOneOpt
 
     override def findOneAndUpdate(
       filter: Filter,
       update: Update,
       options: FindOneAndUpdateOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndUpdate(filter.toBson, update.toBson, options.toJava).getOneOpt
+      wrapped.findOneAndUpdate(filter, update, options.toJava).getOneOpt
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
     ): Task[Option[A]] =
-      wrapped.findOneAndUpdate(clientSession, filter.toBson, update.toBson).getOneOpt
+      wrapped.findOneAndUpdate(clientSession, filter, update).getOneOpt
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
@@ -1871,26 +1864,24 @@ object MongoCollection {
       update: Update,
       options: FindOneAndUpdateOptions,
     ): Task[Option[A]] =
-      wrapped
-        .findOneAndUpdate(clientSession, filter.toBson, update.toBson, options.toJava)
-        .getOneOpt
+      wrapped.findOneAndUpdate(clientSession, filter, update, options.toJava).getOneOpt
 
     override def findOneAndUpdate(filter: Filter, update: Seq[Update]): Task[Option[A]] =
-      wrapped.findOneAndUpdate(filter.toBson, update.map(_.toBson).asJava).getOneOpt
+      wrapped.findOneAndUpdate(filter, update.asJava).getOneOpt
 
     override def findOneAndUpdate(
       filter: Filter,
       update: Seq[Update],
       options: FindOneAndUpdateOptions,
     ): Task[Option[A]] =
-      wrapped.findOneAndUpdate(filter.toBson, update.map(_.toBson).asJava, options.toJava).getOneOpt
+      wrapped.findOneAndUpdate(filter, update.asJava, options.toJava).getOneOpt
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
     ): Task[Option[A]] =
-      wrapped.findOneAndUpdate(clientSession, filter.toBson, update.map(_.toBson).asJava).getOneOpt
+      wrapped.findOneAndUpdate(clientSession, filter, update.asJava).getOneOpt
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
@@ -1898,29 +1889,27 @@ object MongoCollection {
       update: Seq[Update],
       options: FindOneAndUpdateOptions,
     ): Task[Option[A]] =
-      wrapped
-        .findOneAndUpdate(clientSession, filter.toBson, update.map(_.toBson).asJava, options.toJava)
-        .getOneOpt
+      wrapped.findOneAndUpdate(clientSession, filter, update.asJava, options.toJava).getOneOpt
 
     override def drop(): Task[Unit] = wrapped.drop().getOneOpt.unit
 
     override def drop(clientSession: ClientSession): Task[Unit] =
       wrapped.drop(clientSession).getOneOpt.unit
 
-    override def createIndex(key: IndexKey): Task[String] = wrapped.createIndex(key.toBson).getOne
+    override def createIndex(key: IndexKey): Task[String] = wrapped.createIndex(key).getOne
 
     override def createIndex(key: IndexKey, options: IndexOptions): Task[String] =
-      wrapped.createIndex(key.toBson, options.toJava).getOne
+      wrapped.createIndex(key, options.toJava).getOne
 
     override def createIndex(clientSession: ClientSession, key: IndexKey): Task[String] =
-      wrapped.createIndex(clientSession, key.toBson).getOne
+      wrapped.createIndex(clientSession, key).getOne
 
     override def createIndex(
       clientSession: ClientSession,
       key: IndexKey,
       options: IndexOptions,
     ): Task[String] =
-      wrapped.createIndex(clientSession, key.toBson, options.toJava).getOne
+      wrapped.createIndex(clientSession, key, options.toJava).getOne
 
     override def createIndexes(indexes: Index*): Task[Chunk[String]] = {
       val models = indexes.map(_.toJava).asJava
@@ -1969,10 +1958,10 @@ object MongoCollection {
       wrapped.dropIndex(indexName, dropIndexOptions.toJava).getOneOpt.unit
 
     override def dropIndex(keys: IndexKey): Task[Unit] =
-      wrapped.dropIndex(keys.toBson).getOneOpt.unit
+      wrapped.dropIndex(keys).getOneOpt.unit
 
     override def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions): Task[Unit] =
-      wrapped.dropIndex(keys.toBson, dropIndexOptions.toJava).getOneOpt.unit
+      wrapped.dropIndex(keys, dropIndexOptions.toJava).getOneOpt.unit
 
     override def dropIndex(clientSession: ClientSession, indexName: String): Task[Unit] =
       wrapped.dropIndex(clientSession, indexName).getOneOpt.unit
@@ -1985,14 +1974,14 @@ object MongoCollection {
       wrapped.dropIndex(clientSession, indexName, dropIndexOptions.toJava).getOneOpt.unit
 
     override def dropIndex(clientSession: ClientSession, keys: IndexKey): Task[Unit] =
-      wrapped.dropIndex(clientSession, keys.toBson).getOneOpt.unit
+      wrapped.dropIndex(clientSession, keys).getOneOpt.unit
 
     override def dropIndex(
       clientSession: ClientSession,
       keys: IndexKey,
       dropIndexOptions: DropIndexOptions,
     ): Task[Unit] =
-      wrapped.dropIndex(clientSession, keys.toBson, dropIndexOptions.toJava).getOneOpt.unit
+      wrapped.dropIndex(clientSession, keys, dropIndexOptions.toJava).getOneOpt.unit
 
     override def dropIndexes(): Task[Unit] = wrapped.dropIndexes().getOneOpt.unit
 
@@ -2034,7 +2023,7 @@ object MongoCollection {
       ChangeStreamQuery(wrapped.watch(documentClass))
 
     override def watch(pipeline: Seq[Aggregation]): ChangeStreamQuery[A] =
-      ChangeStreamQuery(wrapped.watch(pipeline.map(_.toBson).asJava, documentClass))
+      ChangeStreamQuery(wrapped.watch(pipeline.asJava, documentClass))
 
     override def watch(clientSession: ClientSession): ChangeStreamQuery[A] =
       ChangeStreamQuery(wrapped.watch(clientSession, documentClass))
@@ -2043,6 +2032,6 @@ object MongoCollection {
       clientSession: ClientSession,
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[A] =
-      ChangeStreamQuery(wrapped.watch(clientSession, pipeline.map(_.toBson).asJava, documentClass))
+      ChangeStreamQuery(wrapped.watch(clientSession, pipeline.asJava, documentClass))
   }
 }
