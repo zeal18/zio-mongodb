@@ -81,7 +81,7 @@ final case class UpdateOptions(
     options.upsert(upsert)
     bypassDocumentValidation.foreach(options.bypassDocumentValidation(_))
     collation.foreach(c => options.collation(c.toJava))
-    arrayFilters.foreach(f => options.arrayFilters(f.map(_.toBson).asJava))
+    arrayFilters.foreach(f => options.arrayFilters(f.asJava))
     hint.map(_.toBson).foreach {
       case Left(string) => options.hintString(string)
       case Right(bson)  => options.hint(bson)

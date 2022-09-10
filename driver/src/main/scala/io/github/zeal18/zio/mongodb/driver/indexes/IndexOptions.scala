@@ -37,7 +37,7 @@ final case class IndexOptions(
       new JIndexOptions().background(background).unique(unique).sparse(sparse).hidden(hidden)
 
     name.foreach(options.name(_))
-    partialFilterExpression.foreach(filter => options.partialFilterExpression(filter.toBson))
+    partialFilterExpression.foreach(filter => options.partialFilterExpression(filter))
     expireAfterSeconds.foreach(options.expireAfter(_, TimeUnit.SECONDS))
     storageEngine.foreach(options.storageEngine(_))
     weights.foreach(options.weights(_))

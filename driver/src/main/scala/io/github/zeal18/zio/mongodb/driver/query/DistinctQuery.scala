@@ -27,7 +27,7 @@ case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult
     * @return this
     */
   def filter(filter: Filter): DistinctQuery[TResult] = {
-    wrapped.filter(filter.toBson)
+    wrapped.filter(filter)
     this
   }
 

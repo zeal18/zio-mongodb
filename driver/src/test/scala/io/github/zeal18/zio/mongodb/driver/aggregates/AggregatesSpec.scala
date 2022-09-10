@@ -17,7 +17,7 @@ object AggregatesSpec extends DefaultRunnableSpec {
     expected: String,
   ) =
     test(name) {
-      assertTrue(aggregate.toBson.toBsonDocument.toString == expected)
+      assertTrue(aggregate.toBsonDocument().toString == expected)
     }
 
   @nowarn("msg=possible missing interpolator")
