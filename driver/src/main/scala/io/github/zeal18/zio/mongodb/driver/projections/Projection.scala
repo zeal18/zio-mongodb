@@ -15,80 +15,78 @@ import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
 
-sealed trait Projection { self =>
-  def toBson: Bson = new Bson {
-    override def toBsonDocument[TDocument <: Object](
-      documentClass: Class[TDocument],
-      codecRegistry: CodecRegistry,
-    ): BsonDocument = {
-      def simpleExpression[A](fieldName: String, value: A, codec: Codec[A]): BsonDocument = {
-        val writer = new BsonDocumentWriter(new BsonDocument())
+sealed trait Projection extends Bson { self =>
+  override def toBsonDocument[TDocument <: Object](
+    documentClass: Class[TDocument],
+    codecRegistry: CodecRegistry,
+  ): BsonDocument = {
+    def simpleExpression[A](fieldName: String, value: A, codec: Codec[A]): BsonDocument = {
+      val writer = new BsonDocumentWriter(new BsonDocument())
 
-        writer.writeStartDocument()
-        writer.writeName(fieldName)
-        codec.encode(writer, value, EncoderContext.builder().build())
-        writer.writeEndDocument()
+      writer.writeStartDocument()
+      writer.writeName(fieldName)
+      codec.encode(writer, value, EncoderContext.builder().build())
+      writer.writeEndDocument()
 
-        writer.getDocument()
+      writer.getDocument()
+    }
+
+    def combine(fieldNames: Seq[String], value: BsonValue): BsonDocument = {
+      val document = new BsonDocument()
+      fieldNames.foreach { fieldName =>
+        document.remove(fieldName)
+        document.append(fieldName, value)
       }
 
-      def combine(fieldNames: Seq[String], value: BsonValue): BsonDocument = {
-        val document = new BsonDocument()
-        fieldNames.foreach { fieldName =>
-          document.remove(fieldName)
-          document.append(fieldName, value)
+      document
+    }
+
+    def fields(projections: Seq[Projection]): BsonDocument = {
+      val combinedDocument = new BsonDocument()
+      projections.foreach { sort =>
+        val sortDocument = sort.toBsonDocument(documentClass, codecRegistry)
+        sortDocument.keySet().asScala.foreach { key =>
+          combinedDocument.remove(key)
+          combinedDocument.append(key, sortDocument.get(key))
         }
-
-        document
       }
+      combinedDocument
+    }
 
-      def fields(projections: Seq[Projection]): BsonDocument = {
-        val combinedDocument = new BsonDocument()
-        projections.foreach { sort =>
-          val sortDocument = sort.toBson.toBsonDocument(documentClass, codecRegistry)
-          sortDocument.keySet().asScala.foreach { key =>
-            combinedDocument.remove(key)
-            combinedDocument.append(key, sortDocument.get(key))
-          }
-        }
-        combinedDocument
-      }
-
-      self match {
-        case Projection.Computed(fieldName, expression, codec) =>
-          simpleExpression(fieldName, expression, codec)
-        case Projection.Include(fieldNames) =>
-          combine(fieldNames, new BsonInt32(1))
-        case Projection.Exclude(fieldNames) =>
-          combine(fieldNames, new BsonInt32(0))
-        case Projection.ExcludeId =>
-          new BsonDocument("_id", new BsonInt32(0))
-        case Projection.ElemFirstMatch(fieldName) =>
-          new BsonDocument(fieldName + ".$", new BsonInt32(1))
-        case Projection.ElemMatch(fieldName, filter) =>
+    self match {
+      case Projection.Computed(fieldName, expression, codec) =>
+        simpleExpression(fieldName, expression, codec)
+      case Projection.Include(fieldNames) =>
+        combine(fieldNames, new BsonInt32(1))
+      case Projection.Exclude(fieldNames) =>
+        combine(fieldNames, new BsonInt32(0))
+      case Projection.ExcludeId =>
+        new BsonDocument("_id", new BsonInt32(0))
+      case Projection.ElemFirstMatch(fieldName) =>
+        new BsonDocument(fieldName + ".$", new BsonInt32(1))
+      case Projection.ElemMatch(fieldName, filter) =>
+        new BsonDocument(
+          fieldName,
+          new BsonDocument(
+            "$elemMatch",
+            filter.toBsonDocument(documentClass, codecRegistry),
+          ),
+        )
+      case Projection.Meta(fieldName, metaFieldName) =>
+        new BsonDocument(fieldName, new BsonDocument("$meta", new BsonString(metaFieldName)))
+      case Projection.Slice(fieldName, skip, limit) =>
+        if (skip <= 0)
+          new BsonDocument(fieldName, new BsonDocument("$slice", new BsonInt32(limit)))
+        else
           new BsonDocument(
             fieldName,
             new BsonDocument(
-              "$elemMatch",
-              filter.toBson.toBsonDocument(documentClass, codecRegistry),
+              "$slice",
+              new BsonArray(ju.Arrays.asList(new BsonInt32(skip), new BsonInt32(limit))),
             ),
           )
-        case Projection.Meta(fieldName, metaFieldName) =>
-          new BsonDocument(fieldName, new BsonDocument("$meta", new BsonString(metaFieldName)))
-        case Projection.Slice(fieldName, skip, limit) =>
-          if (skip <= 0)
-            new BsonDocument(fieldName, new BsonDocument("$slice", new BsonInt32(limit)))
-          else
-            new BsonDocument(
-              fieldName,
-              new BsonDocument(
-                "$slice",
-                new BsonArray(ju.Arrays.asList(new BsonInt32(skip), new BsonInt32(limit))),
-              ),
-            )
-        case Projection.Fields(projections) => fields(projections)
-        case Projection.Raw(bson)           => bson.toBsonDocument()
-      }
+      case Projection.Fields(projections) => fields(projections)
+      case Projection.Raw(bson)           => bson.toBsonDocument()
     }
   }
 }

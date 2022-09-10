@@ -9,7 +9,7 @@ import zio.test.*
 object SortSpec extends ZIOSpecDefault {
   private def testSort(title: String, sort: sorts.Sort, expected: String) =
     test(title) {
-      assertTrue(sort.toBson.toBsonDocument.toString == expected)
+      assertTrue(sort.toBsonDocument().toString == expected)
     }
 
   override def spec = suite("SortSpec")(

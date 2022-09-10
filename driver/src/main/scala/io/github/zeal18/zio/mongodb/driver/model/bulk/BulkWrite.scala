@@ -18,21 +18,21 @@ import io.github.zeal18.zio.mongodb.driver.updates.Update
 sealed trait BulkWrite[A] {
   private[driver] def toJava: WriteModel[A] = this match {
     case BulkWrite.DeleteMany(filter, options) =>
-      new DeleteManyModel[A](filter.toBson, options.toJava)
+      new DeleteManyModel[A](filter, options.toJava)
     case BulkWrite.DeleteOne(filter, options) =>
-      new DeleteOneModel[A](filter.toBson, options.toJava)
+      new DeleteOneModel[A](filter, options.toJava)
     case BulkWrite.InsertOne(document) =>
       new InsertOneModel[A](document)
     case BulkWrite.ReplaceOne(filter, replacement, options) =>
-      new ReplaceOneModel[A](filter.toBson, replacement, options.toJava)
+      new ReplaceOneModel[A](filter, replacement, options.toJava)
     case BulkWrite.UpdateMany(filter, update, options) =>
-      new UpdateManyModel[A](filter.toBson, update.toBson, options.toJava)
+      new UpdateManyModel[A](filter, update, options.toJava)
     case BulkWrite.UpdateManyPipeline(filter, pipeline, options) =>
-      new UpdateManyModel[A](filter.toBson, pipeline.map(_.toBson).asJava, options.toJava)
+      new UpdateManyModel[A](filter, pipeline.asJava, options.toJava)
     case BulkWrite.UpdateOne(filter, update, options) =>
-      new UpdateOneModel[A](filter.toBson, update.toBson, options.toJava)
+      new UpdateOneModel[A](filter, update, options.toJava)
     case BulkWrite.UpdateOnePipeline(filter, pipeline, options) =>
-      new UpdateOneModel[A](filter.toBson, pipeline.map(_.toBson).asJava, options.toJava)
+      new UpdateOneModel[A](filter, pipeline.asJava, options.toJava)
   }
 }
 

@@ -101,8 +101,8 @@ final case class FindOneAndReplaceOptions(
   private[driver] def toJava: JFindOneAndReplaceOptions = {
     val options = new JFindOneAndReplaceOptions()
 
-    projection.foreach(p => options.projection(p.toBson))
-    sort.foreach(s => options.sort(s.toBson))
+    projection.foreach(p => options.projection(p))
+    sort.foreach(s => options.sort(s))
     options.upsert(upsert)
     options.returnDocument(returnDocument.toJava)
     maxTime.foreach(t => options.maxTime(t.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS))
