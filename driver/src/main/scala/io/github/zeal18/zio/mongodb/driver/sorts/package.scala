@@ -3,7 +3,10 @@ package io.github.zeal18.zio.mongodb.driver
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort.Asc
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort.Compound
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort.Desc
+import io.github.zeal18.zio.mongodb.driver.sorts.Sort.Raw
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort.TextScore
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 
 package object sorts {
 
@@ -39,4 +42,23 @@ package object sorts {
     * @return the combined sort specification
     */
   def compound(sortings: Sort*): Sort = Compound(sortings)
+
+  /** Creates a sort from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use a sort that is not yet supported by this library.
+    *
+    * @param sort the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/method/cursor.sort/ Sort]]
+    */
+  def raw(sort: Bson): Sort = Raw(sort)
+
+  /** Creates a sort from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use a sort that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/method/cursor.sort/ Sort]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Sort = Raw(BsonDocument.parse(json))
 }

@@ -223,5 +223,17 @@ object FiltersSpec extends DefaultRunnableSpec {
         filters.jsonSchema(BsonDocument("dummy" -> BsonString("schema"))),
         """{"$jsonSchema": {"dummy": "schema"}}""",
       ),
+      suite("raw")(
+        testFilter(
+          "bson",
+          filters.raw(BsonDocument("dummy" -> BsonString("filter"))),
+          """{"dummy": "filter"}""",
+        ),
+        testFilter(
+          "json",
+          filters.raw("""{"dummy": "filter"}"""),
+          """{"dummy": "filter"}""",
+        ),
+      ),
     )
 }

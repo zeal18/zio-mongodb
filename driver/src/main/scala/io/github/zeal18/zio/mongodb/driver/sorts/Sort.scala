@@ -29,13 +29,16 @@ sealed trait Sort { self =>
         }
 
         doc
+      case Sort.Raw(bson) => bson.toBsonDocument()
     }
   }
 }
 
 object Sort {
-  case class Asc(fieldName: String)        extends Sort
-  case class Desc(fieldName: String)       extends Sort
-  case class TextScore(fieldName: String)  extends Sort
-  case class Compound(sortings: Seq[Sort]) extends Sort
+  final case class Raw(bson: Bson) extends Sort
+
+  final case class Asc(fieldName: String)        extends Sort
+  final case class Desc(fieldName: String)       extends Sort
+  final case class TextScore(fieldName: String)  extends Sort
+  final case class Compound(sortings: Seq[Sort]) extends Sort
 }

@@ -9,6 +9,7 @@ import io.github.zeal18.zio.mongodb.bson.BsonElement
 import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
+import io.github.zeal18.zio.mongodb.driver.indexes.IndexKey.Raw
 import org.bson.BsonValue
 import org.bson.codecs.configuration.CodecRegistry
 
@@ -51,12 +52,15 @@ sealed trait IndexKey { self =>
           }
 
           doc
+        case Raw(index) => index.toBsonDocument()
       }
     }
   }
 }
 
 object IndexKey {
+  final case class Raw(index: Bson) extends IndexKey
+
   final case class Asc(fieldNames: Seq[String])                                extends IndexKey
   final case class Desc(fieldNames: Seq[String])                               extends IndexKey
   final case class Geo2dsphere(fieldNames: Seq[String])                        extends IndexKey

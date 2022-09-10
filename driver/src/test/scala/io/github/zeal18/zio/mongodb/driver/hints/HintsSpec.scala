@@ -1,5 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.hints
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.hints
 import io.github.zeal18.zio.mongodb.driver.indexes
 import io.github.zeal18.zio.mongodb.driver.indexes.Index
@@ -27,5 +29,13 @@ object HintsSpec extends DefaultRunnableSpec {
       ),
       testHint("forwardScan", hints.forwardScan, "{\"$natural\": 1}"),
       testHint("reverseScan", hints.reverseScan, "{\"$natural\": -1}"),
+      suite("raw")(
+        testHint(
+          "bson",
+          hints.raw(BsonDocument("index_name" -> BsonInt32(1))),
+          """{"index_name": 1}""",
+        ),
+        testHint("json", hints.raw("""{"index_name": 1}"""), """{"index_name": 1}"""),
+      ),
     )
 }
