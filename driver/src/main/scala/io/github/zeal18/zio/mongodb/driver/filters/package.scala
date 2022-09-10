@@ -1,6 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver
 
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
+import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.filters.Filter.*
 import org.bson
 import org.bson.BsonType
@@ -346,7 +347,7 @@ package object filters {
     * @mongodb.server.release 3.6
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/expr/]]
     */
-  def expr(expression: String): Expr = Expr(expression)
+  def expr(expression: Aggregation): Expr = Expr(expression)
 
   /** Creates a filter that matches all documents where the value of a field is an array that contains all the specified values.
     *
