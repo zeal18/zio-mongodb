@@ -1,5 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.updates
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.sorts
 import io.github.zeal18.zio.mongodb.driver.updates
@@ -104,6 +106,14 @@ object UpdatesSpec extends ZIOSpecDefault {
       testUpdate("or long", updates.bitwiseOr("a", 1L), """{"$bit": {"a": {"or": 1}}}"""),
       testUpdate("xor int", updates.bitwiseXor("a", 1), """{"$bit": {"a": {"xor": 1}}}"""),
       testUpdate("xor long", updates.bitwiseXor("a", 1L), """{"$bit": {"a": {"xor": 1}}}"""),
+    ),
+    suite("raw")(
+      testUpdate(
+        "bson",
+        updates.raw(BsonDocument("$set" -> BsonDocument("a" -> BsonInt32(42)))),
+        """{"$set": {"a": 42}}""",
+      ),
+      testUpdate("json", updates.raw("""{"$set": {"a": 42}}"""), """{"$set": {"a": 42}}"""),
     ),
   )
 }

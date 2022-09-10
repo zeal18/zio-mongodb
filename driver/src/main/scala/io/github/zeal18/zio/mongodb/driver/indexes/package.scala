@@ -1,5 +1,8 @@
 package io.github.zeal18.zio.mongodb.driver
 
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
+
 package object indexes {
 
   /** Create an index key for an ascending index on the given fields.
@@ -60,7 +63,7 @@ package object indexes {
     *
     * @param fieldName the field to create a text index on
     * @return the index specification
-    * @see [[https://www.mongodb.com/docs/manual/core/text text index]]
+    * @see [[https://www.mongodb.com/docs/manual/core/index-text text index]]
     */
   def text(fieldNames: String*): IndexKey.Text = IndexKey.Text(fieldNames)
 
@@ -68,7 +71,7 @@ package object indexes {
     *
     * @param fieldName the field to create a hashed index on
     * @return the index specification
-    * @see [[https://www.mongodb.com/docs/manual/core/hashed hashed index]]
+    * @see [[https://www.mongodb.com/docs/manual/core/index-hashed hashed index]]
     */
   def hashed(fieldNames: String*): IndexKey.Hashed = IndexKey.Hashed(fieldNames)
 
@@ -79,4 +82,23 @@ package object indexes {
     * @see [[https://www.mongodb.com/docs/manual/core/index-compound compoundIndex]]
     */
   def compound(indexes: IndexKey*): IndexKey.Compound = IndexKey.Compound(indexes)
+
+  /** Creates an index from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use an index that is not yet supported by this library.
+    *
+    * @param index the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/indexes/ Indexes]]
+    */
+  def raw(index: Bson): IndexKey.Raw = IndexKey.Raw(index)
+
+  /** Creates an index from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use an index that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/indexes/ Indexes]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): IndexKey.Raw = IndexKey.Raw(BsonDocument.parse(json))
 }

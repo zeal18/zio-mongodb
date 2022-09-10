@@ -1,5 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.sorts
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.sorts
 import zio.test.ZIOSpecDefault
 import zio.test.*
@@ -18,6 +20,10 @@ object SortSpec extends ZIOSpecDefault {
       "compound",
       sorts.compound(sorts.asc("a"), sorts.desc("b")),
       """{"a": 1, "b": -1}""",
+    ),
+    suite("raw")(
+      testSort("bson", sorts.raw(BsonDocument("a" -> BsonInt32(42))), """{"a": 42}"""),
+      testSort("json", sorts.raw("""{"$set": {"a": 42}}"""), """{"$set": {"a": 42}}"""),
     ),
   )
 }

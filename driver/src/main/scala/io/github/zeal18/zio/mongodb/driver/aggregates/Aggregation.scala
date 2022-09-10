@@ -162,6 +162,7 @@ sealed trait Aggregation { self =>
           )
         case Aggregation.LookupPipeline(from, let, pipeline, as) =>
           lookupStage(from, let, pipeline, as)
+        case Aggregation.Raw(bson) => bson.toBsonDocument()
       }
     }
   }
@@ -184,4 +185,5 @@ object Aggregation {
     pipeline: Seq[Aggregation],
     as: String,
   ) extends Aggregation
+  final case class Raw(filter: Bson) extends Aggregation
 }

@@ -3,6 +3,8 @@ package io.github.zeal18.zio.mongodb.driver
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection.*
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 
 package object projections {
 
@@ -104,4 +106,23 @@ package object projections {
     * @return the combined projection
     */
   def fields(projections: Projection*): Fields = Fields(projections)
+
+  /** Creates a projection from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use a projection that is not yet supported by this library.
+    *
+    * @param projection the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/projection/ Projection Operators]]
+    */
+  def raw(projection: Bson): Raw = Raw(projection)
+
+  /** Creates a projection from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use a projection that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/projection/ Projection Operators]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Raw = Raw(BsonDocument.parse(json))
 }

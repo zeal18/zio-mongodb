@@ -162,6 +162,7 @@ sealed trait Filter { self =>
           operatorFilter("$bitsAnySet", fieldName, bitmask, Codec[Long])
         case Filter.JsonSchema(schema) =>
           simpleFilter("$jsonSchema", schema.toBsonDocument())
+        case Filter.Raw(bson) => bson.toBsonDocument()
       }
     }
   }
@@ -169,6 +170,8 @@ sealed trait Filter { self =>
 
 object Filter {
   case object Empty extends Filter
+
+  final case class Raw(filter: Bson) extends Filter
 
   final case class Eq[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter
   final case class Ne[A](fieldName: String, value: A, encoder: Encoder[A])        extends Filter

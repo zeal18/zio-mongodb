@@ -2,6 +2,8 @@ package io.github.zeal18.zio.mongodb.driver.indexes
 
 import scala.annotation.nowarn
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.indexes
 import zio.test.ZIOSpecDefault
 import zio.test.*
@@ -43,6 +45,18 @@ object IndexKeysSpec extends ZIOSpecDefault {
         "overriding",
         indexes.compound(indexes.asc("a"), indexes.desc("a")),
         """{"a": -1}""",
+      ),
+    ),
+    suite("raw")(
+      testKey(
+        "bson",
+        indexes.raw(BsonDocument("a" -> BsonInt32(1), "b" -> BsonInt32(-1))),
+        """{"a": 1, "b": -1}""",
+      ),
+      testKey(
+        "json",
+        indexes.raw("""{"a": 1, "b": -1}"""),
+        """{"a": 1, "b": -1}""",
       ),
     ),
   )

@@ -1,5 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.projections
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
 import zio.test.ZIOSpecDefault
@@ -34,6 +36,18 @@ object ProjectionsSpec extends ZIOSpecDefault {
       "fields",
       projections.fields(projections.computed("a", "b"), projections.include("c", "d")),
       """{"a": "b", "c": 1, "d": 1}""",
+    ),
+    suite("raw")(
+      testProjection(
+        "bson",
+        projections.raw(BsonDocument("a" -> BsonString("b"))),
+        """{"a": "b"}""",
+      ),
+      testProjection(
+        "json",
+        projections.raw("""{"a": "b"}"""),
+        """{"a": "b"}""",
+      ),
     ),
   )
 }
