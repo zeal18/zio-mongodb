@@ -2,6 +2,7 @@ package io.github.zeal18.zio.mongodb.driver
 
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter.*
+import org.bson
 import org.bson.BsonType
 import org.bson.conversions.Bson
 
@@ -446,4 +447,23 @@ package object filters {
     * @return the filter
     */
   val empty: Filter = Empty
+
+  /** Creates a filter from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use a filter that is not yet supported by this library.
+    *
+    * @param filter the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/ Query Operators]]
+    */
+  def raw(filter: Bson): Raw = Raw(filter)
+
+  /** Creates a filter from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use a filter that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/query/ Query Operators]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Raw = Raw(bson.BsonDocument.parse(json))
 }

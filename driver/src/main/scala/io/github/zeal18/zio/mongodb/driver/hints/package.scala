@@ -2,6 +2,8 @@ package io.github.zeal18.zio.mongodb.driver
 
 import io.github.zeal18.zio.mongodb.driver.indexes.Index
 import io.github.zeal18.zio.mongodb.driver.indexes.IndexKey
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 
 package object hints {
 
@@ -42,4 +44,23 @@ package object hints {
     * @see [[https://www.mongodb.com/docs/manual/reference/method/cursor.hint/ Hint]]
     */
   def reverseScan: Hint = Hint.ReverseScan
+
+  /** Creates a hint from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use a hint that is not yet supported by this library.
+    *
+    * @param hint the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/method/cursor.hint/ Hint]]
+    */
+  def raw(hint: Bson): Hint = Hint.Raw(hint)
+
+  /** Creates a hint from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use a hint that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/method/cursor.hint/ Hint]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Hint = Hint.Raw(BsonDocument.parse(json))
 }
