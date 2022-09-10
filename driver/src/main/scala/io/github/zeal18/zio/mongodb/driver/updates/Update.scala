@@ -233,12 +233,15 @@ sealed trait Update { self =>
           createBitUpdateDocumentInt(fieldName, "xor", value)
         case Update.BitwiseXorLong(fieldName, value) =>
           createBitUpdateDocumentLong(fieldName, "xor", value)
+        case Update.Raw(bson) => bson.toBsonDocument()
       }
     }
   }
 }
 
 object Update {
+  final case class Raw(bson: Bson) extends Update
+
   final case class Combine(updates: Seq[Update])                                    extends Update
   final case class Set[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
   final case class Unset(fieldName: String)                                         extends Update

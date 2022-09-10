@@ -4,6 +4,8 @@ import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.updates.Update.*
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 
 package object updates {
 
@@ -312,6 +314,7 @@ package object updates {
     * @param fieldName the field name
     * @param value     the value
     * @return the update
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/bit/ \$bit]]
     */
   def bitwiseXor(fieldName: String, value: Int): BitwiseXorInt = BitwiseXorInt(fieldName, value)
 
@@ -320,6 +323,26 @@ package object updates {
     * @param fieldName the field name
     * @param value     the value
     * @return the update
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/bit/ \$bit]]
     */
   def bitwiseXor(fieldName: String, value: Long): BitwiseXorLong = BitwiseXorLong(fieldName, value)
+
+  /** Creates an update from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use an update that is not yet supported by this library.
+    *
+    * @param update the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/ Update Operators]]
+    */
+  def raw(update: Bson): Raw = Raw(update)
+
+  /** Creates an update from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use an update that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/update/ Update Operators]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Raw = Raw(BsonDocument.parse(json))
 }

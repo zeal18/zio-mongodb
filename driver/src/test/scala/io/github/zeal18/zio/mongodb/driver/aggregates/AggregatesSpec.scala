@@ -2,6 +2,7 @@ package io.github.zeal18.zio.mongodb.driver.aggregates
 
 import scala.annotation.nowarn
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
 import io.github.zeal18.zio.mongodb.driver.aggregates.UnwindOptions
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
@@ -66,6 +67,17 @@ object AggregatesSpec extends ZIOSpecDefault {
       ),
       """{"$unwind": {"path": "a", "preserveNullAndEmptyArrays": true, "includeArrayIndex": "b"}}""",
     ),
+    suite("raw")(
+      testAggregate(
+        "bson",
+        aggregates.raw(BsonDocument("$match" -> BsonDocument("c" -> 42))),
+        """{"$match": {"c": 42}}""",
+      ),
+      testAggregate(
+        "json",
+        aggregates.raw("""{"$match": {"c": 42}}"""),
+        """{"$match": {"c": 42}}""",
+      ),
+    ),
   )
-
 }

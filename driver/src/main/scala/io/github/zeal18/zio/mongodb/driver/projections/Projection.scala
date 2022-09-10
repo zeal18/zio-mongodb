@@ -87,12 +87,15 @@ sealed trait Projection { self =>
               ),
             )
         case Projection.Fields(projections) => fields(projections)
+        case Projection.Raw(bson)           => bson.toBsonDocument()
       }
     }
   }
 }
 
 object Projection {
+  final case class Raw(bson: Bson) extends Projection
+
   final case class Computed[A](fieldName: String, expression: A, codec: Codec[A]) extends Projection
   final case class Include(fieldNames: Seq[String])                               extends Projection
   final case class Exclude(fieldNames: Seq[String])                               extends Projection

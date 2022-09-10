@@ -5,6 +5,8 @@ import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 
 package object aggregates {
 
@@ -142,4 +144,23 @@ package object aggregates {
     */
   def unwind(fieldName: String, unwindOptions: UnwindOptions): Unwind =
     Unwind(fieldName, unwindOptions)
+
+  /** Creates a pipeline from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.
+    *
+    * @param pipeline the raw Bson
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/ Aggregation Pipeline Stages]]
+    */
+  def raw(pipeline: Bson): Raw = Raw(pipeline)
+
+  /** Creates a pipeline from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/ Aggregation Pipeline Stages]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Raw = Raw(BsonDocument.parse(json))
 }
