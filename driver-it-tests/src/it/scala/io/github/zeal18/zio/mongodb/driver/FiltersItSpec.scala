@@ -18,7 +18,7 @@ object FiltersItSpec extends DefaultRunnableSpec {
   )
 
   override def spec: ZSpec[Environment, Failure] =
-    suite("MongoCollectionSpec")(
+    suite("FiltersItSpec")(
       suite("equal")(
         testM("eq _id") {
           val person1 = Person(id = 42, name = "foo")
