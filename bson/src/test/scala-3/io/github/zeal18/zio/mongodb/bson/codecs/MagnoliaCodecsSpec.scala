@@ -16,11 +16,11 @@ object MagnoliaCodecsSpec extends DefaultRunnableSpec {
 
   private case object CaseObject
 
-  private opaque type StringOpaqueType = String
+  opaque type StringOpaqueType = String
   private object StringOpaqueType {
     def apply(value: String): StringOpaqueType = value
   }
-  private opaque type IntOpaqueType = Int
+  opaque type IntOpaqueType = Int
   private object IntOpaqueType {
     def apply(value: Int): IntOpaqueType = value
   }
