@@ -4,7 +4,9 @@ import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
+import io.github.zeal18.zio.mongodb.driver.filters.Filter.Expr
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
+import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.bson.BsonDocument
 import org.bson.conversions.Bson
 
@@ -144,6 +146,15 @@ package object aggregates {
     */
   def unwind(fieldName: String, unwindOptions: UnwindOptions): Unwind =
     Unwind(fieldName, unwindOptions)
+
+  /**
+    * Creates a `\$sort` pipeline stage for the specified sort specification
+    *
+    * @param sort the sort specification
+    * @see Sorts
+    * @see [[http://docs.mongodb.org/manual/reference/operator/aggregation/sort/#sort-aggregation \$sort]]
+    */
+  def sort(sort: sorts.Sort): Aggregation.Sort = Aggregation.Sort(sort)
 
   /** Creates a pipeline from a raw Bson.
     *
