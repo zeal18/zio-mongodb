@@ -1,18 +1,21 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
+import scala.annotation.nowarn
+import scala.reflect.ClassTag
+
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts
-import org.bson.{BsonBoolean, BsonDocumentWriter, BsonInt32, BsonString}
+import org.bson.BsonBoolean
+import org.bson.BsonDocumentWriter
+import org.bson.BsonInt32
+import org.bson.BsonString
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
-
-import scala.annotation.nowarn
-import scala.reflect.ClassTag
 
 sealed trait Aggregation extends Bson { self =>
   @nowarn("msg=possible missing interpolator*")
@@ -152,7 +155,7 @@ sealed trait Aggregation extends Bson { self =>
       case Aggregation.Sort(sort) =>
         new BsonDocument(
           "$sort",
-          sort.toBsonDocument(documentClass, codecRegistry)
+          sort.toBsonDocument(documentClass, codecRegistry),
         )
       case Aggregation.Lookup(from, localField, foreignField, as) =>
         new BsonDocument(

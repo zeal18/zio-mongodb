@@ -1,10 +1,13 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
-import io.github.zeal18.zio.mongodb.bson.BsonDocument
-import io.github.zeal18.zio.mongodb.driver.{aggregates, filters, projections, sorts}
-import zio.test.*
-
 import scala.annotation.nowarn
+
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
+import io.github.zeal18.zio.mongodb.driver.aggregates
+import io.github.zeal18.zio.mongodb.driver.filters
+import io.github.zeal18.zio.mongodb.driver.projections
+import io.github.zeal18.zio.mongodb.driver.sorts
+import zio.test.*
 
 object AggregatesSpec extends ZIOSpecDefault {
   private def testAggregate(
@@ -36,7 +39,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     testAggregate(
       "sort",
       aggregates.sort(sorts.compound(sorts.asc("a", "b"), sorts.desc("c", "d"))),
-      """{"$sort": {"a": 1, "b": 1, "c": -1, "d": -1}}"""
+      """{"$sort": {"a": 1, "b": 1, "c": -1, "d": -1}}""",
     ),
     testAggregate(
       "group",
