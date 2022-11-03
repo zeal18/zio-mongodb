@@ -17,7 +17,7 @@ val immutablesVersion = "2.9.2"
 val magnolia2Version = "1.1.2"
 val magnolia3Version = "1.2.0"
 
-val scalatestVersion = "3.2.13"
+val scalatestVersion = "3.2.14"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
