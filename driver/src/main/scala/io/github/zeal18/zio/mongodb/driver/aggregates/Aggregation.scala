@@ -8,6 +8,7 @@ import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
+import io.github.zeal18.zio.mongodb.driver.sorts
 import org.bson.BsonBoolean
 import org.bson.BsonDocumentWriter
 import org.bson.BsonInt32
@@ -151,6 +152,11 @@ sealed trait Aggregation extends Bson { self =>
         groupStage(id, fieldAccumulators, codec)
       case Aggregation.Project(projection) =>
         simplePipelineStage("$project", projection)
+      case Aggregation.Sort(sort) =>
+        new BsonDocument(
+          "$sort",
+          sort.toBsonDocument(documentClass, codecRegistry),
+        )
       case Aggregation.Lookup(from, localField, foreignField, as) =>
         new BsonDocument(
           "$lookup",
@@ -177,6 +183,7 @@ object Aggregation {
   final case class Project(projection: Projection) extends Aggregation
   final case class Lookup(from: String, localField: String, foreignField: String, as: String)
       extends Aggregation
+  final case class Sort(sort: sorts.Sort) extends Aggregation
   final case class LookupPipeline(
     from: String,
     let: Seq[Variable[?]],

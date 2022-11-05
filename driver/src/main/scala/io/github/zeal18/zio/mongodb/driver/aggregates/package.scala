@@ -145,6 +145,14 @@ package object aggregates {
   def unwind(fieldName: String, unwindOptions: UnwindOptions): Unwind =
     Unwind(fieldName, unwindOptions)
 
+  /** Creates a `\$sort` pipeline stage for the specified sort specification
+    *
+    * @param sort the sort specification
+    * @see Sorts
+    * @see [[http://docs.mongodb.org/manual/reference/operator/aggregation/sort/#sort-aggregation \$sort]]
+    */
+  def sort(sort: sorts.Sort): Aggregation.Sort = Aggregation.Sort(sort)
+
   /** Creates a pipeline from a raw Bson.
     *
     * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.

@@ -4,11 +4,9 @@ import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
-import io.github.zeal18.zio.mongodb.driver.aggregates.UnwindOptions
-import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
-import zio.test.ZIOSpecDefault
+import io.github.zeal18.zio.mongodb.driver.sorts
 import zio.test.*
 
 object AggregatesSpec extends ZIOSpecDefault {
@@ -38,6 +36,11 @@ object AggregatesSpec extends ZIOSpecDefault {
       """{"$facet": {"a": [{"$count": "count"}], "b": [{"$match": {"_id": 42}}]}}""",
     ),
     testAggregate("limit", aggregates.limit(43), """{"$limit": 43}"""),
+    testAggregate(
+      "sort",
+      aggregates.sort(sorts.compound(sorts.asc("a", "b"), sorts.desc("c", "d"))),
+      """{"$sort": {"a": 1, "b": 1, "c": -1, "d": -1}}""",
+    ),
     testAggregate(
       "group",
       aggregates.group("a", accumulators.sum("b", 1)),
