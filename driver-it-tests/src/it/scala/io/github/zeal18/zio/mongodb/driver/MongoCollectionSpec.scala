@@ -41,7 +41,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
         test("createIndex in session") {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.createIndex(session, indexes.geo2d("a"))
                 }
@@ -52,7 +52,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
         test("createIndex in session with options") {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.createIndex(
                     session,
@@ -92,7 +92,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
         test("createIndexes in session") {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.createIndexes(
                     session,
@@ -107,7 +107,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
         test("createIndexes in session with options") {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.createIndexes(
                     session,
@@ -172,7 +172,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
               indexName <- collection.createIndex(indexes.asc("a"))
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexName)
                 }
@@ -186,7 +186,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
               indexName <- collection.createIndex(indexes.asc("a"))
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexName, DropIndexOptions(10.seconds))
                 }
@@ -202,7 +202,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
             for {
               _ <- collection.createIndex(indexKey)
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexKey)
                 }
@@ -218,7 +218,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
             for {
               _ <- collection.createIndex(indexKey)
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexKey, DropIndexOptions(10.seconds))
                 }
@@ -260,7 +260,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               _ <- collection.createIndex(indexes.asc("a"))
               _ <- collection.createIndex(indexes.desc("b"))
 
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndexes(session)
                 }
@@ -276,7 +276,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               _ <- collection.createIndex(indexes.asc("a"))
               _ <- collection.createIndex(indexes.desc("b"))
 
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndexes(session, DropIndexOptions(10.seconds))
                 }
@@ -323,7 +323,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
           MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
             for {
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.insertOne(session, model)
                 }
@@ -339,7 +339,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
           MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
             for {
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.insertOne(
                     session,
@@ -396,7 +396,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
           MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
             for {
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.insertMany(session, Chunk(model1, model2))
                 }
@@ -413,7 +413,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
           MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
             for {
-              _ <- ZIO.scoped {
+              _ <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.insertMany(
                     session,
@@ -454,7 +454,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(model1, model2))
 
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.find(session).execute.runCollect
                 }
@@ -471,7 +471,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(model1, model2))
 
-              result <- ZIO.scoped {
+              result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.find(session, filters.eq("a", 43)).execute.runCollect
                 }
