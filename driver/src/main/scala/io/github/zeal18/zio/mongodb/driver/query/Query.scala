@@ -118,5 +118,5 @@ trait Query[A] {
   def runHead: Task[Option[A]]
 
   @deprecated("use runHead", "0.8.0")
-  def first: Task[Option[A]] = runHead
+  def first(): Task[Option[A]] = runHead
 }
