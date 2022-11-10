@@ -12,8 +12,9 @@ import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.model.Collation
+import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
+import org.reactivestreams.Publisher
 import zio.Task
-import zio.stream.ZStream
 
 /** Observable for aggregate
   *
@@ -153,13 +154,9 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
     * @return an empty Observable that indicates when the operation has completed
     */
-  def toCollection(): Task[Unit] = wrapped.toCollection().stream.runDrain
+  def toCollection(): Task[Unit] = wrapped.toCollection().unit
 
-  /** Helper to return a single observable limited to the first result.
-    *
-    * @return a single observable which will the first result.
-    */
-  def first(): Task[Option[TResult]] = wrapped.first().getOneOpt
+  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
 
   /** Explain the execution plan for this operation with the server's default verbosity level
     *
@@ -168,7 +165,7 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * @note Requires MongoDB 3.6 or greater
     */
   def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
-    wrapped.explain[ExplainResult](ct).getOne
+    wrapped.explain[ExplainResult](ct).head
 
   /** Explain the execution plan for this operation with the given verbosity level
     *
@@ -180,7 +177,7 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
   def explain[ExplainResult](
     verbosity: ExplainVerbosity,
   )(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
-    wrapped.explain[ExplainResult](ct, verbosity).getOne
+    wrapped.explain[ExplainResult](ct, verbosity).head
 
-  override def execute: ZStream[Any, Throwable, TResult] = wrapped.stream
+  override def run: Publisher[TResult] = wrapped
 }

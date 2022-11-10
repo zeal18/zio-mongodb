@@ -11,7 +11,7 @@ object MongoDatabaseSpec extends ZIOSpecDefault {
       MongoDatabaseTest.withRandomName { db =>
         for {
           _           <- db.createCollection("test-collection")
-          collections <- db.listCollections().first().map(_.flatMap(_.get("name")))
+          collections <- db.listCollections().runHead.map(_.flatMap(_.get("name")))
         } yield assertTrue(collections.contains(BsonString("test-collection")))
       }
     },

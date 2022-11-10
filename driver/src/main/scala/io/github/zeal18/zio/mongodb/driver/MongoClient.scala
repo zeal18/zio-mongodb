@@ -17,12 +17,14 @@ import io.github.zeal18.zio.mongodb.driver.MongoDriverInformation
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.query.*
+import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.bson.codecs.configuration.CodecRegistries.fromProviders
 import org.bson.codecs.configuration.CodecRegistries.fromRegistries
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Scope
 import zio.ZIO
 import zio.ZLayer
+import zio.interop.reactivestreams.*
 import zio.stream.ZStream
 
 /** A client-side representation of a MongoDB cluster.  Instances can represent either a standalone MongoDB instance, a replica set,
@@ -174,12 +176,12 @@ object MongoClient {
 
   final private case class Live(wrapped: JMongoClient) extends MongoClient with Closeable {
     override def startSession(): ZIO[Scope, Throwable, ClientSession] =
-      ZIO.acquireRelease(wrapped.startSession().getOne)(s => ZIO.succeed(s.close()))
+      ZIO.acquireRelease(wrapped.startSession().head)(s => ZIO.succeed(s.close()))
 
     override def startSession(
       options: ClientSessionOptions,
     ): ZIO[Scope, Throwable, ClientSession] =
-      ZIO.acquireRelease(wrapped.startSession(options).getOne)(s => ZIO.succeed(s.close()))
+      ZIO.acquireRelease(wrapped.startSession(options).head)(s => ZIO.succeed(s.close()))
 
     override def getDatabase(name: String): MongoDatabase =
       MongoDatabase.Live(this, wrapped.getDatabase(name))
@@ -187,10 +189,10 @@ object MongoClient {
     override def close(): Unit = wrapped.close()
 
     override def listDatabaseNames(): ZStream[Any, Throwable, String] =
-      wrapped.listDatabaseNames().stream
+      wrapped.listDatabaseNames().toZIOStream()
 
     override def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String] =
-      wrapped.listDatabaseNames(clientSession).stream
+      wrapped.listDatabaseNames(clientSession).toZIOStream()
 
     override def listDatabases(): ListDatabasesQuery[Document] =
       ListDatabasesQuery(wrapped.listDatabases(implicitly[ClassTag[Document]]))
