@@ -8,12 +8,12 @@ import com.mongodb.reactivestreams.client.ChangeStreamPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonTimestamp
 import io.github.zeal18.zio.mongodb.bson.BsonValue
-import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.model.changestream.ChangeStreamDocument
 import io.github.zeal18.zio.mongodb.driver.model.changestream.FullDocument
+import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
+import org.reactivestreams.Publisher
 import zio.Task
-import zio.stream.ZStream
 
 /** Observable for change streams.
   *
@@ -144,11 +144,7 @@ case class ChangeStreamQuery[TResult](private val wrapped: ChangeStreamPublisher
   // def withDocumentClass[T](clazz: Class[T]): Observable[T] =
   //   wrapped.withDocumentClass(clazz).toObservable()
 
-  /** Helper to return a single observable limited to the first result.
-    *
-    * @return a single observable which will the first result.
-    */
-  def first(): Task[Option[ChangeStreamDocument[TResult]]] = wrapped.first().getOneOpt
+  override def runHead: Task[Option[ChangeStreamDocument[TResult]]] = wrapped.first().headOption
 
-  override def execute: ZStream[Any, Throwable, ChangeStreamDocument[TResult]] = wrapped.stream
+  override def run: Publisher[ChangeStreamDocument[TResult]] = wrapped
 }

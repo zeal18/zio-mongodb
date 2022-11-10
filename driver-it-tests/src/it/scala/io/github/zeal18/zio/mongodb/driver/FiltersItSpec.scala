@@ -28,8 +28,8 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.eq(42)).execute.runCollect
-              result2 <- collection.find(filters.eq(43)).execute.runCollect
+              result1 <- collection.find(filters.eq(42)).runToChunk
+              result2 <- collection.find(filters.eq(43)).runToChunk
             } yield assertTrue(result1 == Chunk(person1), result2 == Chunk(person2))
           }
         },
@@ -41,8 +41,8 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.eq("name", "foo")).execute.runCollect
-              result2 <- collection.find(filters.eq("name", "bar")).execute.runCollect
+              result1 <- collection.find(filters.eq("name", "foo")).runToChunk
+              result2 <- collection.find(filters.eq("name", "bar")).runToChunk
             } yield assertTrue(result1 == Chunk(person1), result2 == Chunk(person2))
           }
         },
@@ -55,7 +55,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(person1, person2))
 
-            result1 <- collection.find(filters.ne("name", "foo")).execute.runCollect
+            result1 <- collection.find(filters.ne("name", "foo")).runToChunk
           } yield assertTrue(result1 == Chunk(person2))
         }
       },
@@ -68,7 +68,7 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.gt("_id", 42)).execute.runCollect
+              result1 <- collection.find(filters.gt("_id", 42)).runToChunk
             } yield assertTrue(result1 == Chunk(person2))
           }
         },
@@ -80,7 +80,7 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.gte("_id", 43)).execute.runCollect
+              result1 <- collection.find(filters.gte("_id", 43)).runToChunk
             } yield assertTrue(result1 == Chunk(person2))
           }
         },
@@ -94,7 +94,7 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.lt("_id", 43)).execute.runCollect
+              result1 <- collection.find(filters.lt("_id", 43)).runToChunk
             } yield assertTrue(result1 == Chunk(person1))
           }
         },
@@ -106,7 +106,7 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.lte("_id", 42)).execute.runCollect
+              result1 <- collection.find(filters.lte("_id", 42)).runToChunk
             } yield assertTrue(result1 == Chunk(person1))
           }
         },
@@ -120,8 +120,8 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(person1, person2, person3))
 
-            result1 <- collection.find(filters.in("_id", Seq(42, 44))).execute.runCollect
-            result2 <- collection.find(filters.in("name", Seq("bar"))).execute.runCollect
+            result1 <- collection.find(filters.in("_id", Seq(42, 44))).runToChunk
+            result2 <- collection.find(filters.in("name", Seq("bar"))).runToChunk
           } yield assertTrue(result1 == Chunk(person1, person3), result2 == Chunk(person2))
         }
       },
@@ -134,8 +134,8 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(person1, person2, person3))
 
-            result1 <- collection.find(filters.nin("_id", Seq(42, 44))).execute.runCollect
-            result2 <- collection.find(filters.nin("name", Seq("bar"))).execute.runCollect
+            result1 <- collection.find(filters.nin("_id", Seq(42, 44))).runToChunk
+            result2 <- collection.find(filters.nin("name", Seq("bar"))).runToChunk
           } yield assertTrue(result1 == Chunk(person2), result2 == Chunk(person1, person3))
         }
       },
@@ -155,8 +155,7 @@ object FiltersItSpec extends ZIOSpecDefault {
                   filters.eq("name", "baz"),
                 ),
               )
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result1 == Chunk(person3))
         }
       },
@@ -176,8 +175,7 @@ object FiltersItSpec extends ZIOSpecDefault {
                   filters.eq("name", "baz"),
                 ),
               )
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result1 == Chunk(person1, person3))
         }
       },
@@ -197,8 +195,7 @@ object FiltersItSpec extends ZIOSpecDefault {
                   filters.eq("name", "baz"),
                 ),
               )
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result1 == Chunk(person2))
         }
       },
@@ -211,7 +208,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(person1, person2, person3))
 
-            result1 <- collection.find(filters.not(filters.eq(43))).execute.runCollect
+            result1 <- collection.find(filters.not(filters.eq(43))).runToChunk
           } yield assertTrue(result1 == Chunk(person1, person3))
         }
       },
@@ -221,10 +218,10 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertOne(doc)
 
-            result1 <- collection.find(filters.exists("foo", true)).execute.runCollect
-            result2 <- collection.find(filters.exists("foo", false)).execute.runCollect
-            result3 <- collection.find(filters.exists("baz", true)).execute.runCollect
-            result4 <- collection.find(filters.exists("baz", false)).execute.runCollect
+            result1 <- collection.find(filters.exists("foo", true)).runToChunk
+            result2 <- collection.find(filters.exists("foo", false)).runToChunk
+            result3 <- collection.find(filters.exists("baz", true)).runToChunk
+            result4 <- collection.find(filters.exists("baz", false)).runToChunk
           } yield assertTrue(
             result1 == Chunk(doc),
             result2 == Chunk.empty,
@@ -239,9 +236,9 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertOne(doc)
 
-            result1 <- collection.find(filters.`type`("foo", BsonType.STRING)).execute.runCollect
-            result2 <- collection.find(filters.`type`("foo", BsonType.INT32)).execute.runCollect
-            result3 <- collection.find(filters.`type`("baz", BsonType.STRING)).execute.runCollect
+            result1 <- collection.find(filters.`type`("foo", BsonType.STRING)).runToChunk
+            result2 <- collection.find(filters.`type`("foo", BsonType.INT32)).runToChunk
+            result3 <- collection.find(filters.`type`("baz", BsonType.STRING)).runToChunk
           } yield assertTrue(
             result1 == Chunk(doc),
             result2 == Chunk.empty,
@@ -258,7 +255,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(person1, person2, person3))
 
-            result1 <- collection.find(filters.regex("name", "ba.?")).execute.runCollect
+            result1 <- collection.find(filters.regex("name", "ba.?")).runToChunk
           } yield assertTrue(result1 == Chunk(person2, person3))
         }
       },
@@ -271,8 +268,8 @@ object FiltersItSpec extends ZIOSpecDefault {
             _ <- collection.createIndex(indexes.text("name"))
             _ <- collection.insertMany(Chunk(person1, person2))
 
-            result1 <- collection.find(filters.text("bar")).execute.runCollect
-            result2 <- collection.find(filters.text("foo")).execute.runCollect
+            result1 <- collection.find(filters.text("bar")).runToChunk
+            result2 <- collection.find(filters.text("foo")).runToChunk
           } yield assertTrue(result1.toSet == Set(person1, person2), result2 == Chunk(person1))
         }
       },
@@ -290,8 +287,7 @@ object FiltersItSpec extends ZIOSpecDefault {
                   """function() { return (hex_md5(this.name) == "9b53e667f30cd329dca1ec9e6a83e994") }""",
                 ),
               )
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result1.toSet == Set(person2))
         }
       },
@@ -308,8 +304,7 @@ object FiltersItSpec extends ZIOSpecDefault {
 
             result <- collection
               .find(filters.expr(aggregates.raw("""{"$gt": ["$spent", "$budget"]}""")))
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result == Chunk(doc1, doc2, doc5))
         }
       },
@@ -324,7 +319,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2, doc3, doc4, doc5))
 
-            result <- collection.find(filters.mod("budget", 2, 0)).execute.runCollect
+            result <- collection.find(filters.mod("budget", 2, 0)).runToChunk
           } yield assertTrue(result == Chunk(doc1, doc5))
         }
       },
@@ -337,7 +332,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2, doc3))
 
-            result1 <- collection.find(filters.all("tags", Chunk("A", "C"))).execute.runCollect
+            result1 <- collection.find(filters.all("tags", Chunk("A", "C"))).runToChunk
           } yield assertTrue(result1.toSet == Set(doc1, doc3))
         }
       },
@@ -353,8 +348,7 @@ object FiltersItSpec extends ZIOSpecDefault {
               .find(
                 filters.elemMatch("results", filters.raw("""{"$gte": 80, "$lte": 85}""")),
               )
-              .execute
-              .runCollect
+              .runToChunk
           } yield assertTrue(result1.toSet == Set(doc1))
         }
       },
@@ -367,9 +361,9 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2, doc3))
 
-            result1 <- collection.find(filters.size("results", 1)).execute.runCollect
-            result2 <- collection.find(filters.size("results", 2)).execute.runCollect
-            result3 <- collection.find(filters.size("results", 3)).execute.runCollect
+            result1 <- collection.find(filters.size("results", 1)).runToChunk
+            result2 <- collection.find(filters.size("results", 2)).runToChunk
+            result3 <- collection.find(filters.size("results", 3)).runToChunk
           } yield assertTrue(result1 == Chunk(doc1), result2 == Chunk(doc2), result3 == Chunk(doc3))
         }
       },
@@ -381,12 +375,9 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2))
 
-            result1 <- collection.find(filters.bitsAllClear("a", 1)).execute.runCollect // 0000 0001
-            result2 <- collection.find(filters.bitsAllClear("a", 9)).execute.runCollect // 0000 1001
-            result3 <- collection
-              .find(filters.bitsAllClear("a", 41))
-              .execute
-              .runCollect // 0010 0001
+            result1 <- collection.find(filters.bitsAllClear("a", 1)).runToChunk  // 0000 0001
+            result2 <- collection.find(filters.bitsAllClear("a", 9)).runToChunk  // 0000 1001
+            result3 <- collection.find(filters.bitsAllClear("a", 41)).runToChunk // 0010 0001
           } yield assertTrue(
             result1 == Chunk(doc1, doc2),
             result2 == Chunk(doc1, doc2),
@@ -402,8 +393,8 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2))
 
-            result1 <- collection.find(filters.bitsAllSet("a", 20)).execute.runCollect // 0001 0100
-            result2 <- collection.find(filters.bitsAllSet("a", 22)).execute.runCollect // 0001 0110
+            result1 <- collection.find(filters.bitsAllSet("a", 20)).runToChunk // 0001 0100
+            result2 <- collection.find(filters.bitsAllSet("a", 22)).runToChunk // 0001 0110
           } yield assertTrue(
             result1 == Chunk(doc1, doc2),
             result2 == Chunk(doc1),
@@ -418,11 +409,8 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2))
 
-            result1 <- collection.find(filters.bitsAnyClear("a", 6)).execute.runCollect // 0000 0110
-            result2 <- collection
-              .find(filters.bitsAnyClear("a", 14))
-              .execute
-              .runCollect // 0000 1110
+            result1 <- collection.find(filters.bitsAnyClear("a", 6)).runToChunk  // 0000 0110
+            result2 <- collection.find(filters.bitsAnyClear("a", 14)).runToChunk // 0000 1110
           } yield assertTrue(
             result1 == Chunk(doc2),
             result2 == Chunk(doc1, doc2),
@@ -437,8 +425,8 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2))
 
-            result1 <- collection.find(filters.bitsAnySet("a", 96)).execute.runCollect // 0110 0000
-            result2 <- collection.find(filters.bitsAnySet("a", 12)).execute.runCollect // 0000 1100
+            result1 <- collection.find(filters.bitsAnySet("a", 96)).runToChunk // 0110 0000
+            result2 <- collection.find(filters.bitsAnySet("a", 12)).runToChunk // 0000 1100
           } yield assertTrue(
             result1 == Chunk(doc1),
             result2 == Chunk(doc1, doc2),
@@ -463,7 +451,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2))
 
-            result <- collection.find(filters.jsonSchema(schema)).execute.runCollect
+            result <- collection.find(filters.jsonSchema(schema)).runToChunk
           } yield assertTrue(
             result == Chunk(doc2),
           )
@@ -478,8 +466,8 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.raw(Document("name" -> "foo"))).execute.runCollect
-              result2 <- collection.find(filters.raw(Document("name" -> "bar"))).execute.runCollect
+              result1 <- collection.find(filters.raw(Document("name" -> "foo"))).runToChunk
+              result2 <- collection.find(filters.raw(Document("name" -> "bar"))).runToChunk
             } yield assertTrue(result1 == Chunk(person1), result2 == Chunk(person2))
           }
         },
@@ -491,8 +479,8 @@ object FiltersItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(person1, person2))
 
-              result1 <- collection.find(filters.raw("""{"name": "foo"}""")).execute.runCollect
-              result2 <- collection.find(filters.raw("""{"name": "bar"}""")).execute.runCollect
+              result1 <- collection.find(filters.raw("""{"name": "foo"}""")).runToChunk
+              result2 <- collection.find(filters.raw("""{"name": "bar"}""")).runToChunk
             } yield assertTrue(result1 == Chunk(person1), result2 == Chunk(person2))
           }
         },

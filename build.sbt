@@ -10,6 +10,7 @@ val zioVersion          = "2.0.3"
 val zioInteropRSVersion = "2.0.0"
 
 val mongoVersion = "4.6.1"
+val rsVersion    = "1.0.4"
 
 val flapdoodleVersion = "3.4.11"
 val immutablesVersion = "2.9.2"
@@ -129,11 +130,12 @@ lazy val driver: Project = (project in file("driver"))
     // [error] This is likely due to an implementation restriction: an annotation argument cannot refer to a member of the annotated class (scala/bug#7014).
     scalacOptions += "-Wconf:msg=While parsing annotations in:silent",
     libraryDependencies ++= Seq(
-      "dev.zio"    %% "zio"                            % zioVersion,
-      "dev.zio"    %% "zio-interop-reactivestreams"    % zioInteropRSVersion,
-      "org.mongodb" % "mongodb-driver-reactivestreams" % mongoVersion,
-      "dev.zio"    %% "zio-test"                       % zioVersion % Test,
-      "dev.zio"    %% "zio-test-sbt"                   % zioVersion % Test,
+      "dev.zio"            %% "zio"                            % zioVersion,
+      "dev.zio"            %% "zio-interop-reactivestreams"    % zioInteropRSVersion,
+      "org.mongodb"         % "mongodb-driver-reactivestreams" % mongoVersion,
+      "org.reactivestreams" % "reactive-streams-tck"           % rsVersion  % Test,
+      "dev.zio"            %% "zio-test"                       % zioVersion % Test,
+      "dev.zio"            %% "zio-test-sbt"                   % zioVersion % Test,
     ),
   )
   .dependsOn(bson)

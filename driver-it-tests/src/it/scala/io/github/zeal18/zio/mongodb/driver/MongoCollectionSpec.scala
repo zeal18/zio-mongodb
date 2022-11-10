@@ -130,7 +130,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               indexName <- collection.createIndex(indexes.asc("a"))
               _         <- collection.dropIndex(indexName)
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -140,7 +140,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               indexName <- collection.createIndex(indexes.asc("a"))
               _         <- collection.dropIndex(indexName, DropIndexOptions(10.seconds))
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -152,7 +152,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               _ <- collection.createIndex(indexKey)
               _ <- collection.dropIndex(indexKey)
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -164,7 +164,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
               _ <- collection.createIndex(indexKey)
               _ <- collection.dropIndex(indexKey, DropIndexOptions(10.seconds))
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -178,7 +178,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -192,7 +192,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -208,7 +208,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -224,7 +224,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -238,7 +238,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
               _ <- collection.dropIndexes()
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -250,7 +250,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
               _ <- collection.dropIndexes(DropIndexOptions(10.seconds))
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -266,7 +266,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -282,7 +282,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              indexes <- collection.listIndexes().execute.runCollect
+              indexes <- collection.listIndexes().runToChunk
             } yield assertTrue(indexes.size == 1) // only the _id index remains
           }
         },
@@ -296,7 +296,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertOne(model)
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model))
           }
         },
@@ -313,7 +313,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                   .withComment(new BsonString("foo")),
               )
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model))
           }
         },
@@ -329,7 +329,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model))
           }
         },
@@ -351,7 +351,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model))
           }
         },
@@ -366,7 +366,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(model1, model2))
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model1, model2))
           }
         },
@@ -385,7 +385,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                   .withComment(new BsonString("foo")),
               )
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model1, model2))
           }
         },
@@ -402,7 +402,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model1, model2))
           }
         },
@@ -426,7 +426,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                 }
               }
 
-              result <- collection.find().execute.runCollect
+              result <- collection.find().runToChunk
             } yield assertTrue(result == Chunk(model1, model2))
           }
         },
@@ -441,7 +441,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(Chunk(model1, model2))
 
-              result <- collection.find(filters.eq("a", 43)).execute.runCollect
+              result <- collection.find(filters.eq("a", 43)).runToChunk
             } yield assertTrue(result == Chunk(model2))
           }
         },
@@ -456,7 +456,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
               result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
-                  collection.find(session).execute.runCollect
+                  collection.find(session).runToChunk
                 }
               }
             } yield assertTrue(result == Chunk(model1, model2))
@@ -473,7 +473,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
 
               result <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
-                  collection.find(session, filters.eq("a", 43)).execute.runCollect
+                  collection.find(session, filters.eq("a", 43)).runToChunk
                 }
               }
             } yield assertTrue(result == Chunk(model2))

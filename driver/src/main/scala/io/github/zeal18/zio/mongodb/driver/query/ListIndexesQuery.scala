@@ -6,9 +6,9 @@ import scala.concurrent.duration.Duration
 
 import com.mongodb.reactivestreams.client.ListIndexesPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
-import io.github.zeal18.zio.mongodb.driver.*
+import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
+import org.reactivestreams.Publisher
 import zio.Task
-import zio.stream.ZStream
 
 /** Observable interface for ListIndexes.
   *
@@ -61,11 +61,7 @@ case class ListIndexesQuery[TResult](wrapped: ListIndexesPublisher[TResult])
     this
   }
 
-  /** Helper to return a single observable limited to the first result.
-    *
-    * @return a single observable which will the first result.
-    */
-  def first(): Task[Option[TResult]] = wrapped.first().getOneOpt
+  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
 
-  override def execute: ZStream[Any, Throwable, TResult] = wrapped.stream
+  override def run: Publisher[TResult] = wrapped
 }

@@ -15,9 +15,10 @@ import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
+import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
+import org.reactivestreams.Publisher
 import zio.Task
-import zio.stream.ZStream
 
 /** Observable interface for Find.
   *
@@ -26,13 +27,7 @@ import zio.stream.ZStream
   */
 case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) extends Query[TResult] {
 
-  /** Helper to return a Observable limited to just the first result the query.
-    *
-    * **Note:** Sets limit in the background so only returns 1.
-    *
-    * @return a Observable which will return the first item
-    */
-  def first(): Task[Option[TResult]] = wrapped.first().getOneOpt
+  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
 
   /** Sets the query filter to apply to the query.
     *
@@ -284,7 +279,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @note Requires MongoDB 3.2 or greater
     */
   def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
-    wrapped.explain[ExplainResult](ct).getOne
+    wrapped.explain[ExplainResult](ct).head
 
   /** Explain the execution plan for this operation with the given verbosity level
     *
@@ -296,7 +291,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
   def explain[ExplainResult](
     verbosity: ExplainVerbosity,
   )(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
-    wrapped.explain[ExplainResult](ct, verbosity).getOne
+    wrapped.explain[ExplainResult](ct, verbosity).head
 
-  override def execute: ZStream[Any, Throwable, TResult] = wrapped.stream
+  override def run: Publisher[TResult] = wrapped
 }
