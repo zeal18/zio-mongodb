@@ -2,7 +2,6 @@ package io.github.zeal18.zio.mongodb.driver.reactivestreams
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
 import zio.Scope
 import zio.Task
@@ -10,20 +9,15 @@ import zio.UIO
 import zio.URIO
 import zio.ZIO
 
-private trait EmptySubscriber[A] extends Subscriber[A] {
-  def interrupt(): UIO[Unit]
-  def await(): Task[Unit]
-}
-
 private object EmptySubscriber {
-  def make[A]: URIO[Scope, EmptySubscriber[A]] = for {
+  def make[A]: URIO[Scope, InterruptibleSubscriber[A, Unit]] = for {
     subscriptionP <- ZIO.acquireRelease(
       Promise.make[Throwable, Subscription],
     )(
       _.poll.flatMap(_.fold(ZIO.unit)(_.foldZIO(_ => ZIO.unit, sub => ZIO.succeed(sub.cancel())))),
     )
     promise <- Promise.make[Throwable, Unit]
-  } yield new EmptySubscriber[A] {
+  } yield new InterruptibleSubscriber[A, Unit] {
 
     val isSubscribedOrInterrupted = new AtomicBoolean
 
