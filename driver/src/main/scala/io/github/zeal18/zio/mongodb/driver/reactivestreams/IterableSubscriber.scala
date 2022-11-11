@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.IterableFactory
 import scala.collection.mutable.Builder
 
-import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
 import zio.Scope
 import zio.Task
@@ -13,22 +12,17 @@ import zio.UIO
 import zio.URIO
 import zio.ZIO
 
-private trait IterableSubscriber[A, I[B] <: Iterable[B], B] extends Subscriber[A] {
-  def interrupt(): UIO[Unit]
-  def await(): Task[I[A]]
-}
-
 private object IterableSubscriber {
   def make[A, I[B] <: Iterable[B], B](
     factory: IterableFactory[I],
-  ): URIO[Scope, IterableSubscriber[A, I, B]] = for {
+  ): URIO[Scope, InterruptibleSubscriber[A, I[A]]] = for {
     subscriptionP <- ZIO.acquireRelease(
       Promise.make[Throwable, Subscription],
     )(
       _.poll.flatMap(_.fold(ZIO.unit)(_.foldZIO(_ => ZIO.unit, sub => ZIO.succeed(sub.cancel())))),
     )
     promise <- Promise.make[Throwable, I[A]]
-  } yield new IterableSubscriber[A, I, B] {
+  } yield new InterruptibleSubscriber[A, I[A]] {
 
     val isSubscribedOrInterrupted           = new AtomicBoolean
     val collectionBuilder: Builder[A, I[A]] = factory.newBuilder
