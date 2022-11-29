@@ -16,7 +16,6 @@ val flapdoodleVersion = "3.5.2"
 val immutablesVersion = "2.9.2"
 
 val magnolia2Version = "1.1.2"
-val magnolia3Version = "1.2.0"
 
 val scalatestVersion = "3.2.14"
 
@@ -63,8 +62,7 @@ val commonSettings =
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         Seq(
-          "-source:3.0-migration",
-          "-Yretain-trees", // to enable default values for magnolia
+          "-Yretain-trees", // to enable default values for codec derivation
           "-Xmax-inlines:64",
         )
       case _ =>
@@ -109,10 +107,7 @@ lazy val bson = (project in file("bson")).settings(
     "dev.zio"       %% "zio-test-sbt"             % zioVersion       % Test,
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) =>
-      Seq(
-        "com.softwaremill.magnolia1_3" %% "magnolia" % magnolia3Version,
-      )
+    case Some((3, _)) => Seq.empty
     case _ =>
       Seq(
         "com.softwaremill.magnolia1_2" %% "magnolia" % magnolia2Version,

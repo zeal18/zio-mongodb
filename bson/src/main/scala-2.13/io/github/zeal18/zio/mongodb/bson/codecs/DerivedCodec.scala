@@ -14,42 +14,39 @@ import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import magnolia1.CaseClass.Param
 
-private[codecs] trait MagnoliaCodec extends AutoDerivation[Codec] {
-  override def join[T](ctx: CaseClass[Codec, T]): Codec[T] =
-    if ctx.isObject then MagnoliaCodec.CaseObjectCodec(ctx)
-    else if ctx.isValueClass then MagnoliaCodec.ValueClassCodec(ctx)
-    else MagnoliaCodec.CaseClassCodec(ctx)
+private[codecs] trait DerivedCodec {
+  type Typeclass[A] = Codec[A]
 
-  override def split[T](ctx: SealedTrait[Codec, T]): Codec[T] = {
-    val flattenSubtypes = MagnoliaCodec
-      .flattenSealedSubtypes(ctx)
-      .toMap
-      .keys
-      .groupBy(identity)
-      .filter(_._2.size > 1)
-      .toList match {
+  implicit def derived[A]: Codec[A] = macro Magnolia.gen[A]
+
+  def join[A](ctx: CaseClass[Typeclass, A]): Codec[A] =
+    if (ctx.isObject) DerivedCodec.CaseObjectCodec(ctx)
+    else if (ctx.isValueClass) DerivedCodec.ValueClassCodec(ctx)
+    else DerivedCodec.CaseClassCodec(ctx)
+
+  def split[A](ctx: SealedTrait[Typeclass, A]): Codec[A] = {
+    ctx.subtypes.groupBy(_.typeName.short).filter(_._2.size > 1).toList match {
       case Nil => ()
       case ambiguous :: _ =>
         throw BsonError.CodecError(
-          ctx.typeInfo.full,
+          ctx.typeName.full,
           BsonError.GeneralError(
-            s"Ambiguous subtypes: ${ambiguous._1}",
+            s"Ambiguous subtypes: ${ambiguous._2.map(_.typeName.full).mkString(", ")}",
           ),
         ) // scalafix:ok
     }
 
     val isEnum = ctx.subtypes.forall(_.typeclass match {
-      case _: MagnoliaCodec.CaseObjectCodec[?] => true
-      case _                                   => false
+      case _: DerivedCodec.CaseObjectCodec[?] => true
+      case _                                  => false
     })
-    if isEnum then MagnoliaCodec.EnumCodec(ctx)
-    else MagnoliaCodec.SealedTraitCodec(ctx)
+    if (isEnum) DerivedCodec.EnumCodec(ctx)
+    else DerivedCodec.SealedTraitCodec(ctx)
   }
 }
 
-object MagnoliaCodec {
+object DerivedCodec {
   private[codecs] case class CaseClassCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit = try {
       writer.writeStartDocument()
@@ -58,16 +55,16 @@ object MagnoliaCodec {
     } catch {
       case e: BsonSerializationException =>
         throw BsonError.CodecError(
-          ctx.typeInfo.full,
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
-          ctx.typeInfo.full,
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonError =>
-        throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
     }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A = try {
@@ -78,16 +75,16 @@ object MagnoliaCodec {
     } catch {
       case e: BsonSerializationException =>
         throw BsonError.CodecError(
-          ctx.typeInfo.full,
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
-          ctx.typeInfo.full,
+          ctx.typeName.full,
           BsonError.SerializationError(e),
         ) // scalafix:ok
       case e: BsonError =>
-        throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
     }
 
     val inlined: InlinedCaseClassCodec[A] = InlinedCaseClassCodec(ctx)
@@ -105,20 +102,20 @@ object MagnoliaCodec {
 
     override def encode(writer: BsonWriter, x: A, encoderCtx: EncoderContext): Unit =
       try
-        ctx.params
+        ctx.parameters
           .filterNot(_.annotations.exists {
             case BsonIgnore() => true
             case _            => false
           })
           .foreach { param =>
-            val value      = param.deref(x)
+            val value      = param.dereference(x)
             val childCodec = param.typeclass
             writer.writeName(getLabel(param))
             try
               childCodec.encode(writer, value, encoderCtx)
             catch {
               case e: BsonError =>
-                throw BsonError.ProductError(param.label, ctx.typeInfo.short, e) // scalafix:ok
+                throw BsonError.ProductError(param.label, param.typeName.short, e) // scalafix:ok
             }
           }
       catch {
@@ -145,7 +142,7 @@ object MagnoliaCodec {
               )
           case _ =>
             val name = reader.readName()
-            ctx.params.find(getLabel(_) == name) match {
+            ctx.parameters.find(getLabel(_) == name) match {
               case None =>
                 // ignore additional fields
                 reader.skipValue()
@@ -156,15 +153,15 @@ object MagnoliaCodec {
                   case _            => false
                 }
 
-                if ignored && param.default.isEmpty then
+                if (ignored && param.default.isEmpty)
                   throw BsonError.ProductError(
                     name,
-                    ctx.typeInfo.short,
+                    param.typeName.short,
                     BsonError.GeneralError(
                       s"Field '$name' is ignored but doesn't have a default value",
                     ),
                   ) // scalafix:ok
-                else if ignored then {
+                else if (ignored) {
                   reader.skipValue()
                   step(values)
                 } else {
@@ -176,7 +173,7 @@ object MagnoliaCodec {
                       case e: BsonError =>
                         throw BsonError.ProductError(
                           param.label,
-                          ctx.typeInfo.short,
+                          param.typeName.short,
                           e,
                         ) // scalafix:ok
                     }
@@ -198,16 +195,16 @@ object MagnoliaCodec {
 
   private[codecs] case class CaseObjectCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
-      try writer.writeString(ctx.typeInfo.short)
+      try writer.writeString(ctx.typeName.short)
       catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
       }
@@ -215,63 +212,62 @@ object MagnoliaCodec {
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
       try {
         val name = reader.readString()
-        if name == ctx.typeInfo.short then ctx.construct(_ => ())
+        if (name == ctx.typeName.short) ctx.construct(_ => ())
         else
           throw BsonError.GeneralError(
-            s"Expected '${ctx.typeInfo.short}'', got '$name'.",
+            s"Expected '${ctx.typeName.short}'', got '$name'.",
           ) // scalafix:ok
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
   private[codecs] case class ValueClassCodec[A](ctx: CaseClass[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try {
-        val param      = ctx.params.head
-        val childValue = param.deref(value)
+        val param      = ctx.parameters.head
+        val childValue = param.dereference(value)
 
         param.typeclass.encode(writer, childValue, encoderContext)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
       try {
-        val param = ctx.params.head
+        val param = ctx.parameters.head
         val codec = param.typeclass
         val value = codec.decode(reader, decoderContext)
 
-        ctx.construct(_ => ())
+        ctx.construct(_ => value)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
   private[codecs] case class EnumCodec[A](ctx: SealedTrait[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try
-        ctx.choose(value)(subtype =>
+        ctx.split(value)(subtype =>
           subtype.typeclass
-            .asInstanceOf[Codec[A]]
-            .encode(writer, value, encoderContext), // scalafix:ok
+            .encode(writer, value.asInstanceOf[subtype.SType], encoderContext), // scalafix:ok
         )
       catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -279,7 +275,7 @@ object MagnoliaCodec {
         val shortName = reader.readString
         val maybeObjectCodec =
           for {
-            st <- ctx.subtypes.find(_.typeInfo.short == shortName)
+            st <- ctx.subtypes.find(_.typeName.short == shortName)
             objectCodec <- st.typeclass match {
               case oc: CaseObjectCodec[?] =>
                 Some(oc.asInstanceOf[CaseObjectCodec[A]]) // scalafix:ok
@@ -296,16 +292,16 @@ object MagnoliaCodec {
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
 
@@ -315,84 +311,76 @@ object MagnoliaCodec {
 
     override def encode(writer: BsonWriter, value: A, encoderCtx: EncoderContext): Unit =
       try
-        ctx.choose(value) { subtype =>
-          try
+        ctx.split(value) { subtype =>
+          try {
+            writer.writeStartDocument()
             subtype.typeclass match {
               case codec: CaseObjectCodec[?] =>
-                writer.writeStartDocument()
                 writer.writeName(TypeTag)
-                codec.asInstanceOf[Codec[A]].encode(writer, value, encoderCtx) // scalafix:ok
-                writer.writeEndDocument()
-              case codec: EnumCodec[?] =>
-                writer.writeStartDocument()
-                writer.writeName(TypeTag)
-                codec.asInstanceOf[Codec[A]].encode(writer, value, encoderCtx) // scalafix:ok
-                writer.writeEndDocument()
+                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx) // scalafix:ok
               case codec: CaseClassCodec[?] =>
-                writer.writeStartDocument()
-                writer.writeString(TypeTag, subtype.typeInfo.short)
-                codec.inlined
-                  .asInstanceOf[Codec[A]]
-                  .encode(
-                    writer,
-                    value,
-                    encoderCtx,
-                  ) // scalafix:ok
-                writer.writeEndDocument()
+                writer.writeString(TypeTag, subtype.typeName.short)
+                codec.inlined.encode(
+                  writer,
+                  value.asInstanceOf[subtype.SType],
+                  encoderCtx,
+                ) // scalafix:ok
               case codec =>
-                codec.asInstanceOf[Codec[A]].encode(writer, value, encoderCtx) // scalafix:ok
+                writer.writeString(TypeTag, subtype.typeName.short)
+                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx) // scalafix:ok
             }
-          catch {
+            writer.writeEndDocument()
+          } catch {
             case e: BsonSerializationException =>
               throw BsonError.CoproductError(
-                subtype.typeInfo.short,
+                subtype.typeName.short,
                 BsonError.SerializationError(e),
               ) // scalafix:ok
             case e: BsonInvalidOperationException =>
               throw BsonError.CoproductError(
-                subtype.typeInfo.short,
+                subtype.typeName.short,
                 BsonError.SerializationError(e),
               ) // scalafix:ok
             case e: BsonError =>
-              throw BsonError.CoproductError(subtype.typeInfo.short, e) // scalafix:ok
+              throw BsonError.CoproductError(subtype.typeName.short, e) // scalafix:ok
           }
         }
       catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
       try {
         reader.readStartDocument()
-        val typeTag         = reader.readString(TypeTag)
-        val flattenSubtypes = flattenSealedSubtypes(ctx).toMap
-        val codec           = flattenSubtypes.get(typeTag)
-        val result = codec
-          .map { codec =>
-            try
-              codec match {
-                case CaseObjectCodec(objectCtx) =>
-                  objectCtx.construct(_ => ())
-                case codec: CaseClassCodec[?] =>
-                  codec.inlined.decode(reader, decoderCtx)
-                case _ =>
-                  codec.decode(reader, decoderCtx)
+        val typeTag = reader.readString(TypeTag)
+        val result = ctx.subtypes
+          .collectFirst {
+            case st if st.typeName.short == typeTag =>
+              val codec = st.typeclass
+              try
+                codec match {
+                  case CaseObjectCodec(objectCtx) =>
+                    objectCtx.construct(_ => ())
+                  case codec: CaseClassCodec[?] =>
+                    codec.inlined.decode(reader, decoderCtx)
+                  case _ =>
+                    codec.decode(reader, decoderCtx)
+                }
+              catch {
+                case e: BsonError =>
+                  throw BsonError.CoproductError(st.typeName.short, e) // scalafix:ok
               }
-            catch {
-              case e: BsonError =>
-                throw BsonError.CoproductError(typeTag, e) // scalafix:ok
-            }
           }
           .getOrElse(
             throw BsonError.CoproductError(
@@ -400,39 +388,22 @@ object MagnoliaCodec {
               BsonError.GeneralError("unsupported discriminator value"),
             ), // scalafix:ok
           )
-          .asInstanceOf[A] // scalafix:ok
         reader.readEndDocument()
 
         result
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
-            ctx.typeInfo.full,
+            ctx.typeName.full,
             BsonError.SerializationError(e),
           ) // scalafix:ok
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeInfo.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
       }
   }
-
-  private[codecs] def flattenSealedSubtypes[A](
-    ctx: SealedTrait[Codec, A],
-  ): List[(String, Codec[?])] =
-    ctx.subtypes.toList.flatMap { subtype =>
-      subtype.typeclass match {
-        // case codec: CaseObjectCodec[?] => List(subtype.typeInfo.short -> codec)
-        // case codec: CaseClassCodec[?] => List(subtype.typeInfo.short -> codec)
-        case codec: EnumCodec[?] =>
-          codec.ctx.subtypes.map { enumSubtype =>
-            enumSubtype.typeInfo.short -> enumSubtype.typeclass
-          }
-        case codec: SealedTraitCodec[?] => flattenSealedSubtypes(codec.ctx)
-        case codec                      => List(subtype.typeInfo.short -> codec)
-      }
-    }
 }

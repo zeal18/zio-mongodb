@@ -30,12 +30,12 @@ abstract class Codec[A] extends Encoder[A] with Decoder[A] { self =>
 }
 
 object Codec
-    extends MagnoliaCodec
-    with PrimitiveCodecs
+    extends PrimitiveCodecs
     with BsonCodecs
     with TemporalCodecs
     with CollectionsCodecs
-    with OptionCodecs {
+    with OptionCodecs
+    with DerivedCodec {
   def apply[A](implicit codec: Codec[A]): Codec[A] = codec
 
   def apply[A](encoder: Encoder[A], decoder: Decoder[A])(implicit ct: ClassTag[A]): Codec[A] =
