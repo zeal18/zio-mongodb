@@ -66,7 +66,7 @@ object EmbeddedMongo {
   )
 
   def live(
-    version: IFeatureAwareVersion = Version.Main.PRODUCTION,
+    version: IFeatureAwareVersion = Version.Main.V4_4,
   ): ZLayer[Any, Throwable, MongodProcess] =
     ZLayer.scoped(ZIO.acquireRelease((for {
       asp           <- Live.live(artifactStorePath)
