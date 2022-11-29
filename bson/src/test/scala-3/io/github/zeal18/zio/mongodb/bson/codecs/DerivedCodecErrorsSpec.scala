@@ -6,7 +6,7 @@ import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
 
-object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
+object DerivedCodecErrorsSpec extends ZIOSpecDefault {
   private case class Simple(a: Int)
 
   sealed private trait SimpleEnum
@@ -26,7 +26,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
   private case class WrappedList[A](e: List[A])
 
   override def spec =
-    suite("MagnoliaCodecsErrorsSpec")(
+    suite("DerivedCodecErrorsSpec")(
       suite("case class")(
         testCodecDecodeError[Simple](
           "wrong field type",
@@ -53,7 +53,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleEnum",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.DerivedCodecErrorsSpec.SimpleEnum",
               ) &&
               assertTrue(
                 result
@@ -88,7 +88,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.DerivedCodecErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
@@ -111,7 +111,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.DerivedCodecErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
@@ -144,7 +144,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                   .asInstanceOf[BsonError.ProductError]
                   .underlying
                   .asInstanceOf[BsonError.CodecError]
-                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.MagnoliaCodecsErrorsSpec.SimpleCoproduct",
+                  .name == "io.github.zeal18.zio.mongodb.bson.codecs.DerivedCodecErrorsSpec.SimpleCoproduct",
               ) &&
               assertTrue(
                 result
