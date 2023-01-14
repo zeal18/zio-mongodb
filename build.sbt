@@ -17,8 +17,6 @@ val immutablesVersion = "2.9.3"
 
 val magnolia2Version = "1.1.2"
 
-val scalatestVersion = "3.2.15"
-
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 autoCompilerPlugins := true
@@ -99,12 +97,9 @@ lazy val bson = (project in file("bson")).settings(
   name := "zio-mongodb-bson",
   commonSettings,
   libraryDependencies ++= Seq(
-    "org.mongodb"    % "bson"                     % mongoVersion,
-    "org.scalatest" %% "scalatest"                % scalatestVersion % Test,
-    "org.scalatest" %% "scalatest-flatspec"       % scalatestVersion % Test,
-    "org.scalatest" %% "scalatest-shouldmatchers" % scalatestVersion % Test,
-    "dev.zio"       %% "zio-test"                 % zioVersion       % Test,
-    "dev.zio"       %% "zio-test-sbt"             % zioVersion       % Test,
+    "org.mongodb" % "bson"         % mongoVersion,
+    "dev.zio"    %% "zio-test"     % zioVersion % Test,
+    "dev.zio"    %% "zio-test-sbt" % zioVersion % Test,
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => Seq.empty

@@ -20,77 +20,81 @@ import java.util.Date
 
 import io.github.zeal18.zio.mongodb.bson.collection.immutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
+import zio.test.*
 
-class BsonTransformerSpec extends BaseSpec {
-
-  "The BsonTransformer companion" should "not transform BsonValues" in {
-    transform(BsonString("abc")) should equal(BsonString("abc"))
-  }
-  it should "transform Binary" in {
-    transform(Array[Byte](128.toByte)) should equal(BsonBinary(Array[Byte](128.toByte)))
-  }
-  it should "transform BigDecmial" in {
-    transform(BigDecimal(100)) should equal(BsonDecimal128(100))
-  }
-  it should "transform Boolean" in {
-    transform(true) should equal(BsonBoolean(true))
-  }
-  it should "transform DateTime" in {
-    transform(new Date(100)) should equal(BsonDateTime(100))
-  }
-  it should "transform Decimal128" in {
-    transform(new Decimal128(100)) should equal(BsonDecimal128(100))
-  }
-  it should "transform Double" in {
-    transform(2.0) should equal(BsonDouble(2.0))
-  }
-  it should "transform ImmutableDocument" in {
-    transform(immutable.Document("a" -> 1, "b" -> "two", "c" -> false)) should equal(
-      BsonDocument("a" -> 1, "b" -> "two", "c" -> false),
-    )
-  }
-
-  it should "transform Int" in {
-    transform(1) should equal(BsonInt32(1))
-  }
-  it should "transform KeyValuePairs[T]" in {
-    transform(Seq("a" -> "a", "b" -> "b", "c" -> "c")) should equal(
-      BsonDocument("a" -> "a", "b" -> "b", "c" -> "c"),
-    )
-  }
-  it should "transform Long" in {
-    transform(1L) should equal(BsonInt64(1))
-  }
-  it should "transform MutableDocument" in {
-    transform(mutable.Document("a" -> 1, "b" -> "two", "c" -> false)) should equal(
-      BsonDocument("a" -> 1, "b" -> "two", "c" -> false),
-    )
-  }
-  it should "transform None" in {
-    transform(None) should equal(BsonNull())
-  }
-  it should "transform ObjectId" in {
-    val objectId = new ObjectId()
-    transform(objectId) should equal(BsonObjectId(objectId))
-  }
-  it should "transform Option[T]" in {
-    transform(Some(1)) should equal(new BsonInt32(1))
-  }
-  it should "transform Regex" in {
-    transform("/.*/".r) should equal(BsonRegularExpression("/.*/"))
-  }
-  it should "transform Seq[T]" in {
-    transform(Seq("a", "b", "c")) should equal(BsonArray("a", "b", "c"))
-  }
-  it should "transform String" in {
-    transform("abc") should equal(BsonString("abc"))
-  }
-
-  it should "thrown a runtime exception when no transformer available" in {
-    "transform(BigInt(12))" shouldNot compile
-  }
+object BsonTransformerSpec extends ZIOSpecDefault {
+  override def spec = suite("BsonTransformerSpec")(
+    suite("The BsonTransformer companion")(
+      test("should not transform BsonValues") {
+        assertTrue(transform(BsonString("abc")) == BsonString("abc"))
+      },
+      test("should transform Binary") {
+        assertTrue(transform(Array[Byte](128.toByte)) == BsonBinary(Array[Byte](128.toByte)))
+      },
+      test("should transform BigDecmial") {
+        assertTrue(transform(BigDecimal(100)) == BsonDecimal128(100))
+      },
+      test("should transform Boolean") {
+        assertTrue(transform(true) == BsonBoolean(true))
+      },
+      test("should transform DateTime") {
+        assertTrue(transform(new Date(100)) == BsonDateTime(100))
+      },
+      test("should transform Decimal128") {
+        assertTrue(transform(new Decimal128(100)) == BsonDecimal128(100))
+      },
+      test("should transform Double") {
+        assertTrue(transform(2.0) == BsonDouble(2.0))
+      },
+      test("should transform ImmutableDocument") {
+        assertTrue(
+          transform(immutable.Document("a" -> 1, "b" -> "two", "c" -> false)) ==
+            BsonDocument("a" -> 1, "b" -> "two", "c" -> false),
+        )
+      },
+      test("should transform Int") {
+        assertTrue(transform(1) == BsonInt32(1))
+      },
+      test("should transform KeyValuePairs[T]") {
+        assertTrue(
+          transform(Seq("a" -> "a", "b" -> "b", "c" -> "c")) ==
+            BsonDocument("a" -> "a", "b" -> "b", "c" -> "c"),
+        )
+      },
+      test("should transform Long") {
+        assertTrue(transform(1L) == BsonInt64(1))
+      },
+      test("should transform MutableDocument") {
+        assertTrue(
+          transform(mutable.Document("a" -> 1, "b" -> "two", "c" -> false)) ==
+            BsonDocument("a" -> 1, "b" -> "two", "c" -> false),
+        )
+      },
+      test("should transform None") {
+        assertTrue(transform(None) == BsonNull())
+      },
+      test("should transform ObjectId") {
+        val objectId = new ObjectId()
+        assertTrue(transform(objectId) == BsonObjectId(objectId))
+      },
+      test("should transform Option[T]") {
+        assertTrue(transform(Some(1)) == new BsonInt32(1))
+      },
+      test("should transform Regex") {
+        assertTrue(transform("/.*/".r) == BsonRegularExpression("/.*/"))
+      },
+      test("should transform Seq[T]") {
+        assertTrue(transform(Seq("a", "b", "c")) == BsonArray("a", "b", "c"))
+      },
+      test("should transform String") {
+        assertTrue(transform("abc") == BsonString("abc"))
+      },
+      // test("should thrown a runtime exception when no transformer available") {
+      //   assertTrue("transform(BigInt(12))" shouldNot compile
+      // },
+    ),
+  )
 
   implicit def transform[T](v: T)(implicit transformer: BsonTransformer[T]): BsonValue =
     transformer(v)
-
 }

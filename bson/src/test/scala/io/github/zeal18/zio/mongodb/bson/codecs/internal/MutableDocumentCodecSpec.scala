@@ -21,7 +21,6 @@ import java.util.Date
 
 import scala.jdk.CollectionConverters.*
 
-import io.github.zeal18.zio.mongodb.bson.BaseSpec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.Registry.DEFAULT_CODEC_REGISTRY
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document
@@ -32,111 +31,119 @@ import org.bson.codecs.configuration.CodecRegistry
 import org.bson.io.BasicOutputBuffer
 import org.bson.io.ByteBufferBsonInput
 import org.bson.types.ObjectId
+import zio.test.*
 
-class MutableDocumentCodecSpec extends BaseSpec {
-
+object MutableDocumentCodecSpec extends ZIOSpecDefault {
   val registry: CodecRegistry = DEFAULT_CODEC_REGISTRY
 
-  "MutableDocumentCodec" should "encode and decode all default types with readers and writers" in {
-    val original: mutable.Document = Document(
-      "binary"       -> new BsonBinary("bson".toCharArray map (_.toByte)),
-      "boolean"      -> new BsonBoolean(true),
-      "dateTime"     -> new BsonDateTime(new Date().getTime),
-      "double"       -> new BsonDouble(1.0),
-      "int"          -> new BsonInt32(1),
-      "long"         -> new BsonInt64(1L),
-      "null"         -> new BsonNull(),
-      "objectId"     -> new BsonObjectId(new ObjectId()),
-      "regEx"        -> new BsonRegularExpression("^bson".r.regex),
-      "string"       -> new BsonString("string"),
-      "symbol"       -> new BsonSymbol(Symbol("bson").name),
-      "bsonDocument" -> new BsonDocument("a", new BsonString("string")),
-      "array"        -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
-    )
-
-    info("encoding")
-    val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
-    MutableDocumentCodec(registry).encode(writer, original, EncoderContext.builder().build())
-
-    info("decoding")
-    val buffer: BasicOutputBuffer =
-      writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
-    val reader: BsonBinaryReader =
-      new BsonBinaryReader(
-        new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
+  override def spec = suite("MutableDocumentCodecSpec")(
+    test("should encode and decode all default types with readers and writers") {
+      val original: mutable.Document = Document(
+        "binary"       -> new BsonBinary("bson".toCharArray map (_.toByte)),
+        "boolean"      -> new BsonBoolean(true),
+        "dateTime"     -> new BsonDateTime(new Date().getTime),
+        "double"       -> new BsonDouble(1.0),
+        "int"          -> new BsonInt32(1),
+        "long"         -> new BsonInt64(1L),
+        "null"         -> new BsonNull(),
+        "objectId"     -> new BsonObjectId(new ObjectId()),
+        "regEx"        -> new BsonRegularExpression("^bson".r.regex),
+        "string"       -> new BsonString("string"),
+        "symbol"       -> new BsonSymbol(Symbol("bson").name),
+        "bsonDocument" -> new BsonDocument("a", new BsonString("string")),
+        "array" -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
       )
 
-    val decodedDocument = MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
+      val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
+      MutableDocumentCodec(registry).encode(writer, original, EncoderContext.builder().build())
 
-    decodedDocument shouldBe a[mutable.Document]
-    original should equal(decodedDocument)
-  }
+      val buffer: BasicOutputBuffer =
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+      val reader: BsonBinaryReader = new BsonBinaryReader(
+        new ByteBufferBsonInput(
+          new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray)),
+        ),
+      )
 
-  it should "respect encodeIdFirst property in encoder context" in {
-    val original: mutable.Document = Document(
-      "a"   -> new BsonString("string"),
-      "_id" -> new BsonInt32(1),
-      "nested" -> Document(
+      val decodedDocument =
+        MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
+
+      assertTrue(
+        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+      ) &&
+      assertTrue(original == decodedDocument)
+    },
+    test("should respect encodeIdFirst property in encoder context") {
+      val original: mutable.Document = Document(
         "a"   -> new BsonString("string"),
         "_id" -> new BsonInt32(1),
-      ).toBsonDocument,
-    )
-
-    info("encoding")
-    val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
-    MutableDocumentCodec(registry).encode(
-      writer,
-      original,
-      EncoderContext.builder().isEncodingCollectibleDocument(true).build(),
-    )
-
-    info("decoding")
-    val buffer: BasicOutputBuffer =
-      writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
-    val reader: BsonBinaryReader =
-      new BsonBinaryReader(
-        new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
+        "nested" -> Document(
+          "a"   -> new BsonString("string"),
+          "_id" -> new BsonInt32(1),
+        ).toBsonDocument,
       )
 
-    val decodedDocument = MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
+      val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
+      MutableDocumentCodec(registry).encode(
+        writer,
+        original,
+        EncoderContext.builder().isEncodingCollectibleDocument(true).build(),
+      )
 
-    decodedDocument shouldBe a[mutable.Document]
-    original should equal(decodedDocument)
-    decodedDocument.keys.toList should contain theSameElementsInOrderAs (List("_id", "a", "nested"))
+      val buffer: BasicOutputBuffer =
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+      val reader: BsonBinaryReader =
+        new BsonBinaryReader(
+          new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
+        )
 
-    Document(
-      decodedDocument[BsonDocument]("nested"),
-    ).keys.toList should contain theSameElementsInOrderAs (List(
-      "a",
-      "_id",
-    ))
-  }
+      val decodedDocument =
+        MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
-  it should "encoder class should work as expected" in {
-    MutableDocumentCodec().getEncoderClass should equal(classOf[mutable.Document])
-  }
+      assertTrue(
+        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+      ) &&
+      assertTrue(original == decodedDocument) &&
+      assertTrue(
+        decodedDocument.keys.toList == List(
+          "_id",
+          "a",
+          "nested",
+        ),
+      ) &&
+      assertTrue(
+        Document(
+          decodedDocument[BsonDocument]("nested"),
+        ).keys.toList == List(
+          "a",
+          "_id",
+        ),
+      )
+    },
+    test("should encoder class should work as expected") {
+      assertTrue(MutableDocumentCodec().getEncoderClass == classOf[mutable.Document])
+    },
+    test("should determine if document has an _id") {
+      assertTrue(MutableDocumentCodec().documentHasId(Document()) == false) &&
+      assertTrue(
+        MutableDocumentCodec().documentHasId(Document("_id" -> new BsonInt32(1))) == true,
+      )
+    },
+    test("should get the document_id") {
+      assertTrue(
+        MutableDocumentCodec().getDocumentId(Document()) == null, // scalafix:ok
+      ) &&
+      assertTrue(
+        MutableDocumentCodec().getDocumentId(Document("_id" -> new BsonInt32(1))) == new BsonInt32(
+          1,
+        ),
+      )
+    },
+    test("should not generate document id if present") {
+      val document = Document("_id" -> new BsonInt32(1))
+      val _        = MutableDocumentCodec().generateIdIfAbsentFromDocument(document)
 
-  it should "determine if document has an _id" in {
-    MutableDocumentCodec().documentHasId(Document()) should be(false)
-    MutableDocumentCodec().documentHasId(Document("_id" -> new BsonInt32(1))) should be(true)
-  }
-
-  it should "get the document_id" in {
-    MutableDocumentCodec().getDocumentId(Document()) should be(null) // scalafix:ok
-    MutableDocumentCodec().getDocumentId(Document("_id" -> new BsonInt32(1))) should be(
-      new BsonInt32(1),
-    )
-  }
-
-  it should "generate document id if absent" in {
-    val document = Document()
-    MutableDocumentCodec().generateIdIfAbsentFromDocument(document)
-    document("_id") shouldBe a[BsonObjectId]
-  }
-
-  it should "not generate document id if present" in {
-    val document = Document("_id" -> new BsonInt32(1))
-    MutableDocumentCodec().generateIdIfAbsentFromDocument(document)
-    document("_id") should equal(new BsonInt32(1))
-  }
+      assertTrue(document("_id") == new BsonInt32(1))
+    },
+  )
 }

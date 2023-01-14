@@ -19,65 +19,73 @@ package io.github.zeal18.zio.mongodb.bson.collections
 import io.github.zeal18.zio.mongodb.bson.*
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
+import zio.test.*
 
-class DocumentImplicitTypeConversion extends BaseSpec {
-
+object DocumentImplicitTypeConversionSpec extends ZIOSpecDefault {
   val emptyDoc: Document = Document.empty
 
-  "Document additions and updates" should "support simple additions" in {
-    val doc1: Document = Document() + ("key" -> "value")
-    doc1 should equal(Document("key" -> BsonString("value")))
+  override def spec = suite("DocumentImplicitTypeConversionSpec")(
+    suite("Document additions and updates")(
+      test("should support simple additions") {
+        val doc1: Document = Document() + ("key" -> "value")
 
-    val doc2: Document = doc1 + ("key2" -> 2)
-    doc2 should equal(Document("key" -> BsonString("value"), "key2" -> BsonInt32(2)))
-  }
+        val doc2: Document = doc1 + ("key2" -> 2)
 
-  it should "support multiple additions" in {
-    val doc1: Document = emptyDoc + ("key" -> "value", "key2" -> 2, "key3" -> true, "key4" -> None)
-    doc1 should equal(
-      Document(
-        "key"  -> BsonString("value"),
-        "key2" -> BsonInt32(2),
-        "key3" -> BsonBoolean(true),
-        "key4" -> BsonNull(),
-      ),
-    )
-  }
+        assertTrue(doc1 == Document("key" -> BsonString("value"))) &&
+        assertTrue(doc2 == Document("key" -> BsonString("value"), "key2" -> BsonInt32(2)))
+      },
+      test("should support multiple additions") {
+        val doc1: Document =
+          emptyDoc + ("key" -> "value", "key2" -> 2, "key3" -> true, "key4" -> None)
 
-  it should "support addition of a traversable" in {
-    val doc1: Document =
-      emptyDoc ++ Document("key" -> "value", "key2" -> 2, "key3" -> true, "key4" -> None)
-    doc1 should equal(
-      Document(
-        "key"  -> BsonString("value"),
-        "key2" -> BsonInt32(2),
-        "key3" -> BsonBoolean(true),
-        "key4" -> BsonNull(),
-      ),
-    )
-  }
+        assertTrue(
+          doc1 == Document(
+            "key"  -> BsonString("value"),
+            "key2" -> BsonInt32(2),
+            "key3" -> BsonBoolean(true),
+            "key4" -> BsonNull(),
+          ),
+        )
+      },
+      test("should support addition of a traversable") {
+        val doc1: Document =
+          emptyDoc ++ Document("key" -> "value", "key2" -> 2, "key3" -> true, "key4" -> None)
+        assertTrue(
+          doc1 == Document(
+            "key"  -> BsonString("value"),
+            "key2" -> BsonInt32(2),
+            "key3" -> BsonBoolean(true),
+            "key4" -> BsonNull(),
+          ),
+        )
+      },
+      test("should support updated") {
+        val doc1: Document = emptyDoc.updated("key", "value")
 
-  it should "support updated" in {
-    val doc1: Document = emptyDoc.updated("key", "value")
-    emptyDoc should not be doc1
-    doc1 should equal(Document("key" -> BsonString("value")))
-  }
+        assertTrue(doc1 != emptyDoc) &&
+        assertTrue(doc1 == Document("key" -> BsonString("value")))
+      },
+      test("should be creatable from mixed types") {
+        val doc1: Document = Document(
+          "a" -> "string",
+          "b" -> true,
+          "c" -> List("a", "b", "c"),
+          "d" -> Document("a" -> "string", "b" -> true, "c" -> List("a", "b", "c")),
+        )
 
-  it should "be creatable from mixed types" in {
-    val doc1: Document = Document(
-      "a" -> "string",
-      "b" -> true,
-      "c" -> List("a", "b", "c"),
-      "d" -> Document("a" -> "string", "b" -> true, "c" -> List("a", "b", "c")),
-    )
+        val doc2: mutable.Document = mutable.Document(
+          "a" -> "string",
+          "b" -> true,
+          "c" -> List("a", "b", "c"),
+          "d" ->
+            mutable.Document("a" -> "string", "b" -> true, "c" -> List("a", "b", "c")),
+        )
 
-    val doc2: mutable.Document = mutable.Document(
-      "a" -> "string",
-      "b" -> true,
-      "c" -> List("a", "b", "c"),
-      "d" ->
-        mutable.Document("a" -> "string", "b" -> true, "c" -> List("a", "b", "c")),
-    )
-    doc1.toBsonDocument should equal(doc2.toBsonDocument)
-  }
+        val bsonDoc1 = doc1.toBsonDocument
+        val bsonDoc2 = doc2.toBsonDocument
+
+        assertTrue(bsonDoc1 == bsonDoc2)
+      },
+    ),
+  )
 }
