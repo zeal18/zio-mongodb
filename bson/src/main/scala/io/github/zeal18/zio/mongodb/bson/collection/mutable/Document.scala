@@ -174,8 +174,7 @@ case class Document(protected[mongodb] val underlying: BsonDocument)
     *  @param value  The new value
     */
   def update[B](key: String, value: B)(implicit transformer: BsonTransformer[B]): Unit = {
-    this += ((key, value))
-    ()
+    val _ = this += ((key, value))
   }
 
   /**  Adds a new key/value pair to this document and optionally returns previously bound value.
@@ -202,7 +201,10 @@ case class Document(protected[mongodb] val underlying: BsonDocument)
   def getOrElseUpdate[B](key: String, op: => B)(implicit
     transformer: BsonTransformer[B],
   ): BsonValue = {
-    if (get(key).isEmpty) this += ((key, op))
+    if (get(key).isEmpty) {
+      val _ = this += ((key, op))
+    }
+
     this(key)
   }
 
@@ -234,7 +236,7 @@ case class Document(protected[mongodb] val underlying: BsonDocument)
     */
   def remove(key: String): Option[BsonValue] = {
     val r = get(key)
-    this -= key
+    val _ = this -= key
     r
   }
 
