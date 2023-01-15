@@ -20,133 +20,116 @@ import java.util.Date
 
 import scala.jdk.CollectionConverters.*
 
-class BsonValueSpec extends BaseSpec {
+import zio.test.*
 
-  "BsonArray companion" should "create a BsonArray" in {
-    BsonArray() should equal(new BsonArray())
+object BsonValueSpec extends ZIOSpecDefault {
+  override def spec = suite("BsonValueSpec")(
+    test("BsonArray companion should create a BsonArray") {
 
-    val values: List[BsonNumber] = List(BsonInt32(1), BsonInt64(2), new BsonDouble(3.0))
-    val bsonArray                = BsonArray.fromIterable(values)
-    val expected                 = new BsonArray(values.asJava)
+      val values: List[BsonNumber] = List(BsonInt32(1), BsonInt64(2), new BsonDouble(3.0))
+      val bsonArray                = BsonArray.fromIterable(values)
+      val expected                 = new BsonArray(values.asJava)
 
-    bsonArray should equal(expected)
+      val implicitBsonArray = BsonArray(1, 2L, 3.0)
 
-    val implicitBsonArray = BsonArray(1, 2L, 3.0)
-    implicitBsonArray should equal(expected)
-  }
+      assertTrue(BsonArray() == new BsonArray()) &&
+      assertTrue(bsonArray == expected) &&
+      assertTrue(implicitBsonArray == expected)
+    },
+    test("BsonBinary companion should create a BsonBinary") {
+      val byteArray = Array[Byte](80.toByte, 5, 4, 3, 2, 1)
 
-  "BsonBinary companion" should "create a BsonBinary" in {
-    val byteArray = Array[Byte](80.toByte, 5, 4, 3, 2, 1)
-    BsonBinary(byteArray) should equal(new BsonBinary(byteArray))
-  }
+      assertTrue(BsonBinary(byteArray) == new BsonBinary(byteArray))
+    },
+    test("BsonBoolean companion should create a BsonBoolean") {
+      assertTrue(BsonBoolean(false) == new BsonBoolean(false)) &&
+      assertTrue(BsonBoolean(true) == new BsonBoolean(true))
+    },
+    test("BsonDateTime companion should create a BsonDateTime") {
+      val date = new Date()
 
-  "BsonBoolean companion" should "create a BsonBoolean" in {
-    BsonBoolean(false) should equal(new BsonBoolean(false))
-    BsonBoolean(true) should equal(new BsonBoolean(true))
-  }
+      assertTrue(BsonDateTime(date) == new BsonDateTime(date.getTime)) &&
+      assertTrue(BsonDateTime(1000) == new BsonDateTime(1000))
+    },
+    test("BsonDecimal128 companion should create a BsonDecimal128") {
+      val expected = new BsonDecimal128(new Decimal128(100))
 
-  "BsonDateTime companion" should "create a BsonDateTime" in {
-    val date = new Date()
+      assertTrue(BsonDecimal128(100) == expected) &&
+      assertTrue(BsonDecimal128("100") == expected) &&
+      assertTrue(BsonDecimal128(BigDecimal(100)) == expected) &&
+      assertTrue(BsonDecimal128(new Decimal128(100)) == expected)
+    },
+    test("BsonDocument companion should create a BsonDocument") {
+      val expected = new BsonDocument("a", BsonInt32(1))
+      expected.put("b", BsonDouble(2.0))
 
-    BsonDateTime(date) should equal(new BsonDateTime(date.getTime))
-    BsonDateTime(1000) should equal(new BsonDateTime(1000))
-  }
+      assertTrue(BsonDocument() == new BsonDocument()) &&
+      assertTrue(BsonDocument("a" -> 1, "b" -> 2.0) == expected) &&
+      assertTrue(BsonDocument(Seq(("a", BsonInt32(1)), ("b", BsonDouble(2.0)))) == expected) &&
+      assertTrue(BsonDocument("{a: 1, b: 2.0}") == expected)
+    },
+    test("BsonDouble companion should create a BsonDouble") {
+      assertTrue(BsonDouble(2.0) == new BsonDouble(2.0))
+    },
+    test("BsonInt32 companion should create a BsonInt32") {
+      assertTrue(BsonInt32(1) == new BsonInt32(1))
+    },
+    test("BsonInt64 companion should create a BsonInt64") {
+      assertTrue(BsonInt64(1) == new BsonInt64(1))
+    },
+    test("BsonJavaScript companion should create a BsonJavaScript") {
+      assertTrue(BsonJavaScript("function(){}") == new BsonJavaScript("function(){}"))
+    },
+    test("BsonJavaScriptWithScope companion should create a BsonJavaScriptWithScope") {
+      val function = "function(){}"
+      val scope    = new BsonDocument("a", new BsonInt32(1))
+      val expected = new BsonJavaScriptWithScope(function, scope)
 
-  "BsonDecimal128 companion" should "create a BsonDecimal128" in {
-    val expected = new BsonDecimal128(new Decimal128(100))
+      assertTrue(BsonJavaScriptWithScope(function, scope) == expected) &&
+      assertTrue(BsonJavaScriptWithScope(function, "a" -> 1) == expected) &&
+      assertTrue(BsonJavaScriptWithScope(function, Document("a" -> 1)) == expected)
+    },
+    test("BsonMaxKey companion should create a BsonMaxKey") {
+      assertTrue(BsonMaxKey() == new BsonMaxKey())
+    },
+    test("BsonMinKey companion should create a BsonMinKey") {
+      assertTrue(BsonMinKey() == new BsonMinKey())
+    },
+    test("BsonNull companion should create a BsonNull") {
+      assertTrue(BsonNull() == new BsonNull())
+    },
+    test("BsonNumber companion should create a BsonNumber") {
+      assertTrue(BsonNumber(1) == BsonInt32(1)) &&
+      assertTrue(BsonNumber(1L) == BsonInt64(1)) &&
+      assertTrue(BsonNumber(1.0) == BsonDouble(1.0))
+    },
+    test("BsonObjectId companion should create a BsonObjectId") {
+      val bsonObjectId = BsonObjectId()
+      val objectId     = bsonObjectId.getValue
+      val hexString    = objectId.toHexString
+      val expected     = new BsonObjectId(bsonObjectId.getValue)
 
-    BsonDecimal128(100) should equal(expected)
-    BsonDecimal128("100") should equal(expected)
-    BsonDecimal128(BigDecimal(100)) should equal(expected)
-    BsonDecimal128(new Decimal128(100)) should equal(expected)
-  }
-
-  "BsonDocument companion" should "create a BsonDocument" in {
-    val expected = new BsonDocument("a", BsonInt32(1))
-    expected.put("b", BsonDouble(2.0))
-
-    BsonDocument() should equal(new BsonDocument())
-    BsonDocument("a" -> 1, "b" -> 2.0) should equal(expected)
-    BsonDocument(Seq(("a", BsonInt32(1)), ("b", BsonDouble(2.0)))) should equal(expected)
-    BsonDocument("{a: 1, b: 2.0}") should equal(expected)
-  }
-
-  "BsonDouble companion" should "create a BsonDouble" in {
-    BsonDouble(2.0) should equal(new BsonDouble(2.0))
-  }
-
-  "BsonInt32 companion" should "create a BsonInt32" in {
-    BsonInt32(1) should equal(new BsonInt32(1))
-  }
-
-  "BsonInt64 companion" should "create a BsonInt64" in {
-    BsonInt64(1) should equal(new BsonInt64(1))
-  }
-
-  "BsonJavaScript companion" should "create a BsonJavaScript" in {
-    BsonJavaScript("function(){}") should equal(new BsonJavaScript("function(){}"))
-  }
-
-  "BsonJavaScriptWithScope companion" should "create a BsonJavaScriptWithScope" in {
-    val function = "function(){}"
-    val scope    = new BsonDocument("a", new BsonInt32(1))
-    val expected = new BsonJavaScriptWithScope(function, scope)
-
-    BsonJavaScriptWithScope(function, scope) should equal(expected)
-    BsonJavaScriptWithScope(function, "a" -> 1) should equal(expected)
-    BsonJavaScriptWithScope(function, Document("a" -> 1)) should equal(expected)
-  }
-
-  "BsonMaxKey companion" should "create a BsonMaxKey" in {
-    BsonMaxKey() should equal(new BsonMaxKey())
-  }
-
-  "BsonMinKey companion" should "create a BsonMinKey" in {
-    BsonMinKey() should equal(new BsonMinKey())
-  }
-
-  "BsonNull companion" should "create a BsonNull" in {
-    BsonNull() should equal(new BsonNull())
-  }
-
-  "BsonNumber companion" should "create a BsonNumber" in {
-    BsonNumber(1) should equal(BsonInt32(1))
-    BsonNumber(1L) should equal(BsonInt64(1))
-    BsonNumber(1.0) should equal(BsonDouble(1.0))
-  }
-
-  "BsonObjectId companion" should "create a BsonObjectId" in {
-    val bsonObjectId = BsonObjectId()
-    val objectId     = bsonObjectId.getValue
-    val hexString    = objectId.toHexString
-    val expected     = new BsonObjectId(bsonObjectId.getValue)
-
-    bsonObjectId should equal(expected)
-    BsonObjectId(hexString) should equal(expected)
-    BsonObjectId(objectId) should equal(expected)
-  }
-
-  "BsonRegularExpression companion" should "create a BsonRegularExpression" in {
-    BsonRegularExpression("/(.*)/") should equal(new BsonRegularExpression("/(.*)/"))
-    BsonRegularExpression("/(.*)/".r) should equal(new BsonRegularExpression("/(.*)/"))
-    BsonRegularExpression("/(.*)/", "?i") should equal(new BsonRegularExpression("/(.*)/", "?i"))
-  }
-
-  "BsonString companion" should "create a BsonString" in {
-    BsonString("aBc") should equal(new BsonString("aBc"))
-  }
-
-  "BsonSymbol companion" should "create a BsonSymbol" in {
-    BsonSymbol(Symbol("sym")) should equal(new BsonSymbol("sym"))
-  }
-
-  "BsonTimestamp companion" should "create a BsonTimestamp" in {
-    BsonTimestamp() should equal(new BsonTimestamp(0, 0))
-    BsonTimestamp(10, 1) should equal(new BsonTimestamp(10, 1))
-  }
-
-  "BsonUndefined companion" should "create a BsonUndefined" in {
-    BsonUndefined() should equal(new BsonUndefined())
-  }
-
+      assertTrue(bsonObjectId == expected) &&
+      assertTrue(BsonObjectId(hexString) == expected) &&
+      assertTrue(BsonObjectId(objectId) == expected)
+    },
+    test("BsonRegularExpression companion should create a BsonRegularExpression") {
+      assertTrue(BsonRegularExpression("/(.*)/") == new BsonRegularExpression("/(.*)/")) &&
+      assertTrue(BsonRegularExpression("/(.*)/".r) == new BsonRegularExpression("/(.*)/")) &&
+      assertTrue(BsonRegularExpression("/(.*)/", "?i") == new BsonRegularExpression("/(.*)/", "?i"))
+    },
+    test("BsonString companion should create a BsonString") {
+      assertTrue(BsonString("aBc") == new BsonString("aBc"))
+    },
+    test("BsonSymbol companion should create a BsonSymbol") {
+      assertTrue(BsonSymbol(Symbol("sym")) == new BsonSymbol("sym"))
+    },
+    test("BsonTimestamp companion should create a BsonTimestamp") {
+      assertTrue(BsonTimestamp() == new BsonTimestamp(0, 0)) &&
+      assertTrue(BsonTimestamp(10, 1) == new BsonTimestamp(10, 1))
+    },
+    test("BsonUndefined companion should create a BsonUndefined") {
+      assertTrue(BsonUndefined() == new BsonUndefined())
+    },
+  )
 }

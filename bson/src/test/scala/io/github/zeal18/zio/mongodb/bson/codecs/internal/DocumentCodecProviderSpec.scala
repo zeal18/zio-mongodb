@@ -16,25 +16,35 @@
 
 package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
-import io.github.zeal18.zio.mongodb.bson.BaseSpec
 import io.github.zeal18.zio.mongodb.bson.collection.Document
 import io.github.zeal18.zio.mongodb.bson.collection.immutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
 import org.bson.codecs.configuration.CodecRegistries.fromProviders
+import zio.test.*
 
-class DocumentCodecProviderSpec extends BaseSpec {
+object DocumentCodecProviderSpec extends ZIOSpecDefault {
+  override def spec = suite("DocumentCodecProviderSpec")(
+    test("get the correct codec") {
 
-  "DocumentCodecProvider" should "get the correct codec" in {
+      val provider = DocumentCodecProvider()
+      val registry = fromProviders(provider)
 
-    val provider = DocumentCodecProvider()
-    val registry = fromProviders(provider)
-
-    provider.get[Document](classOf[Document], registry) shouldBe a[ImmutableDocumentCodec]
-    provider.get[immutable.Document](classOf[immutable.Document], registry) shouldBe a[
-      ImmutableDocumentCodec,
-    ]
-    provider
-      .get[mutable.Document](classOf[mutable.Document], registry) shouldBe a[MutableDocumentCodec]
-    Option(provider.get[String](classOf[String], registry)) shouldBe None
-  }
+      assertTrue(
+        provider
+          .get[Document](classOf[Document], registry)
+          .isInstanceOf[ImmutableDocumentCodec], // scalafix:ok
+      ) &&
+      assertTrue(
+        provider
+          .get[immutable.Document](classOf[immutable.Document], registry)
+          .isInstanceOf[ImmutableDocumentCodec], // scalafix:ok
+      ) &&
+      assertTrue(
+        provider
+          .get[mutable.Document](classOf[mutable.Document], registry)
+          .isInstanceOf[MutableDocumentCodec], // scalafix:ok
+      ) &&
+      assertTrue(Option(provider.get[String](classOf[String], registry)).isEmpty)
+    },
+  )
 }

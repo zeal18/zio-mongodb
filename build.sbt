@@ -9,15 +9,13 @@ ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 val zioVersion          = "2.0.5"
 val zioInteropRSVersion = "2.0.0"
 
-val mongoVersion = "4.7.2"
+val mongoVersion = "4.8.2"
 val rsVersion    = "1.0.4"
 
 val flapdoodleVersion = "3.5.4"
-val immutablesVersion = "2.9.2"
+val immutablesVersion = "2.9.3"
 
 val magnolia2Version = "1.1.2"
-
-val scalatestVersion = "3.2.14"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -99,12 +97,9 @@ lazy val bson = (project in file("bson")).settings(
   name := "zio-mongodb-bson",
   commonSettings,
   libraryDependencies ++= Seq(
-    "org.mongodb"    % "bson"                     % mongoVersion,
-    "org.scalatest" %% "scalatest"                % scalatestVersion % Test,
-    "org.scalatest" %% "scalatest-flatspec"       % scalatestVersion % Test,
-    "org.scalatest" %% "scalatest-shouldmatchers" % scalatestVersion % Test,
-    "dev.zio"       %% "zio-test"                 % zioVersion       % Test,
-    "dev.zio"       %% "zio-test-sbt"             % zioVersion       % Test,
+    "org.mongodb" % "bson"         % mongoVersion,
+    "dev.zio"    %% "zio-test"     % zioVersion % Test,
+    "dev.zio"    %% "zio-test-sbt" % zioVersion % Test,
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => Seq.empty
