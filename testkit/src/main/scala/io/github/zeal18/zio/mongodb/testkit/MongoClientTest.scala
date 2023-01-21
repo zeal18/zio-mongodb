@@ -11,8 +11,8 @@ object MongoClientTest {
     version: IFeatureAwareVersion = Version.Main.V4_4,
   ): ZLayer[Live, Throwable, MongoClient] =
     EmbeddedMongo.live(version).flatMap { process =>
-      val net              = process.get.getConfig.net
-      val connectionString = s"mongodb://${net.getBindIp()}:${net.getPort}"
+      val address          = process.get.current().getServerAddress()
+      val connectionString = s"mongodb://${address.getHost()}:${address.getPort()}"
 
       MongoClient.live(connectionString)
     }
