@@ -2,9 +2,10 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 val scala2_13 = "2.13.10"
 val scala3    = "3.2.2"
+val scala3_3  = "3.3.0-RC6"
 
 ThisBuild / scalaVersion       := scala2_13
-ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
+ThisBuild / crossScalaVersions := Seq(scala2_13, scala3, scala3_3)
 
 val zioVersion          = "2.0.10"
 val zioInteropRSVersion = "2.0.2"
