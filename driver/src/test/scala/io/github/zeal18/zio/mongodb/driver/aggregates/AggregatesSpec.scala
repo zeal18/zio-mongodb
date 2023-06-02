@@ -4,6 +4,7 @@ import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
 import io.github.zeal18.zio.mongodb.driver.sorts
@@ -43,7 +44,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     ),
     testAggregate(
       "group",
-      aggregates.group("a", accumulators.sum("b", 1)),
+      aggregates.group("a", accumulators.sum("b", expressions.const(1))),
       """{"$group": {"_id": "a", "b": {"$sum": 1}}}""",
     ),
     testAggregate(
