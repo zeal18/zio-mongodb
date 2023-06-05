@@ -44,7 +44,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     ),
     testAggregate(
       "group",
-      aggregates.group("a", accumulators.sum("b", expressions.const(1))),
+      aggregates.group("a", Map("b" -> accumulators.sum(expressions.const(1)))),
       """{"$group": {"_id": "a", "b": {"$sum": 1}}}""",
     ),
     testAggregate(

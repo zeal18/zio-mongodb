@@ -9,57 +9,43 @@ object AccumulatorsSpec extends ZIOSpecDefault {
   private def testAccumulator(
     title: String,
     acc: accumulators.Accumulator,
-    expectedName: String,
     expectedValue: String,
   ) =
     test(title) {
-      assertTrue(
-        acc.toBsonField.getName == expectedName,
-        acc.toBsonField.getValue.toBsonDocument.toString == expectedValue,
-      )
+      assertTrue(acc.toBsonDocument().toString == expectedValue)
     }
 
   override def spec = suite("AccumulatorsSpec")(
-    testAccumulator("sum", accumulators.sum("a", expressions.const(1)), "a", """{"$sum": 1}"""),
-    testAccumulator("avg", accumulators.avg("a", expressions.const(2)), "a", """{"$avg": 2}"""),
-    testAccumulator(
-      "first",
-      accumulators.first("a", expressions.const(3)),
-      "a",
-      """{"$first": 3}""",
-    ),
-    testAccumulator("last", accumulators.last("a", expressions.const(4)), "a", """{"$last": 4}"""),
-    testAccumulator("max", accumulators.max("a", expressions.const(5)), "a", """{"$max": 5}"""),
-    testAccumulator("min", accumulators.min("a", expressions.const(6)), "a", """{"$min": 6}"""),
-    testAccumulator("push", accumulators.push("a", expressions.const(7)), "a", """{"$push": 7}"""),
+    testAccumulator("sum", accumulators.sum(expressions.const(1)), """{"$sum": 1}"""),
+    testAccumulator("avg", accumulators.avg(expressions.const(2)), """{"$avg": 2}"""),
+    testAccumulator("first", accumulators.first(expressions.const(3)), """{"$first": 3}"""),
+    testAccumulator("last", accumulators.last(expressions.const(4)), """{"$last": 4}"""),
+    testAccumulator("max", accumulators.max(expressions.const(5)), """{"$max": 5}"""),
+    testAccumulator("min", accumulators.min(expressions.const(6)), """{"$min": 6}"""),
+    testAccumulator("push", accumulators.push(expressions.const(7)), """{"$push": 7}"""),
     testAccumulator(
       "addToSet",
-      accumulators.addToSet("a", expressions.const(8)),
-      "a",
+      accumulators.addToSet(expressions.const(8)),
       """{"$addToSet": 8}""",
     ),
     testAccumulator(
       "mergeObjects",
-      accumulators.mergeObjects("a", expressions.const(9)),
-      "a",
+      accumulators.mergeObjects(expressions.const(9)),
       """{"$mergeObjects": 9}""",
     ),
     testAccumulator(
       "stdDevPop",
-      accumulators.stdDevPop("a", expressions.const(1)),
-      "a",
+      accumulators.stdDevPop(expressions.const(1)),
       """{"$stdDevPop": 1}""",
     ),
     testAccumulator(
       "stdDevSamp",
-      accumulators.stdDevSamp("a", expressions.const(2)),
-      "a",
+      accumulators.stdDevSamp(expressions.const(2)),
       """{"$stdDevSamp": 2}""",
     ),
     testAccumulator(
       "accumulator",
       accumulators.accumulator(
-        fieldName = "a",
         initFunction = "initF",
         initArgs = Some(expressions.const(Seq("initArg"))),
         accumulateFunction = "accF",
@@ -68,7 +54,6 @@ object AccumulatorsSpec extends ZIOSpecDefault {
         finalizeFunction = Some("finalizeF"),
         lang = "lang",
       ),
-      "a",
       """{"$accumulator": {"init": "initF", "initArgs": ["initArg"], "accumulate": "accF", "accumulateArgs": ["accArg"], "merge": "mergeF", "finalize": "finalizeF", "lang": "lang"}}""",
     ),
   )
