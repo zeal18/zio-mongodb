@@ -10,6 +10,7 @@ import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts
 import org.bson.BsonBoolean
+import org.bson.BsonDocumentReader
 import org.bson.BsonDocumentWriter
 import org.bson.BsonInt32
 import org.bson.BsonString
@@ -69,24 +70,20 @@ sealed trait Aggregation extends Bson { self =>
       new BsonDocument("$unwind", options);
     }
 
-    def groupStage[A](id: A, accumulators: Seq[Accumulator], codec: Codec[A]): BsonDocument = {
+    def groupStage[A](
+      id: A,
+      accumulators: Map[String, Accumulator],
+      codec: Codec[A],
+    ): BsonDocument = {
       val writer = new BsonDocumentWriter(new BsonDocument())
 
       writer.writeStartDocument()
       writer.writeStartDocument("$group")
       writer.writeName("_id")
       codec.encode(writer, id, context)
-      accumulators.foreach { acc =>
-        val bsonField = acc.toBsonField
-
-        writer.writeName(bsonField.getName())
-        codecRegistry
-          .get(documentClass)
-          .encode(
-            writer,
-            bsonField.getValue().toBsonDocument(documentClass, codecRegistry),
-            context,
-          )
+      accumulators.foreach { case (name, acc) =>
+        writer.writeName(name)
+        writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
       }
 
       writer.writeEndDocument()
@@ -178,7 +175,7 @@ object Aggregation {
   final case class Count(field: String)                                    extends Aggregation
   final case class Facets(facets: Seq[Facet])                              extends Aggregation
   final case class Unwind(fieldName: String, unwindOptions: UnwindOptions) extends Aggregation
-  final case class Group[Id](id: Id, fieldAccumulators: Seq[Accumulator], codec: Codec[Id])
+  final case class Group[Id](id: Id, fieldAccumulators: Map[String, Accumulator], codec: Codec[Id])
       extends Aggregation
   final case class Project(projection: Projection) extends Aggregation
   final case class Lookup(from: String, localField: String, foreignField: String, as: String)

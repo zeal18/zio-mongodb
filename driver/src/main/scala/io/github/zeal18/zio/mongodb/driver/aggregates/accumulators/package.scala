@@ -14,8 +14,7 @@ package object accumulators {
     * @tparam A the expression type
     * @return the field
     */
-  def sum(fieldName: String, expression: Expression): Sum =
-    Sum(fieldName, expression)
+  def sum(expression: Expression): Sum = Sum(expression)
 
   /** Gets a field name for a `\$group` operation representing the average of the values of the given expression when applied to all
     * members of the group.
@@ -26,8 +25,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/avg/ \$avg]]
     */
-  def avg(fieldName: String, expression: Expression): Avg =
-    Avg(fieldName, expression)
+  def avg(expression: Expression): Avg = Avg(expression)
 
   /** Gets a field name for a `\$group` operation representing the value of the given expression when applied to the first member of
     * the group.
@@ -38,8 +36,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/first/ \$first]]
     */
-  def first(fieldName: String, expression: Expression): First =
-    First(fieldName, expression)
+  def first(expression: Expression): First = First(expression)
 
   /** Gets a field name for a `\$group` operation representing the value of the given expression when applied to the last member of
     * the group.
@@ -50,8 +47,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/last/ \$last]]
     */
-  def last(fieldName: String, expression: Expression): Last =
-    Last(fieldName, expression)
+  def last(expression: Expression): Last = Last(expression)
 
   /** Gets a field name for a `\$group` operation representing the maximum of the values of the given expression when applied to all
     * members of the group.
@@ -62,8 +58,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/max/ \$max]]
     */
-  def max(fieldName: String, expression: Expression): Max =
-    Max(fieldName, expression)
+  def max(expression: Expression): Max = Max(expression)
 
   /** Gets a field name for a `\$group` operation representing the minimum of the values of the given expression when applied to all
     * members of the group.
@@ -74,8 +69,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/min/ \$min]]
     */
-  def min(fieldName: String, expression: Expression): Min =
-    Min(fieldName, expression)
+  def min(expression: Expression): Min = Min(expression)
 
   /** Gets a field name for a `\$group` operation representing an array of all values that results from applying an expression to each
     * document in a group of documents that share the same group by key.
@@ -86,8 +80,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/push/ \$push]]
     */
-  def push(fieldName: String, expression: Expression): Push =
-    Push(fieldName, expression)
+  def push(expression: Expression): Push = Push(expression)
 
   /** Gets a field name for a `\$group` operation representing all unique values that results from applying the given expression to each
     * document in a group of documents that share the same group by key.
@@ -98,8 +91,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/addToSet/ \$addToSet]]
     */
-  def addToSet(fieldName: String, expression: Expression): AddToSet =
-    AddToSet(fieldName, expression)
+  def addToSet(expression: Expression): AddToSet = AddToSet(expression)
 
   /** Gets a field name for a `\$group` operation representing the result of merging the fields of the documents.
     * If documents to merge include the same field name, the field, in the resulting document, has the value from the last document
@@ -111,8 +103,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/mergeObjects/ \$mergeObjects]]
     */
-  def mergeObjects(fieldName: String, expression: Expression): MergeObjects =
-    MergeObjects(fieldName, expression)
+  def mergeObjects(expression: Expression): MergeObjects = MergeObjects(expression)
 
   /** Gets a field name for a `\$group` operation representing the sample standard deviation of the values of the given expression
     * when applied to all members of the group.
@@ -127,8 +118,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/stdDevPop/ \$stdDevPop]]
     */
-  def stdDevPop(fieldName: String, expression: Expression): StdDevPop =
-    StdDevPop(fieldName, expression)
+  def stdDevPop(expression: Expression): StdDevPop = StdDevPop(expression)
 
   /** Gets a field name for a `\$group` operation representing the sample standard deviation of the values of the given expression
     * when applied to all members of the group.
@@ -142,8 +132,7 @@ package object accumulators {
     * @return the field
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/stdDevSamp/ \$stdDevSamp]]
     */
-  def stdDevSamp(fieldName: String, expression: Expression): StdDevSamp =
-    StdDevSamp(fieldName, expression)
+  def stdDevSamp(expression: Expression): StdDevSamp = StdDevSamp(expression)
 
   /** Creates an `\$accumulator` pipeline stage
     *
@@ -162,7 +151,6 @@ package object accumulators {
     * @note Requires MongoDB 4.4 or greater
     */
   def accumulator(
-    fieldName: String,
     initFunction: String,
     initArgs: Option[Expression],
     accumulateFunction: String,
@@ -172,7 +160,6 @@ package object accumulators {
     lang: String = "js",
   ): Function =
     Function(
-      fieldName,
       initFunction,
       initArgs,
       accumulateFunction,
