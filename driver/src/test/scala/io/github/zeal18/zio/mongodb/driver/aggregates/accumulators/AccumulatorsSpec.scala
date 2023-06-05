@@ -1,10 +1,14 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
+import scala.annotation.nowarn
+
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
+import io.github.zeal18.zio.mongodb.driver.sorts
 import zio.test.ZIOSpecDefault
 import zio.test.*
 
+@nowarn("msg=possible missing interpolator")
 object AccumulatorsSpec extends ZIOSpecDefault {
   private def testAccumulator(
     title: String,
@@ -19,9 +23,29 @@ object AccumulatorsSpec extends ZIOSpecDefault {
     testAccumulator("sum", accumulators.sum(expressions.const(1)), """{"$sum": 1}"""),
     testAccumulator("avg", accumulators.avg(expressions.const(2)), """{"$avg": 2}"""),
     testAccumulator("first", accumulators.first(expressions.const(3)), """{"$first": 3}"""),
+    testAccumulator(
+      "firstN",
+      accumulators.firstN(expressions.const(3), expressions.fieldPath("$a")),
+      """{"$firstN": {"input": 3, "n": "$a"}}""",
+    ),
     testAccumulator("last", accumulators.last(expressions.const(4)), """{"$last": 4}"""),
+    testAccumulator(
+      "lastN",
+      accumulators.lastN(expressions.const(4), expressions.fieldPath("$b")),
+      """{"$lastN": {"input": 4, "n": "$b"}}""",
+    ),
     testAccumulator("max", accumulators.max(expressions.const(5)), """{"$max": 5}"""),
+    testAccumulator(
+      "maxN",
+      accumulators.maxN(expressions.const(5), expressions.fieldPath("$c")),
+      """{"$maxN": {"input": 5, "n": "$c"}}""",
+    ),
     testAccumulator("min", accumulators.min(expressions.const(6)), """{"$min": 6}"""),
+    testAccumulator(
+      "minN",
+      accumulators.minN(expressions.const(6), expressions.fieldPath("$d")),
+      """{"$minN": {"input": 6, "n": "$d"}}""",
+    ),
     testAccumulator("push", accumulators.push(expressions.const(7)), """{"$push": 7}"""),
     testAccumulator(
       "addToSet",
@@ -56,6 +80,41 @@ object AccumulatorsSpec extends ZIOSpecDefault {
       ),
       """{"$accumulator": {"init": "initF", "initArgs": ["initArg"], "accumulate": "accF", "accumulateArgs": ["accArg"], "merge": "mergeF", "finalize": "finalizeF", "lang": "lang"}}""",
     ),
+    testAccumulator(
+      "bottom",
+      accumulators.bottom(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+      ),
+      """{"$bottom": {"sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "bottomN",
+      accumulators.bottomN(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+        n = expressions.const(10),
+      ),
+      """{"$bottom": {"n": 10, "sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "top",
+      accumulators.top(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+      ),
+      """{"$top": {"sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "topN",
+      accumulators.topN(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+        n = expressions.const(10),
+      ),
+      """{"$topN": {"n": 10, "sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator("count", accumulators.count(), """{"$count": {}}"""),
   )
 
 }

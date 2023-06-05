@@ -2,6 +2,7 @@ package io.github.zeal18.zio.mongodb.driver.aggregates
 
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
+import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 
 package object accumulators {
 
@@ -38,6 +39,17 @@ package object accumulators {
     */
   def first(expression: Expression): First = First(expression)
 
+  /** Returns an aggregation of the first n elements within a group.
+    *
+    * @param input specifies the field(s) from the document to take the first n of
+    * @param n the number of documents to return
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/firstN/ \$firstN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def firstN(input: Expression, n: Expression): FirstN = FirstN(input, n)
+
   /** Gets a field name for a `\$group` operation representing the value of the given expression when applied to the last member of
     * the group.
     *
@@ -48,6 +60,17 @@ package object accumulators {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/last/ \$last]]
     */
   def last(expression: Expression): Last = Last(expression)
+
+  /** Returns an aggregation of the last n elements within a group.
+    *
+    * @param input specifies the field(s) from the document to take the last n of
+    * @param n the number of documents to return
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/lastN/ \$lastN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def lastN(input: Expression, n: Expression): LastN = LastN(input, n)
 
   /** Gets a field name for a `\$group` operation representing the maximum of the values of the given expression when applied to all
     * members of the group.
@@ -60,6 +83,17 @@ package object accumulators {
     */
   def max(expression: Expression): Max = Max(expression)
 
+  /** Returns an aggregation of the maxmimum value n elements within a group.
+    *
+    * @param input specifies an expression that is the input to $maxN
+    * @param n limits the number of results per group
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/maxN/ \$maxN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def maxN(input: Expression, n: Expression): MaxN = MaxN(input, n)
+
   /** Gets a field name for a `\$group` operation representing the minimum of the values of the given expression when applied to all
     * members of the group.
     *
@@ -70,6 +104,17 @@ package object accumulators {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/min/ \$min]]
     */
   def min(expression: Expression): Min = Min(expression)
+
+  /** Returns an aggregation of the minimum value n elements within a group.
+    *
+    * @param input specifies an expression that is the input to $minN
+    * @param n limits the number of results per group
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/minN/ \$minN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def minN(input: Expression, n: Expression): MinN = MinN(input, n)
 
   /** Gets a field name for a `\$group` operation representing an array of all values that results from applying an expression to each
     * document in a group of documents that share the same group by key.
@@ -168,4 +213,62 @@ package object accumulators {
       finalizeFunction,
       lang,
     )
+
+  /** Returns the bottom element within a group according to the specified sort order.
+    *
+    * @param sortBy specifies the order of results
+    * @param output represents the output for each element in the group and can be any expression
+    * @return the bottom element
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bottom/ \$bottom]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def bottom(sortBy: Sort, output: Expression): Bottom = Bottom(sortBy, output)
+
+  /** Returns an aggregation of the bottom n elements within a group, according to the specified sort order
+    *
+    * @param n limits the number of results per group and has to be a positive integral expression
+    * @param sortBy specifies the order of results
+    * @param output represents the output for each element in the group and can be any expression
+    * @return the bottom element
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bottomN/ \$bottomN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def bottomN(sortBy: Sort, output: Expression, n: Expression): BottomN = BottomN(sortBy, output, n)
+
+  /** Returns the top element within a group according to the specified sort order.
+    *
+    * @param sortBy specifies the order of results
+    * @param output represents the output for each element in the group and can be any expression
+    * @return the top element
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/top/ \$top]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def top(sortBy: Sort, output: Expression): Top = Top(sortBy, output)
+
+  /** Returns an aggregation of the top n elements within a group, according to the specified sort order
+    *
+    * @param n limits the number of results per group and has to be a positive integral expression
+    * @param sortBy specifies the order of results
+    * @param output represents the output for each element in the group and can be any expression
+    * @return the top element
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/topN/ \$topN]]
+    *
+    * @note Requires MongoDB 5.2 or greater
+    */
+  def topN(sortBy: Sort, output: Expression, n: Expression): TopN = TopN(sortBy, output, n)
+
+  /** Returns the number of documents in a group.
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/count-accumulator/ \$count]]
+    *
+    * @note Requires MongoDB 5.0 or greater
+    */
+  def count(): Count.type = Count
 }
