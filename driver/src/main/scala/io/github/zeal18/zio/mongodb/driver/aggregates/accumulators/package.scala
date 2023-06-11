@@ -1,8 +1,10 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
+import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
+import org.bson.BsonDocument
 
 package object accumulators {
 
@@ -225,4 +227,23 @@ package object accumulators {
     * @note Requires MongoDB 5.0 or greater
     */
   def count(): Count.type = Count
+
+  /** Creates an Accumulator from a raw Bson.
+    *
+    * It is less type safe but useful when you want to use an accumulator that is not yet supported by this library.
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/#accumulators---group---bucket---bucketauto---setwindowfields- Accumulators]]
+    */
+  def raw(bson: Bson): Raw = Raw(bson)
+
+  /** Creates an Accumulator from a raw extended Json.
+    *
+    * It is less type safe but useful when you want to use an accumulator that is not yet supported by this library.
+    *
+    * @param json the raw extended Json
+    *
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/#accumulators---group---bucket---bucketauto---setwindowfields- Accumulators]]
+    * @see [[https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/ MongoDB Extended JSON]]
+    */
+  def raw(json: String): Raw = Raw(BsonDocument.parse(json))
 }

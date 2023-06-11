@@ -28,6 +28,10 @@ sealed trait Accumulator extends Bson { self =>
     }
 
     self match {
+      case Accumulator.Raw(bson) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+        writer.pipe(new BsonDocumentReader(bson.toBsonDocument()))
+        writer.getDocument()
       case Accumulator.Sum(expression) =>
         simpleExpression("$sum", expression)
       case Accumulator.Avg(expression) =>
@@ -222,6 +226,7 @@ sealed trait Accumulator extends Bson { self =>
 }
 
 object Accumulator {
+  final case class Raw(bson: Bson)                          extends Accumulator
   final case class Sum(expression: Expression)              extends Accumulator
   final case class Avg(expression: Expression)              extends Accumulator
   final case class First(expression: Expression)            extends Accumulator
