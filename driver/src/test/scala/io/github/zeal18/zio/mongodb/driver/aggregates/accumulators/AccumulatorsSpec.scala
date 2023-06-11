@@ -2,6 +2,7 @@ package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
 import scala.annotation.nowarn
 
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.driver.sorts
@@ -115,6 +116,10 @@ object AccumulatorsSpec extends ZIOSpecDefault {
       """{"$topN": {"n": 10, "sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
     ),
     testAccumulator("count", accumulators.count(), """{"$count": {}}"""),
+    suite("raw")(
+      testAccumulator("bson", accumulators.raw(BsonDocument("a" -> 1)), """{"a": 1}"""),
+      testAccumulator("json", accumulators.raw("""{"a": 1}"""), """{"a": 1}"""),
+    ),
   )
 
 }
