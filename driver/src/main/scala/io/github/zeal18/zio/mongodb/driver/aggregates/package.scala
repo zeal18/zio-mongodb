@@ -162,6 +162,49 @@ package object aggregates {
     */
   def sort(sort: sorts.Sort): Aggregation.Sort = Aggregation.Sort(sort)
 
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+  ): Bucket[Boundary, Int] =
+    Bucket(groupBy, boundaries, None, Map.empty, boundariesCodec, Codec.int)
+
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    output: Map[String, Accumulator],
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+  ): Bucket[Boundary, Int] =
+    Bucket(groupBy, boundaries, None, output, boundariesCodec, Codec.int)
+
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric, Default](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    default: Default,
+    output: Map[String, Accumulator] = Map.empty,
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+    defaultCodec: Codec[Default],
+  ): Bucket[Boundary, Default] =
+    Bucket(groupBy, boundaries, Some(default), output, boundariesCodec, defaultCodec)
+
   /** Creates a pipeline from a raw Bson.
     *
     * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.

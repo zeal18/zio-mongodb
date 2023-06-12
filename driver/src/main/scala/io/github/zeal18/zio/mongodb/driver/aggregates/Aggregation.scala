@@ -1,6 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
 import scala.annotation.nowarn
+import scala.math.Numeric
 import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
@@ -177,6 +178,45 @@ sealed trait Aggregation extends Bson { self =>
         )
       case Aggregation.LookupPipeline(from, let, pipeline, as) =>
         lookupStage(from, let, pipeline, as)
+      case Aggregation.Bucket(
+            groupBy,
+            boundaries,
+            default,
+            output,
+            boundariesCodec,
+            defaultCodec,
+          ) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$bucket")
+        writer.writeStartDocument()
+        writer.writeName("groupBy")
+        groupBy.encode(writer)
+        writer.writeName("boundaries")
+        writer.writeStartArray()
+        boundaries.foreach { boundary =>
+          boundariesCodec.encode(writer, boundary, context)
+        }
+        writer.writeEndArray()
+        default.foreach { default =>
+          writer.writeName("default")
+          defaultCodec.encode(writer, default, context)
+        }
+        if (!output.isEmpty) {
+          writer.writeName("output")
+          writer.writeStartDocument()
+          output.foreach { case (name, acc) =>
+            writer.writeName(name)
+            writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+          }
+          writer.writeEndDocument()
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Raw(bson) => bson.toBsonDocument()
     }
   }
@@ -200,6 +240,15 @@ object Aggregation {
     let: Seq[Variable[?]],
     pipeline: Seq[Aggregation],
     as: String,
+  ) extends Aggregation
+  @nowarn("msg=never used")
+  final case class Bucket[Boundary: Numeric, Default](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    default: Option[Default],
+    output: Map[String, Accumulator],
+    boundariesCodec: Codec[Boundary],
+    defaultCodec: Codec[Default],
   ) extends Aggregation
   final case class Raw(filter: Bson) extends Aggregation
 }
