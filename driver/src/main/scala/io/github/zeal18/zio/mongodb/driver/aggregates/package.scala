@@ -218,6 +218,13 @@ package object aggregates {
   ): BucketAuto =
     BucketAuto(groupBy, buckets, output, granularity)
 
+  /** Groups incoming documents based on the value of a specified expression, then computes the count of documents in each distinct group.
+    *
+    * @return the `\$sortByCount` pipeline stage
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/sortByCount/ \$sortByCount]]
+    */
+  def sortByCount(expression: Expression): SortByCount = SortByCount(expression)
+
   /** Creates a pipeline from a raw Bson.
     *
     * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.
