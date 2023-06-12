@@ -205,6 +205,19 @@ package object aggregates {
   ): Bucket[Boundary, Default] =
     Bucket(groupBy, boundaries, Some(default), output, boundariesCodec, defaultCodec)
 
+  /* Categorizes incoming documents into a specific number of groups, called buckets, based on a specified expression. Bucket boundaries are automatically determined in an attempt to evenly distribute the documents into the specified number of buckets.
+   *
+   * @return the `\$bucketAuto` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucketAuto/ \$bucketAuto]]
+   */
+  def bucketAuto(
+    groupBy: Expression,
+    buckets: Int,
+    output: Map[String, Accumulator] = Map.empty,
+    granularity: Option[BucketGranularity] = None,
+  ): BucketAuto =
+    BucketAuto(groupBy, buckets, output, granularity)
+
   /** Creates a pipeline from a raw Bson.
     *
     * It is less type safe but useful when you want to use a pipeline that is not yet supported by this library.

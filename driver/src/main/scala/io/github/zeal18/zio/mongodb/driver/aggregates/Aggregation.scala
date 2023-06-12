@@ -217,6 +217,34 @@ sealed trait Aggregation extends Bson { self =>
         writer.writeEndDocument()
 
         writer.getDocument()
+      case Aggregation.BucketAuto(groupBy, buckets, output, granularity) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$bucketAuto")
+        writer.writeStartDocument()
+        writer.writeName("groupBy")
+        groupBy.encode(writer)
+        writer.writeName("buckets")
+        writer.writeInt32(buckets)
+        if (!output.isEmpty) {
+          writer.writeName("output")
+          writer.writeStartDocument()
+          output.foreach { case (name, acc) =>
+            writer.writeName(name)
+            writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+          }
+          writer.writeEndDocument()
+        }
+        granularity.foreach { granularity =>
+          writer.writeName("granularity")
+          writer.writeString(granularity.name)
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Raw(bson) => bson.toBsonDocument()
     }
   }
@@ -249,6 +277,12 @@ object Aggregation {
     output: Map[String, Accumulator],
     boundariesCodec: Codec[Boundary],
     defaultCodec: Codec[Default],
+  ) extends Aggregation
+  final case class BucketAuto(
+    groupBy: Expression,
+    buckets: Int,
+    output: Map[String, Accumulator],
+    granularity: Option[BucketGranularity],
   ) extends Aggregation
   final case class Raw(filter: Bson) extends Aggregation
 }

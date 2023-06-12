@@ -93,6 +93,28 @@ object AggregatesSpec extends ZIOSpecDefault {
       ),
       """{"$bucket": {"groupBy": "$a", "boundaries": [10, 25, 39], "default": "Other", "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}}}""",
     ),
+    testAggregate(
+      "bucketAuto",
+      aggregates.bucketAuto(
+        groupBy = expressions.fieldPath("$a"),
+        buckets = 42,
+        output = Map(
+          "count" -> accumulators.sum(expressions.const(1)),
+          "artists" -> accumulators.push(
+            expressions.obj(
+              "name" -> expressions.concat(
+                expressions.fieldPath("$first_name"),
+                expressions.const(" "),
+                expressions.fieldPath("$last_name"),
+              ),
+              "year_born" -> expressions.fieldPath("$year_born"),
+            ),
+          ),
+        ),
+        granularity = Some(BucketGranularity.R5),
+      ),
+      """{"$bucketAuto": {"groupBy": "$a", "buckets": 42, "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}, "granularity": "R5"}}""",
+    ),
     suite("raw")(
       testAggregate(
         "bson",
