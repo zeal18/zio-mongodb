@@ -6,6 +6,7 @@ import scala.reflect.ClassTag
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts
@@ -137,6 +138,18 @@ sealed trait Aggregation extends Bson { self =>
     self match {
       case Aggregation.Match(filter) =>
         simplePipelineStage("$match", filter)
+      case Aggregation.MatchExpr(expr) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$match")
+        writer.writeStartDocument()
+        writer.writeName("$expr")
+        expr.encode(writer)
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Limit(limit) =>
         new BsonDocument("$limit", new BsonInt32(limit))
       case Aggregation.Count(field) =>
@@ -171,6 +184,7 @@ sealed trait Aggregation extends Bson { self =>
 
 object Aggregation {
   final case class Match(filter: Filter)                                   extends Aggregation
+  final case class MatchExpr(expression: Expression)                       extends Aggregation
   final case class Limit(limit: Int)                                       extends Aggregation
   final case class Count(field: String)                                    extends Aggregation
   final case class Facets(facets: Seq[Facet])                              extends Aggregation

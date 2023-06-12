@@ -3,6 +3,7 @@ package io.github.zeal18.zio.mongodb.driver
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import org.bson.BsonDocument
@@ -35,6 +36,14 @@ package object aggregates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/ \$match]]
     */
   def `match`(filter: Filter): Match = Match(filter)
+
+  /** Creates a `\$match` pipeline stage for the specified filter
+    *
+    * @param filter the filter to match
+    * @return the `\$match` pipeline stage
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/ \$match]]
+    */
+  def `match`(expression: Expression): MatchExpr = MatchExpr(expression)
 
   /** Creates a `\$match` pipeline stage for the specified filter
     *
