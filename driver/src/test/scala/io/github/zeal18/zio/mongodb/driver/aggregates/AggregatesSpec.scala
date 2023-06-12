@@ -115,6 +115,11 @@ object AggregatesSpec extends ZIOSpecDefault {
       ),
       """{"$bucketAuto": {"groupBy": "$a", "buckets": 42, "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}, "granularity": "R5"}}""",
     ),
+    testAggregate(
+      "sortByCount",
+      aggregates.sortByCount(expressions.fieldPath("$a")),
+      """{"$sortByCount": "$a"}""",
+    ),
     suite("raw")(
       testAggregate(
         "bson",

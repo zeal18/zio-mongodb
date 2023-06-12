@@ -245,6 +245,15 @@ sealed trait Aggregation extends Bson { self =>
         writer.writeEndDocument()
 
         writer.getDocument()
+      case Aggregation.SortByCount(expression) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$sortByCount")
+        expression.encode(writer)
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Raw(bson) => bson.toBsonDocument()
     }
   }
@@ -284,5 +293,6 @@ object Aggregation {
     output: Map[String, Accumulator],
     granularity: Option[BucketGranularity],
   ) extends Aggregation
-  final case class Raw(filter: Bson) extends Aggregation
+  final case class SortByCount(expression: Expression) extends Aggregation
+  final case class Raw(filter: Bson)                   extends Aggregation
 }
