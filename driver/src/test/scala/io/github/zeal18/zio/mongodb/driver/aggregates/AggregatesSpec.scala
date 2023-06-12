@@ -71,6 +71,28 @@ object AggregatesSpec extends ZIOSpecDefault {
       ),
       """{"$unwind": {"path": "a", "preserveNullAndEmptyArrays": true, "includeArrayIndex": "b"}}""",
     ),
+    testAggregate(
+      "bucket",
+      aggregates.bucket(
+        groupBy = expressions.fieldPath("$a"),
+        boundaries = Seq(10, 25, 39),
+        default = "Other",
+        output = Map(
+          "count" -> accumulators.sum(expressions.const(1)),
+          "artists" -> accumulators.push(
+            expressions.obj(
+              "name" -> expressions.concat(
+                expressions.fieldPath("$first_name"),
+                expressions.const(" "),
+                expressions.fieldPath("$last_name"),
+              ),
+              "year_born" -> expressions.fieldPath("$year_born"),
+            ),
+          ),
+        ),
+      ),
+      """{"$bucket": {"groupBy": "$a", "boundaries": [10, 25, 39], "default": "Other", "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}}}""",
+    ),
     suite("raw")(
       testAggregate(
         "bson",
