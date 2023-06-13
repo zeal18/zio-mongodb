@@ -55,23 +55,6 @@ sealed trait Aggregation extends Bson { self =>
       writer.getDocument()
     }
 
-    def unwind(fieldName: String, unwindOptions: UnwindOptions): BsonDocument = {
-      val options = new BsonDocument("path", new BsonString(fieldName))
-
-      unwindOptions.preserveNullAndEmptyArrays.foreach { preserveNullAndEmptyArrays =>
-        options.append(
-          "preserveNullAndEmptyArrays",
-          BsonBoolean.valueOf(preserveNullAndEmptyArrays),
-        )
-      }
-
-      unwindOptions.includeArrayIndex.foreach { includeArrayIndex =>
-        options.append("includeArrayIndex", new BsonString(includeArrayIndex))
-      }
-
-      new BsonDocument("$unwind", options);
-    }
-
     def groupStage[A](
       id: A,
       accumulators: Map[String, Accumulator],
@@ -157,8 +140,21 @@ sealed trait Aggregation extends Bson { self =>
         new BsonDocument("$count", new BsonString(field))
       case Aggregation.Facets(facets) =>
         facetStage(facets)
-      case Aggregation.Unwind(fieldName, unwindOptions) =>
-        unwind(fieldName, unwindOptions)
+      case Aggregation.Unwind(fieldName, preserveNullAndEmptyArrays, includeArrayIndex) =>
+        val options = new BsonDocument("path", new BsonString(fieldName))
+
+        preserveNullAndEmptyArrays.foreach { preserveNullAndEmptyArrays =>
+          options.append(
+            "preserveNullAndEmptyArrays",
+            BsonBoolean.valueOf(preserveNullAndEmptyArrays),
+          )
+        }
+
+        includeArrayIndex.foreach { includeArrayIndex =>
+          options.append("includeArrayIndex", new BsonString(includeArrayIndex))
+        }
+
+        new BsonDocument("$unwind", options);
       case Aggregation.Group(id, fieldAccumulators, codec) =>
         groupStage(id, fieldAccumulators, codec)
       case Aggregation.Project(projection) =>
@@ -260,12 +256,16 @@ sealed trait Aggregation extends Bson { self =>
 }
 
 object Aggregation {
-  final case class Match(filter: Filter)                                   extends Aggregation
-  final case class MatchExpr(expression: Expression)                       extends Aggregation
-  final case class Limit(limit: Int)                                       extends Aggregation
-  final case class Count(field: String)                                    extends Aggregation
-  final case class Facets(facets: Seq[Facet])                              extends Aggregation
-  final case class Unwind(fieldName: String, unwindOptions: UnwindOptions) extends Aggregation
+  final case class Match(filter: Filter)             extends Aggregation
+  final case class MatchExpr(expression: Expression) extends Aggregation
+  final case class Limit(limit: Int)                 extends Aggregation
+  final case class Count(field: String)              extends Aggregation
+  final case class Facets(facets: Seq[Facet])        extends Aggregation
+  final case class Unwind(
+    fieldName: String,
+    preserveNullAndEmptyArrays: Option[Boolean],
+    includeArrayIndex: Option[String],
+  ) extends Aggregation
   final case class Group[Id](id: Id, fieldAccumulators: Map[String, Accumulator], codec: Codec[Id])
       extends Aggregation
   final case class Project(projection: Projection) extends Aggregation

@@ -67,7 +67,8 @@ object AggregatesSpec extends ZIOSpecDefault {
       "unwind with options",
       aggregates.unwind(
         "a",
-        UnwindOptions(Some(true), Some("b")),
+        preserveNullAndEmptyArrays = Some(true),
+        includeArrayIndex = Some("b"),
       ),
       """{"$unwind": {"path": "a", "preserveNullAndEmptyArrays": true, "includeArrayIndex": "b"}}""",
     ),

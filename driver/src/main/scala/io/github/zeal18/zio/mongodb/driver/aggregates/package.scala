@@ -140,19 +140,19 @@ package object aggregates {
   /** Creates a `\$unwind` pipeline stage for the specified field name, which must be prefixed by a `\$` sign.
     *
     * @param fieldName the field name, prefixed by a  `\$` sign
-    * @return the `\$unwind` pipeline stage
-    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/ \$unwind]]
-    */
-  def unwind(fieldName: String): Unwind = Unwind(fieldName, UnwindOptions())
-
-  /** Creates a `\$unwind` pipeline stage for the specified field name, which must be prefixed by a `\$` sign.
+    * @param preserveNullAndEmptyArrays flag depicting if the unwind stage should include documents that have null values or empty arrays
+    * @param arrayIndexFieldName the field to be used to store the array index of the unwound item
     *
-    * @param fieldName the field name, prefixed by a  `\$` sign
     * @return the `\$unwind` pipeline stage
+    *
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/ \$unwind]]
     */
-  def unwind(fieldName: String, unwindOptions: UnwindOptions): Unwind =
-    Unwind(fieldName, unwindOptions)
+  def unwind(
+    fieldName: String,
+    preserveNullAndEmptyArrays: Option[Boolean] = None,
+    includeArrayIndex: Option[String] = None,
+  ): Unwind =
+    Unwind(fieldName, preserveNullAndEmptyArrays, includeArrayIndex)
 
   /** Creates a `\$sort` pipeline stage for the specified sort specification
     *
