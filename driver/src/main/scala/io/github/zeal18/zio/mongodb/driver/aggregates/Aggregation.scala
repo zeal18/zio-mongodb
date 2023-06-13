@@ -55,28 +55,6 @@ sealed trait Aggregation extends Bson { self =>
       writer.getDocument()
     }
 
-    def groupStage[A](
-      id: A,
-      accumulators: Map[String, Accumulator],
-      codec: Codec[A],
-    ): BsonDocument = {
-      val writer = new BsonDocumentWriter(new BsonDocument())
-
-      writer.writeStartDocument()
-      writer.writeStartDocument("$group")
-      writer.writeName("_id")
-      codec.encode(writer, id, context)
-      accumulators.foreach { case (name, acc) =>
-        writer.writeName(name)
-        writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
-      }
-
-      writer.writeEndDocument()
-      writer.writeEndDocument()
-
-      writer.getDocument()
-    }
-
     def lookupStage(
       from: String,
       let: Seq[Variable[?]],
@@ -155,8 +133,22 @@ sealed trait Aggregation extends Bson { self =>
         }
 
         new BsonDocument("$unwind", options);
-      case Aggregation.Group(id, fieldAccumulators, codec) =>
-        groupStage(id, fieldAccumulators, codec)
+      case Aggregation.Group(id, accumulators) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeStartDocument("$group")
+        writer.writeName("_id")
+        id.encode(writer)
+        accumulators.foreach { case (name, acc) =>
+          writer.writeName(name)
+          writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Project(projection) =>
         simplePipelineStage("$project", projection)
       case Aggregation.Sort(sort) =>
@@ -266,7 +258,7 @@ object Aggregation {
     preserveNullAndEmptyArrays: Option[Boolean],
     includeArrayIndex: Option[String],
   ) extends Aggregation
-  final case class Group[Id](id: Id, fieldAccumulators: Map[String, Accumulator], codec: Codec[Id])
+  final case class Group(id: Expression, fieldAccumulators: Map[String, Accumulator])
       extends Aggregation
   final case class Project(projection: Projection) extends Aggregation
   final case class Lookup(from: String, localField: String, foreignField: String, as: String)

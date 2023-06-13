@@ -82,8 +82,8 @@ package object aggregates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/group/ \$group]]
     * @see [[https://www.mongodb.com/docs/manual/meta/aggregation-quick-reference/#aggregation-expressions Expressions]]
     */
-  def group[A](id: A, fieldAccumulators: Map[String, Accumulator])(implicit c: Codec[A]): Group[A] =
-    Group(id, fieldAccumulators, c)
+  def group(id: Expression, fieldAccumulators: Map[String, Accumulator] = Map.empty): Group =
+    Group(id, fieldAccumulators)
 
   /** Creates a `\$lookup` pipeline stage for the specified filter
     *
