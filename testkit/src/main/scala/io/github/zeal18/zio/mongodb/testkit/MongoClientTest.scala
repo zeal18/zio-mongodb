@@ -8,7 +8,7 @@ import zio.test.Live
 
 object MongoClientTest {
   def live(
-    version: IFeatureAwareVersion = Version.Main.V4_4,
+    version: IFeatureAwareVersion = Version.Main.V6_0,
   ): ZLayer[Live, Throwable, MongoClient] =
     EmbeddedMongo.live(version).flatMap { process =>
       val address          = process.get.current().getServerAddress()
