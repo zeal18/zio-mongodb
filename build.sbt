@@ -2,7 +2,7 @@ import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 val scala2_13 = "2.13.10"
 val scala3    = "3.2.2"
-val scala3_3  = "3.3.0-RC6"
+val scala3_3  = "3.3.1-RC2"
 
 ThisBuild / scalaVersion       := scala2_13
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3, scala3_3)
