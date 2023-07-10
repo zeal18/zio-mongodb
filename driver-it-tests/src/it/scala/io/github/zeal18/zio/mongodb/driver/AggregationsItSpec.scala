@@ -3,10 +3,12 @@ package io.github.zeal18.zio.mongodb.driver
 import io.github.zeal18.zio.mongodb.bson.BsonNull
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.aggregates.Facet
+import io.github.zeal18.zio.mongodb.driver.aggregates.Variable
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.testkit.MongoClientTest
 import io.github.zeal18.zio.mongodb.testkit.MongoCollectionTest
+import io.github.zeal18.zio.mongodb.testkit.MongoDatabaseTest
 import org.bson.BsonDocument
 import zio.Chunk
 import zio.test.*
@@ -532,6 +534,155 @@ object AggregationsItSpec extends ZIOSpecDefault {
 
               result <- collection
                 .aggregate(aggregates.group(expressions.fieldPath("$item")))
+                .runToChunk
+            } yield assertTrue(result.toSet == expected.toSet)
+          }
+        },
+      ),
+      suite("lookup")(
+        test("single join") {
+          MongoDatabaseTest.withRandomName[TestResult] { database =>
+            val documentsA = Chunk(
+              """{ "_id" : 1, "item" : "almonds", "price" : 12, "quantity" : 2 }""",
+              """{ "_id" : 2, "item" : "pecans", "price" : 20, "quantity" : 1 }""",
+              """{ "_id" : 3  }""",
+            ).map(d => Document(BsonDocument.parse(d)))
+
+            val documentsB = Chunk(
+              """{ "_id" : 1, "sku" : "almonds", "description": "product 1", "instock" : 120 }""",
+              """{ "_id" : 2, "sku" : "bread", "description": "product 2", "instock" : 80 }""",
+              """{ "_id" : 3, "sku" : "cashews", "description": "product 3", "instock" : 60 }""",
+              """{ "_id" : 4, "sku" : "pecans", "description": "product 4", "instock" : 70 }""",
+              """{ "_id" : 5, "sku": null, "description": "Incomplete" }""",
+              """{ "_id" : 6 }""",
+            ).map(d => Document(BsonDocument.parse(d)))
+
+            val expected =
+              Chunk(
+                """|{
+                   |   "_id" : 1,
+                   |   "item" : "almonds",
+                   |   "price" : 12,
+                   |   "quantity" : 2,
+                   |   "inventory_docs" : [
+                   |      { "_id" : 1, "sku" : "almonds", "description" : "product 1", "instock" : 120 }
+                   |   ]
+                   |}""".stripMargin,
+                """|{
+                   |   "_id" : 2,
+                   |   "item" : "pecans",
+                   |   "price" : 20,
+                   |   "quantity" : 1,
+                   |   "inventory_docs" : [
+                   |      { "_id" : 4, "sku" : "pecans", "description" : "product 4", "instock" : 70 }
+                   |   ]
+                   |}""".stripMargin,
+                """|{
+                   |   "_id" : 3,
+                   |   "inventory_docs" : [
+                   |      { "_id" : 5, "sku" : null, "description" : "Incomplete" },
+                   |      { "_id" : 6 }
+                   |   ]
+                   |}""".stripMargin,
+              ).map(d => Document(BsonDocument.parse(d)))
+
+            val collectionA = database.getCollection[Document]("collectionA")
+            val collectionB = database.getCollection[Document]("collectionB")
+
+            for {
+              _ <- collectionA.insertMany(documentsA)
+              _ <- collectionB.insertMany(documentsB)
+
+              result <- collectionA
+                .aggregate(
+                  aggregates.lookup(
+                    from = "collectionB",
+                    localField = "item",
+                    foreignField = "sku",
+                    as = "inventory_docs",
+                  ),
+                )
+                .runToChunk
+            } yield assertTrue(result.toSet == expected.toSet)
+          }
+        },
+        test("multiple joins") {
+          MongoDatabaseTest.withRandomName[TestResult] { database =>
+            val documentsA = Chunk(
+              """{ "_id" : 1, "item" : "almonds", "price" : 12, "ordered" : 2 }""",
+              """{ "_id" : 2, "item" : "pecans", "price" : 20, "ordered" : 1 }""",
+              """{ "_id" : 3, "item" : "cookies", "price" : 10, "ordered" : 60 }""",
+            ).map(d => Document(BsonDocument.parse(d)))
+
+            val documentsB = Chunk(
+              """{ "_id" : 1, "stock_item" : "almonds", warehouse: "A", "instock" : 120 }""",
+              """{ "_id" : 2, "stock_item" : "pecans", warehouse: "A", "instock" : 80 }""",
+              """{ "_id" : 3, "stock_item" : "almonds", warehouse: "B", "instock" : 60 }""",
+              """{ "_id" : 4, "stock_item" : "cookies", warehouse: "B", "instock" : 40 }""",
+              """{ "_id" : 5, "stock_item" : "cookies", warehouse: "A", "instock" : 80 }""",
+            ).map(d => Document(BsonDocument.parse(d)))
+
+            val expected =
+              Chunk(
+                """|{
+                   |  _id: 1,
+                   |  item: 'almonds',
+                   |  price: 12,
+                   |  ordered: 2,
+                   |  stockdata: [
+                   |    { warehouse: 'A', instock: 120 },
+                   |    { warehouse: 'B', instock: 60 }
+                   |  ]
+                   |}""".stripMargin,
+                """|{
+                   |  _id: 2,
+                   |  item: 'pecans',
+                   |  price: 20,
+                   |  ordered: 1,
+                   |  stockdata: [ { warehouse: 'A', instock: 80 } ]
+                   |}""".stripMargin,
+                """|{
+                   |  _id: 3,
+                   |  item: 'cookies',
+                   |  price: 10,
+                   |  ordered: 60,
+                   |  stockdata: [ { warehouse: 'A', instock: 80 } ]
+                   |}""".stripMargin,
+              ).map(d => Document(BsonDocument.parse(d)))
+
+            val collectionA = database.getCollection[Document]("collectionA")
+            val collectionB = database.getCollection[Document]("collectionB")
+
+            for {
+              _ <- collectionA.insertMany(documentsA)
+              _ <- collectionB.insertMany(documentsB)
+
+              result <- collectionA
+                .aggregate(
+                  aggregates.lookup(
+                    from = "collectionB",
+                    let = Seq(Variable("order_item", "$item"), Variable("order_qty", "$ordered")),
+                    pipeline = Seq(
+                      aggregates.`match`(
+                        expressions.and(
+                          expressions.eq(
+                            expressions.fieldPath("$stock_item"),
+                            expressions.fieldPath("$$order_item"),
+                          ),
+                          expressions.gte(
+                            expressions.fieldPath("$instock"),
+                            expressions.fieldPath("$$order_qty"),
+                          ),
+                        ),
+                      ),
+                      aggregates.project(
+                        projections
+                          .fields(projections.exclude("stock_item"), projections.excludeId()),
+                      ),
+                    ),
+                    as = "stockdata",
+                  ),
+                )
                 .runToChunk
             } yield assertTrue(result.toSet == expected.toSet)
           }

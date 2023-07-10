@@ -261,9 +261,9 @@ object Aggregation {
   final case class Group(id: Expression, fieldAccumulators: Map[String, Accumulator])
       extends Aggregation
   final case class Project(projection: Projection) extends Aggregation
+  final case class Sort(sort: sorts.Sort)          extends Aggregation
   final case class Lookup(from: String, localField: String, foreignField: String, as: String)
       extends Aggregation
-  final case class Sort(sort: sorts.Sort) extends Aggregation
   final case class LookupPipeline(
     from: String,
     let: Seq[Variable[?]],
