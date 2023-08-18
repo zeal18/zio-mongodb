@@ -15,7 +15,7 @@ val rsVersion    = "1.0.4"
 val flapdoodleVersion = "4.7.0"
 val immutablesVersion = "2.9.3"
 
-val magnolia2Version = "1.1.3"
+val magnolia2Version = "1.1.4"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
