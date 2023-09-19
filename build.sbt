@@ -1,21 +1,21 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
 val scala2_13 = "2.13.11"
-val scala3    = "3.3.0"
+val scala3    = "3.3.1"
 
 ThisBuild / scalaVersion       := scala2_13
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 
-val zioVersion          = "2.0.15"
+val zioVersion          = "2.0.16"
 val zioInteropRSVersion = "2.0.2"
 
 val mongoVersion = "4.10.2"
 val rsVersion    = "1.0.4"
 
-val flapdoodleVersion = "4.7.0"
+val flapdoodleVersion = "4.7.2"
 val immutablesVersion = "2.9.3"
 
-val magnolia2Version = "1.1.3"
+val magnolia2Version = "1.1.6"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
