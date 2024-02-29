@@ -15,7 +15,6 @@ import io.github.zeal18.zio.mongodb.driver.ReadPreference
 import io.github.zeal18.zio.mongodb.driver.WriteConcern
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
-import io.github.zeal18.zio.mongodb.driver.classTagToClassOf
 import io.github.zeal18.zio.mongodb.driver.model.CreateCollectionOptions
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
