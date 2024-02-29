@@ -369,7 +369,7 @@ trait MongoCollection[A] {
     * @return a Observable containing the result of the aggregation operation
     *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
     */
-  def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[A]
+  def aggregate(pipeline: Aggregation*): AggregateQuery[A]
 
   /** Aggregates documents according to the specified aggregation pipeline.
     *
@@ -379,10 +379,7 @@ trait MongoCollection[A] {
     *         [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
     * @note Requires MongoDB 3.6 or greater
     */
-  def aggregate(
-    clientSession: ClientSession,
-    pipeline: Seq[Aggregation],
-  ): AggregateQuery[A]
+  def aggregate(clientSession: ClientSession, pipeline: Aggregation*): AggregateQuery[A]
 
   /** Executes a mix of inserts, updates, replaces, and deletes.
     *
@@ -1568,12 +1565,12 @@ object MongoCollection {
     override def find(clientSession: ClientSession, filter: Filter): FindQuery[A] =
       FindQuery(wrapped.find(clientSession, filter, documentClass))
 
-    override def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[A] =
+    override def aggregate(pipeline: Aggregation*): AggregateQuery[A] =
       AggregateQuery(wrapped.aggregate[A](pipeline.asJava, documentClass))
 
     override def aggregate(
       clientSession: ClientSession,
-      pipeline: Seq[Aggregation],
+      pipeline: Aggregation*,
     ): AggregateQuery[A] =
       AggregateQuery(
         wrapped.aggregate[A](clientSession, pipeline.asJava, documentClass),

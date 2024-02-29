@@ -3,6 +3,7 @@ package io.github.zeal18.zio.mongodb.driver
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import org.bson.BsonDocument
@@ -35,6 +36,14 @@ package object aggregates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/ \$match]]
     */
   def `match`(filter: Filter): Match = Match(filter)
+
+  /** Creates a `\$match` pipeline stage for the specified filter
+    *
+    * @param filter the filter to match
+    * @return the `\$match` pipeline stage
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/match/ \$match]]
+    */
+  def `match`(expression: Expression): MatchExpr = MatchExpr(expression)
 
   /** Creates a `\$match` pipeline stage for the specified filter
     *
@@ -73,8 +82,8 @@ package object aggregates {
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/group/ \$group]]
     * @see [[https://www.mongodb.com/docs/manual/meta/aggregation-quick-reference/#aggregation-expressions Expressions]]
     */
-  def group[A](id: A, fieldAccumulators: Accumulator*)(implicit c: Codec[A]): Group[A] =
-    Group(id, fieldAccumulators, c)
+  def group(id: Expression, fieldAccumulators: Map[String, Accumulator] = Map.empty): Group =
+    Group(id, fieldAccumulators)
 
   /** Creates a `\$lookup` pipeline stage for the specified filter
     *
@@ -131,19 +140,19 @@ package object aggregates {
   /** Creates a `\$unwind` pipeline stage for the specified field name, which must be prefixed by a `\$` sign.
     *
     * @param fieldName the field name, prefixed by a  `\$` sign
-    * @return the `\$unwind` pipeline stage
-    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/ \$unwind]]
-    */
-  def unwind(fieldName: String): Unwind = Unwind(fieldName, UnwindOptions())
-
-  /** Creates a `\$unwind` pipeline stage for the specified field name, which must be prefixed by a `\$` sign.
+    * @param preserveNullAndEmptyArrays flag depicting if the unwind stage should include documents that have null values or empty arrays
+    * @param arrayIndexFieldName the field to be used to store the array index of the unwound item
     *
-    * @param fieldName the field name, prefixed by a  `\$` sign
     * @return the `\$unwind` pipeline stage
+    *
     * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/ \$unwind]]
     */
-  def unwind(fieldName: String, unwindOptions: UnwindOptions): Unwind =
-    Unwind(fieldName, unwindOptions)
+  def unwind(
+    fieldName: String,
+    preserveNullAndEmptyArrays: Option[Boolean] = None,
+    includeArrayIndex: Option[String] = None,
+  ): Unwind =
+    Unwind(fieldName, preserveNullAndEmptyArrays, includeArrayIndex)
 
   /** Creates a `\$sort` pipeline stage for the specified sort specification
     *
@@ -152,6 +161,69 @@ package object aggregates {
     * @see [[http://docs.mongodb.org/manual/reference/operator/aggregation/sort/#sort-aggregation \$sort]]
     */
   def sort(sort: sorts.Sort): Aggregation.Sort = Aggregation.Sort(sort)
+
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+  ): Bucket[Boundary, Int] =
+    Bucket(groupBy, boundaries, None, Map.empty, boundariesCodec, Codec.int)
+
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    output: Map[String, Accumulator],
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+  ): Bucket[Boundary, Int] =
+    Bucket(groupBy, boundaries, None, output, boundariesCodec, Codec.int)
+
+  /* Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket.
+   *
+   * @return the `\$bucket` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucket/ \$bucket]]
+   */
+  def bucket[Boundary: Numeric, Default](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    default: Default,
+    output: Map[String, Accumulator] = Map.empty,
+  )(implicit
+    boundariesCodec: Codec[Boundary],
+    defaultCodec: Codec[Default],
+  ): Bucket[Boundary, Default] =
+    Bucket(groupBy, boundaries, Some(default), output, boundariesCodec, defaultCodec)
+
+  /* Categorizes incoming documents into a specific number of groups, called buckets, based on a specified expression. Bucket boundaries are automatically determined in an attempt to evenly distribute the documents into the specified number of buckets.
+   *
+   * @return the `\$bucketAuto` pipeline stage
+   * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/bucketAuto/ \$bucketAuto]]
+   */
+  def bucketAuto(
+    groupBy: Expression,
+    buckets: Int,
+    output: Map[String, Accumulator] = Map.empty,
+    granularity: Option[BucketGranularity] = None,
+  ): BucketAuto =
+    BucketAuto(groupBy, buckets, output, granularity)
+
+  /** Groups incoming documents based on the value of a specified expression, then computes the count of documents in each distinct group.
+    *
+    * @return the `\$sortByCount` pipeline stage
+    * @see [[https://www.mongodb.com/docs/manual/reference/operator/aggregation/sortByCount/ \$sortByCount]]
+    */
+  def sortByCount(expression: Expression): SortByCount = SortByCount(expression)
 
   /** Creates a pipeline from a raw Bson.
     *
