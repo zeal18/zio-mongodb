@@ -6,16 +6,16 @@ val scala3    = "3.3.1"
 ThisBuild / scalaVersion       := scala2_13
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 
-val zioVersion          = "2.0.19"
+val zioVersion          = "2.0.21"
 val zioInteropRSVersion = "2.0.2"
 
 val mongoVersion = "4.11.1"
 val rsVersion    = "1.0.4"
 
 val flapdoodleVersion = "4.10.2"
-val immutablesVersion = "2.10.0"
+val immutablesVersion = "2.10.1"
 
-val magnolia2Version = "1.1.6"
+val magnolia2Version = "1.1.8"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
