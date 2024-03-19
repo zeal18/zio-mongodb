@@ -90,7 +90,7 @@ val integrationTestSettings =
 
 lazy val root =
   (project in file("."))
-    .aggregate(bson, driver, testkit, driverItTests)
+    .aggregate(bson, driver, testkit, driverItTests, example)
     .settings(publish / skip := true)
 
 lazy val bson = (project in file("bson")).settings(
@@ -163,6 +163,15 @@ lazy val driverItTests = (project in file("driver-it-tests"))
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
     ),
+  )
+  .dependsOn(driver)
+  .dependsOn(testkit)
+
+lazy val example = (project in file("example"))
+  .settings(
+    commonSettings,
+    name           := "zio-mongodb-example",
+    publish / skip := true,
   )
   .dependsOn(driver)
   .dependsOn(testkit)
