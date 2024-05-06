@@ -1,6 +1,6 @@
 import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 
-val scala2_13 = "2.13.13"
+val scala2_13 = "2.13.14"
 val scala3    = "3.3.3"
 
 ThisBuild / scalaVersion       := scala2_13
