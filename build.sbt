@@ -6,7 +6,7 @@ val scala3    = "3.3.3"
 ThisBuild / scalaVersion       := scala2_13
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 
-val zioVersion          = "2.0.22"
+val zioVersion          = "2.1.2"
 val zioInteropRSVersion = "2.0.2"
 
 val mongoVersion = "4.11.2"
