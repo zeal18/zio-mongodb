@@ -1,54 +1,124 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
+import scala.annotation.nowarn
+
+import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
+import io.github.zeal18.zio.mongodb.driver.sorts
 import zio.test.ZIOSpecDefault
 import zio.test.*
 
+@nowarn("msg=possible missing interpolator")
 object AccumulatorsSpec extends ZIOSpecDefault {
   private def testAccumulator(
     title: String,
     acc: accumulators.Accumulator,
-    expectedName: String,
     expectedValue: String,
   ) =
     test(title) {
-      assertTrue(
-        acc.toBsonField.getName == expectedName,
-        acc.toBsonField.getValue.toBsonDocument.toString == expectedValue,
-      )
+      assertTrue(acc.toBsonDocument().toString == expectedValue)
     }
 
   override def spec = suite("AccumulatorsSpec")(
-    testAccumulator("sum", accumulators.sum("a", 1), "a", """{"$sum": 1}"""),
-    testAccumulator("avg", accumulators.avg("a", 2), "a", """{"$avg": 2}"""),
-    testAccumulator("first", accumulators.first("a", 3), "a", """{"$first": 3}"""),
-    testAccumulator("last", accumulators.last("a", 4), "a", """{"$last": 4}"""),
-    testAccumulator("max", accumulators.max("a", 5), "a", """{"$max": 5}"""),
-    testAccumulator("min", accumulators.min("a", 6), "a", """{"$min": 6}"""),
-    testAccumulator("push", accumulators.push("a", 7), "a", """{"$push": 7}"""),
-    testAccumulator("addToSet", accumulators.addToSet("a", 8), "a", """{"$addToSet": 8}"""),
+    testAccumulator("sum", accumulators.sum(expressions.const(1)), """{"$sum": 1}"""),
+    testAccumulator("avg", accumulators.avg(expressions.const(2)), """{"$avg": 2}"""),
+    testAccumulator("first", accumulators.first(expressions.const(3)), """{"$first": 3}"""),
+    testAccumulator(
+      "firstN",
+      accumulators.firstN(expressions.const(3), expressions.fieldPath("$a")),
+      """{"$firstN": {"input": 3, "n": "$a"}}""",
+    ),
+    testAccumulator("last", accumulators.last(expressions.const(4)), """{"$last": 4}"""),
+    testAccumulator(
+      "lastN",
+      accumulators.lastN(expressions.const(4), expressions.fieldPath("$b")),
+      """{"$lastN": {"input": 4, "n": "$b"}}""",
+    ),
+    testAccumulator("max", accumulators.max(expressions.const(5)), """{"$max": 5}"""),
+    testAccumulator(
+      "maxN",
+      accumulators.maxN(expressions.const(5), expressions.fieldPath("$c")),
+      """{"$maxN": {"input": 5, "n": "$c"}}""",
+    ),
+    testAccumulator("min", accumulators.min(expressions.const(6)), """{"$min": 6}"""),
+    testAccumulator(
+      "minN",
+      accumulators.minN(expressions.const(6), expressions.fieldPath("$d")),
+      """{"$minN": {"input": 6, "n": "$d"}}""",
+    ),
+    testAccumulator("push", accumulators.push(expressions.const(7)), """{"$push": 7}"""),
+    testAccumulator(
+      "addToSet",
+      accumulators.addToSet(expressions.const(8)),
+      """{"$addToSet": 8}""",
+    ),
     testAccumulator(
       "mergeObjects",
-      accumulators.mergeObjects("a", 9),
-      "a",
+      accumulators.mergeObjects(expressions.const(9)),
       """{"$mergeObjects": 9}""",
     ),
-    testAccumulator("stdDevPop", accumulators.stdDevPop("a", 1), "a", """{"$stdDevPop": 1}"""),
-    testAccumulator("stdDevSamp", accumulators.stdDevSamp("a", 2), "a", """{"$stdDevSamp": 2}"""),
+    testAccumulator(
+      "stdDevPop",
+      accumulators.stdDevPop(expressions.const(1)),
+      """{"$stdDevPop": 1}""",
+    ),
+    testAccumulator(
+      "stdDevSamp",
+      accumulators.stdDevSamp(expressions.const(2)),
+      """{"$stdDevSamp": 2}""",
+    ),
     testAccumulator(
       "accumulator",
       accumulators.accumulator(
-        fieldName = "a",
         initFunction = "initF",
-        initArgs = Seq("initArg"),
+        initArgs = Some(expressions.const(Seq("initArg"))),
         accumulateFunction = "accF",
-        accumulateArgs = Seq("accArg"),
+        accumulateArgs = Some(expressions.const(Seq("accArg"))),
         mergeFunction = "mergeF",
         finalizeFunction = Some("finalizeF"),
         lang = "lang",
       ),
-      "a",
-      """{"$accumulator": {"init": "initF", "initArgs": ["initArg"], "accumulate": "accF", "accumulateArgs": ["accArg"], "merge": "mergeF", "lang": "lang", "finalize": "finalizeF"}}""",
+      """{"$accumulator": {"init": "initF", "initArgs": ["initArg"], "accumulate": "accF", "accumulateArgs": ["accArg"], "merge": "mergeF", "finalize": "finalizeF", "lang": "lang"}}""",
+    ),
+    testAccumulator(
+      "bottom",
+      accumulators.bottom(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+      ),
+      """{"$bottom": {"sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "bottomN",
+      accumulators.bottomN(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+        n = expressions.const(10),
+      ),
+      """{"$bottom": {"n": 10, "sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "top",
+      accumulators.top(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+      ),
+      """{"$top": {"sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator(
+      "topN",
+      accumulators.topN(
+        sortBy = sorts.compound(sorts.desc("a"), sorts.asc("b")),
+        output = expressions.const(Seq("$playerId", "$score")),
+        n = expressions.const(10),
+      ),
+      """{"$topN": {"n": 10, "sortBy": {"a": -1, "b": 1}, "output": ["$playerId", "$score"]}}""",
+    ),
+    testAccumulator("count", accumulators.count(), """{"$count": {}}"""),
+    suite("raw")(
+      testAccumulator("bson", accumulators.raw(BsonDocument("a" -> 1)), """{"a": 1}"""),
+      testAccumulator("json", accumulators.raw("""{"a": 1}"""), """{"a": 1}"""),
     ),
   )
 

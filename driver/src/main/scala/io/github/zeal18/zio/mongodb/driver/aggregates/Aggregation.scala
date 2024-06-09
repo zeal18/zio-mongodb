@@ -1,15 +1,18 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
 import scala.annotation.nowarn
+import scala.math.Numeric
 import scala.reflect.ClassTag
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts
 import org.bson.BsonBoolean
+import org.bson.BsonDocumentReader
 import org.bson.BsonDocumentWriter
 import org.bson.BsonInt32
 import org.bson.BsonString
@@ -46,49 +49,6 @@ sealed trait Aggregation extends Bson { self =>
         writer.writeEndArray()
 
       }
-      writer.writeEndDocument()
-      writer.writeEndDocument()
-
-      writer.getDocument()
-    }
-
-    def unwind(fieldName: String, unwindOptions: UnwindOptions): BsonDocument = {
-      val options = new BsonDocument("path", new BsonString(fieldName))
-
-      unwindOptions.preserveNullAndEmptyArrays.foreach { preserveNullAndEmptyArrays =>
-        options.append(
-          "preserveNullAndEmptyArrays",
-          BsonBoolean.valueOf(preserveNullAndEmptyArrays),
-        )
-      }
-
-      unwindOptions.includeArrayIndex.foreach { includeArrayIndex =>
-        options.append("includeArrayIndex", new BsonString(includeArrayIndex))
-      }
-
-      new BsonDocument("$unwind", options);
-    }
-
-    def groupStage[A](id: A, accumulators: Seq[Accumulator], codec: Codec[A]): BsonDocument = {
-      val writer = new BsonDocumentWriter(new BsonDocument())
-
-      writer.writeStartDocument()
-      writer.writeStartDocument("$group")
-      writer.writeName("_id")
-      codec.encode(writer, id, context)
-      accumulators.foreach { acc =>
-        val bsonField = acc.toBsonField
-
-        writer.writeName(bsonField.getName())
-        codecRegistry
-          .get(documentClass)
-          .encode(
-            writer,
-            bsonField.getValue().toBsonDocument(documentClass, codecRegistry),
-            context,
-          )
-      }
-
       writer.writeEndDocument()
       writer.writeEndDocument()
 
@@ -140,16 +100,55 @@ sealed trait Aggregation extends Bson { self =>
     self match {
       case Aggregation.Match(filter) =>
         simplePipelineStage("$match", filter)
+      case Aggregation.MatchExpr(expr) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$match")
+        writer.writeStartDocument()
+        writer.writeName("$expr")
+        expr.encode(writer)
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Limit(limit) =>
         new BsonDocument("$limit", new BsonInt32(limit))
       case Aggregation.Count(field) =>
         new BsonDocument("$count", new BsonString(field))
       case Aggregation.Facets(facets) =>
         facetStage(facets)
-      case Aggregation.Unwind(fieldName, unwindOptions) =>
-        unwind(fieldName, unwindOptions)
-      case Aggregation.Group(id, fieldAccumulators, codec) =>
-        groupStage(id, fieldAccumulators, codec)
+      case Aggregation.Unwind(fieldName, preserveNullAndEmptyArrays, includeArrayIndex) =>
+        val options = new BsonDocument("path", new BsonString(fieldName))
+
+        preserveNullAndEmptyArrays.foreach { preserveNullAndEmptyArrays =>
+          options.append(
+            "preserveNullAndEmptyArrays",
+            BsonBoolean.valueOf(preserveNullAndEmptyArrays),
+          )
+        }
+
+        includeArrayIndex.foreach { includeArrayIndex =>
+          options.append("includeArrayIndex", new BsonString(includeArrayIndex))
+        }
+
+        new BsonDocument("$unwind", options);
+      case Aggregation.Group(id, accumulators) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeStartDocument("$group")
+        writer.writeName("_id")
+        id.encode(writer)
+        accumulators.foreach { case (name, acc) =>
+          writer.writeName(name)
+          writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Project(projection) =>
         simplePipelineStage("$project", projection)
       case Aggregation.Sort(sort) =>
@@ -167,28 +166,125 @@ sealed trait Aggregation extends Bson { self =>
         )
       case Aggregation.LookupPipeline(from, let, pipeline, as) =>
         lookupStage(from, let, pipeline, as)
+      case Aggregation.Bucket(
+            groupBy,
+            boundaries,
+            default,
+            output,
+            boundariesCodec,
+            defaultCodec,
+          ) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$bucket")
+        writer.writeStartDocument()
+        writer.writeName("groupBy")
+        groupBy.encode(writer)
+        writer.writeName("boundaries")
+        writer.writeStartArray()
+        boundaries.foreach { boundary =>
+          boundariesCodec.encode(writer, boundary, context)
+        }
+        writer.writeEndArray()
+        default.foreach { default =>
+          writer.writeName("default")
+          defaultCodec.encode(writer, default, context)
+        }
+        if (!output.isEmpty) {
+          writer.writeName("output")
+          writer.writeStartDocument()
+          output.foreach { case (name, acc) =>
+            writer.writeName(name)
+            writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+          }
+          writer.writeEndDocument()
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
+      case Aggregation.BucketAuto(groupBy, buckets, output, granularity) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$bucketAuto")
+        writer.writeStartDocument()
+        writer.writeName("groupBy")
+        groupBy.encode(writer)
+        writer.writeName("buckets")
+        writer.writeInt32(buckets)
+        if (!output.isEmpty) {
+          writer.writeName("output")
+          writer.writeStartDocument()
+          output.foreach { case (name, acc) =>
+            writer.writeName(name)
+            writer.pipe(new BsonDocumentReader(acc.toBsonDocument()))
+          }
+          writer.writeEndDocument()
+        }
+        granularity.foreach { granularity =>
+          writer.writeName("granularity")
+          writer.writeString(granularity.name)
+        }
+
+        writer.writeEndDocument()
+        writer.writeEndDocument()
+
+        writer.getDocument()
+      case Aggregation.SortByCount(expression) =>
+        val writer = new BsonDocumentWriter(new BsonDocument())
+
+        writer.writeStartDocument()
+        writer.writeName("$sortByCount")
+        expression.encode(writer)
+        writer.writeEndDocument()
+
+        writer.getDocument()
       case Aggregation.Raw(bson) => bson.toBsonDocument()
     }
   }
 }
 
 object Aggregation {
-  final case class Match(filter: Filter)                                   extends Aggregation
-  final case class Limit(limit: Int)                                       extends Aggregation
-  final case class Count(field: String)                                    extends Aggregation
-  final case class Facets(facets: Seq[Facet])                              extends Aggregation
-  final case class Unwind(fieldName: String, unwindOptions: UnwindOptions) extends Aggregation
-  final case class Group[Id](id: Id, fieldAccumulators: Seq[Accumulator], codec: Codec[Id])
+  final case class Match(filter: Filter)             extends Aggregation
+  final case class MatchExpr(expression: Expression) extends Aggregation
+  final case class Limit(limit: Int)                 extends Aggregation
+  final case class Count(field: String)              extends Aggregation
+  final case class Facets(facets: Seq[Facet])        extends Aggregation
+  final case class Unwind(
+    fieldName: String,
+    preserveNullAndEmptyArrays: Option[Boolean],
+    includeArrayIndex: Option[String],
+  ) extends Aggregation
+  final case class Group(id: Expression, fieldAccumulators: Map[String, Accumulator])
       extends Aggregation
   final case class Project(projection: Projection) extends Aggregation
+  final case class Sort(sort: sorts.Sort)          extends Aggregation
   final case class Lookup(from: String, localField: String, foreignField: String, as: String)
       extends Aggregation
-  final case class Sort(sort: sorts.Sort) extends Aggregation
   final case class LookupPipeline(
     from: String,
     let: Seq[Variable[?]],
     pipeline: Seq[Aggregation],
     as: String,
   ) extends Aggregation
-  final case class Raw(filter: Bson) extends Aggregation
+  @nowarn("msg=never used")
+  final case class Bucket[Boundary: Numeric, Default](
+    groupBy: Expression,
+    boundaries: Seq[Boundary],
+    default: Option[Default],
+    output: Map[String, Accumulator],
+    boundariesCodec: Codec[Boundary],
+    defaultCodec: Codec[Default],
+  ) extends Aggregation
+  final case class BucketAuto(
+    groupBy: Expression,
+    buckets: Int,
+    output: Map[String, Accumulator],
+    granularity: Option[BucketGranularity],
+  ) extends Aggregation
+  final case class SortByCount(expression: Expression) extends Aggregation
+  final case class Raw(filter: Bson)                   extends Aggregation
 }

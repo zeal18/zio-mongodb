@@ -4,6 +4,7 @@ import scala.annotation.nowarn
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
 import io.github.zeal18.zio.mongodb.driver.sorts
@@ -43,8 +44,9 @@ object AggregatesSpec extends ZIOSpecDefault {
     ),
     testAggregate(
       "group",
-      aggregates.group("a", accumulators.sum("b", 1)),
-      """{"$group": {"_id": "a", "b": {"$sum": 1}}}""",
+      aggregates
+        .group(expressions.fieldPath("$item"), Map("b" -> accumulators.sum(expressions.const(1)))),
+      """{"$group": {"_id": "$item", "b": {"$sum": 1}}}""",
     ),
     testAggregate(
       "lookup",
@@ -66,9 +68,59 @@ object AggregatesSpec extends ZIOSpecDefault {
       "unwind with options",
       aggregates.unwind(
         "a",
-        UnwindOptions(Some(true), Some("b")),
+        preserveNullAndEmptyArrays = Some(true),
+        includeArrayIndex = Some("b"),
       ),
       """{"$unwind": {"path": "a", "preserveNullAndEmptyArrays": true, "includeArrayIndex": "b"}}""",
+    ),
+    testAggregate(
+      "bucket",
+      aggregates.bucket(
+        groupBy = expressions.fieldPath("$a"),
+        boundaries = Seq(10, 25, 39),
+        default = "Other",
+        output = Map(
+          "count" -> accumulators.sum(expressions.const(1)),
+          "artists" -> accumulators.push(
+            expressions.obj(
+              "name" -> expressions.concat(
+                expressions.fieldPath("$first_name"),
+                expressions.const(" "),
+                expressions.fieldPath("$last_name"),
+              ),
+              "year_born" -> expressions.fieldPath("$year_born"),
+            ),
+          ),
+        ),
+      ),
+      """{"$bucket": {"groupBy": "$a", "boundaries": [10, 25, 39], "default": "Other", "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}}}""",
+    ),
+    testAggregate(
+      "bucketAuto",
+      aggregates.bucketAuto(
+        groupBy = expressions.fieldPath("$a"),
+        buckets = 42,
+        output = Map(
+          "count" -> accumulators.sum(expressions.const(1)),
+          "artists" -> accumulators.push(
+            expressions.obj(
+              "name" -> expressions.concat(
+                expressions.fieldPath("$first_name"),
+                expressions.const(" "),
+                expressions.fieldPath("$last_name"),
+              ),
+              "year_born" -> expressions.fieldPath("$year_born"),
+            ),
+          ),
+        ),
+        granularity = Some(BucketGranularity.R5),
+      ),
+      """{"$bucketAuto": {"groupBy": "$a", "buckets": 42, "output": {"count": {"$sum": 1}, "artists": {"$push": {"name": {"$concat": ["$first_name", " ", "$last_name"]}, "year_born": "$year_born"}}}, "granularity": "R5"}}""",
+    ),
+    testAggregate(
+      "sortByCount",
+      aggregates.sortByCount(expressions.fieldPath("$a")),
+      """{"$sortByCount": "$a"}""",
     ),
     suite("raw")(
       testAggregate(

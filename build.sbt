@@ -12,10 +12,10 @@ val zioInteropRSVersion = "2.0.2"
 val mongoVersion = "4.11.2"
 val rsVersion    = "1.0.4"
 
-val flapdoodleVersion = "4.12.6"
+val flapdoodleVersion = "4.13.1"
 val immutablesVersion = "2.10.1"
 
-val magnolia2Version = "1.1.9"
+val magnolia2Version = "1.1.10"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
