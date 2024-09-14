@@ -302,9 +302,7 @@ object FiltersItSpec extends ZIOSpecDefault {
           for {
             _ <- collection.insertMany(Chunk(doc1, doc2, doc3, doc4, doc5))
 
-            result <- collection
-              .find(filters.expr(aggregates.raw("""{"$gt": ["$spent", "$budget"]}""")))
-              .runToChunk
+            result <- collection.find(filters.expr(aggregates.raw("""{"$gt": ["$spent", "$budget"]}"""))).runToChunk
           } yield assertTrue(result == Chunk(doc1, doc2, doc5))
         }
       },

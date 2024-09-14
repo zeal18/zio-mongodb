@@ -16,12 +16,11 @@
 
 package io.github.zeal18.zio.mongodb.driver
 
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import com.mongodb.ReadPreference as JReadPreference
 
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.*
-
-import com.mongodb.ReadPreference as JReadPreference
 
 /** The preferred replica set members to which a query or command can be sent.
   */

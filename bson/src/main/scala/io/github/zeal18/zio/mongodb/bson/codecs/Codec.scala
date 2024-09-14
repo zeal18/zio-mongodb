@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.BsonCodecs
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.CollectionsCodecs
@@ -12,9 +10,11 @@ import org.bson.BsonInvalidOperationException
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
 import org.bson.BsonWriter
+import org.bson.codecs.Codec as JCodec
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import org.bson.codecs.Codec as JCodec
+
+import scala.reflect.ClassTag
 
 abstract class Codec[A] extends Encoder[A] with Decoder[A] { self =>
 
@@ -47,14 +47,14 @@ object Codec
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonInvalidOperationException =>
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonError =>
-            throw BsonError.CodecError(ct.toString(), e) // scalafix:ok
+            throw BsonError.CodecError(ct.toString(), e)
         }
 
       override def decode(reader: BsonReader, context: DecoderContext): A =
@@ -64,14 +64,14 @@ object Codec
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonInvalidOperationException =>
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonError =>
-            throw BsonError.CodecError(ct.toString(), e) // scalafix:ok
+            throw BsonError.CodecError(ct.toString(), e)
         }
     }
 
@@ -80,18 +80,18 @@ object Codec
       try c.encode(writer, value, context)
       catch {
         case e: BsonSerializationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
         case e: BsonInvalidOperationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
       }
 
     override def decode(reader: BsonReader, context: DecoderContext): A =
       try c.decode(reader, context)
       catch {
         case e: BsonSerializationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
         case e: BsonInvalidOperationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
       }
   }
 }

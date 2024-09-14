@@ -4,8 +4,8 @@ import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
-import zio.test.ZIOSpecDefault
 import zio.test.*
+import zio.test.ZIOSpecDefault
 
 object ProjectionsSpec extends ZIOSpecDefault {
   private def testProjection(title: String, proj: projections.Projection, expected: String) =

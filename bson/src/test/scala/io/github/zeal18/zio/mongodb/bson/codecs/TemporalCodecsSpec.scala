@@ -1,13 +1,13 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
+import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
+import zio.test.ZIOSpecDefault
+
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
-
-import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
-import zio.test.ZIOSpecDefault
 
 object TemporalCodecsSpec extends ZIOSpecDefault {
   override def spec = suite("TemporalCodecsSpec")(

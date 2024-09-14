@@ -1,20 +1,16 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import scala.annotation.nowarn
-import scala.jdk.CollectionConverters.*
-import scala.reflect.ClassTag
-
 import com.mongodb.bulk.BulkWriteResult
 import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoCollection as JMongoCollection
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.CodecAdapter
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
+import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.MongoNamespace
 import io.github.zeal18.zio.mongodb.driver.ReadConcern
 import io.github.zeal18.zio.mongodb.driver.ReadPreference
 import io.github.zeal18.zio.mongodb.driver.WriteConcern
-import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.indexes.CreateIndexOptions
@@ -35,6 +31,9 @@ import zio.Scope
 import zio.Task
 import zio.ZIO
 import zio.ZLayer
+
+import scala.jdk.CollectionConverters.*
+import scala.reflect.ClassTag
 
 /** The MongoCollection representation.
   *
@@ -1457,7 +1456,6 @@ trait MongoCollection[A] {
 
 object MongoCollection {
 
-  @nowarn("cat=unused")
   def live[A: izumi.reflect.Tag: ClassTag](name: String)(implicit
     codec: Codec[A],
   ): ZLayer[MongoDatabase, Nothing, MongoCollection[A]] =
@@ -2015,10 +2013,7 @@ object MongoCollection {
       newCollectionNamespace: MongoNamespace,
       options: RenameCollectionOptions,
     ): Task[Unit] =
-      wrapped
-        .renameCollection(clientSession, newCollectionNamespace, options.toJava)
-        .headOption
-        .unit
+      wrapped.renameCollection(clientSession, newCollectionNamespace, options.toJava).headOption.unit
 
     override def watch(): ChangeStreamQuery[A] =
       ChangeStreamQuery(wrapped.watch(documentClass))

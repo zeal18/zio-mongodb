@@ -37,9 +37,7 @@ object AggregationsItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(documents)
 
-              result1 <- collection
-                .aggregate(aggregates.`match`(filters.eq("author", "dave")))
-                .runToChunk
+              result1 <- collection.aggregate(aggregates.`match`(filters.eq("author", "dave"))).runToChunk
             } yield assertTrue(result1 == expected)
           }
         },
@@ -446,9 +444,8 @@ object AggregationsItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(documents)
 
-              result <- collection
-                .aggregate(aggregates.unwind("$sizes", preserveNullAndEmptyArrays = Some(true)))
-                .runToChunk
+              result <-
+                collection.aggregate(aggregates.unwind("$sizes", preserveNullAndEmptyArrays = Some(true))).runToChunk
             } yield assertTrue(result == expected)
           }
         },
@@ -472,9 +469,8 @@ object AggregationsItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(documents)
 
-              result <- collection
-                .aggregate(aggregates.unwind("$sizes", includeArrayIndex = Some("arrayIndex")))
-                .runToChunk
+              result <-
+                collection.aggregate(aggregates.unwind("$sizes", includeArrayIndex = Some("arrayIndex"))).runToChunk
             } yield assertTrue(result == expected)
           }
         },
@@ -502,8 +498,7 @@ object AggregationsItSpec extends ZIOSpecDefault {
 
               result <- collection
                 .aggregate(
-                  aggregates
-                    .group(expressions.const(BsonNull()), Map("count" -> accumulators.count())),
+                  aggregates.group(expressions.const(BsonNull()), Map("count" -> accumulators.count())),
                 )
                 .runToChunk
             } yield assertTrue(result == expected)
@@ -532,9 +527,7 @@ object AggregationsItSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertMany(documents)
 
-              result <- collection
-                .aggregate(aggregates.group(expressions.fieldPath("$item")))
-                .runToChunk
+              result <- collection.aggregate(aggregates.group(expressions.fieldPath("$item"))).runToChunk
             } yield assertTrue(result.toSet == expected.toSet)
           }
         },
@@ -676,8 +669,7 @@ object AggregationsItSpec extends ZIOSpecDefault {
                         ),
                       ),
                       aggregates.project(
-                        projections
-                          .fields(projections.exclude("stock_item"), projections.excludeId()),
+                        projections.fields(projections.exclude("stock_item"), projections.excludeId()),
                       ),
                     ),
                     as = "stockdata",

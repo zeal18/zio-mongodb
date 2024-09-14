@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
-import scala.annotation.nowarn
-import scala.math.Numeric
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates.accumulators.Accumulator
@@ -20,6 +16,10 @@ import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
 
+import scala.annotation.nowarn
+import scala.math.Numeric
+import scala.reflect.ClassTag
+
 sealed trait Aggregation extends Bson { self =>
   @nowarn("msg=possible missing interpolator*")
   override def toBsonDocument[TDocument <: Object](
@@ -27,8 +27,7 @@ sealed trait Aggregation extends Bson { self =>
     codecRegistry: CodecRegistry,
   ): BsonDocument = {
     val documentClass =
-      implicitly[ClassTag[BsonDocument]].runtimeClass
-        .asInstanceOf[Class[BsonDocument]] // scalafix:ok
+      implicitly[ClassTag[BsonDocument]].runtimeClass.asInstanceOf[Class[BsonDocument]]
     val context = EncoderContext.builder().build()
 
     def simplePipelineStage(name: String, value: Bson): BsonDocument =
@@ -258,12 +257,10 @@ object Aggregation {
     preserveNullAndEmptyArrays: Option[Boolean],
     includeArrayIndex: Option[String],
   ) extends Aggregation
-  final case class Group(id: Expression, fieldAccumulators: Map[String, Accumulator])
-      extends Aggregation
-  final case class Project(projection: Projection) extends Aggregation
-  final case class Sort(sort: sorts.Sort)          extends Aggregation
-  final case class Lookup(from: String, localField: String, foreignField: String, as: String)
-      extends Aggregation
+  final case class Group(id: Expression, fieldAccumulators: Map[String, Accumulator])         extends Aggregation
+  final case class Project(projection: Projection)                                            extends Aggregation
+  final case class Sort(sort: sorts.Sort)                                                     extends Aggregation
+  final case class Lookup(from: String, localField: String, foreignField: String, as: String) extends Aggregation
   final case class LookupPipeline(
     from: String,
     let: Seq[Variable[?]],

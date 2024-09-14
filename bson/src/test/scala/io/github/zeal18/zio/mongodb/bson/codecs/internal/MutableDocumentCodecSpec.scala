@@ -16,11 +16,6 @@
 
 package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
-import java.nio.ByteBuffer
-import java.util.Date
-
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.Registry.DEFAULT_CODEC_REGISTRY
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document
@@ -32,6 +27,10 @@ import org.bson.io.BasicOutputBuffer
 import org.bson.io.ByteBufferBsonInput
 import org.bson.types.ObjectId
 import zio.test.*
+
+import java.nio.ByteBuffer
+import java.util.Date
+import scala.jdk.CollectionConverters.*
 
 object MutableDocumentCodecSpec extends ZIOSpecDefault {
   val registry: CodecRegistry = DEFAULT_CODEC_REGISTRY
@@ -51,14 +50,14 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
         "string"       -> new BsonString("string"),
         "symbol"       -> new BsonSymbol(Symbol("bson").name),
         "bsonDocument" -> new BsonDocument("a", new BsonString("string")),
-        "array" -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
+        "array"        -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
       )
 
       val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
       MutableDocumentCodec(registry).encode(writer, original, EncoderContext.builder().build())
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader = new BsonBinaryReader(
         new ByteBufferBsonInput(
           new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray)),
@@ -69,7 +68,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
         MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+        decodedDocument.isInstanceOf[mutable.Document],
       ) &&
       assertTrue(original == decodedDocument)
     },
@@ -91,7 +90,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
       )
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader =
         new BsonBinaryReader(
           new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
@@ -101,7 +100,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
         MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+        decodedDocument.isInstanceOf[mutable.Document],
       ) &&
       assertTrue(original == decodedDocument) &&
       assertTrue(
@@ -131,7 +130,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
     },
     test("should get the document_id") {
       assertTrue(
-        MutableDocumentCodec().getDocumentId(Document()) == null, // scalafix:ok
+        MutableDocumentCodec().getDocumentId(Document()) == null,
       ) &&
       assertTrue(
         MutableDocumentCodec().getDocumentId(Document("_id" -> new BsonInt32(1))) == new BsonInt32(

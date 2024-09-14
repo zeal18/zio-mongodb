@@ -1,19 +1,16 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import scala.jdk.CollectionConverters.*
-import scala.reflect.ClassTag
-
 import com.mongodb.client.model.CreateViewOptions
 import com.mongodb.reactivestreams.client.MongoDatabase as JMongoDatabase
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.CodecAdapter
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
+import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.ClientSession
 import io.github.zeal18.zio.mongodb.driver.Document
 import io.github.zeal18.zio.mongodb.driver.ReadConcern
 import io.github.zeal18.zio.mongodb.driver.ReadPreference
 import io.github.zeal18.zio.mongodb.driver.WriteConcern
-import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.model.CreateCollectionOptions
 import io.github.zeal18.zio.mongodb.driver.query.*
@@ -26,6 +23,9 @@ import zio.ZIO
 import zio.ZLayer
 import zio.interop.reactivestreams.*
 import zio.stream.ZStream
+
+import scala.jdk.CollectionConverters.*
+import scala.reflect.ClassTag
 
 trait MongoDatabase {
 
@@ -365,8 +365,7 @@ object MongoDatabase {
   def live(name: String): ZLayer[MongoClient, Nothing, MongoDatabase] =
     ZLayer.fromFunction[MongoClient => MongoDatabase](_.getDatabase(name))
 
-  final private[driver] case class Live(client: MongoClient, wrapped: JMongoDatabase)
-      extends MongoDatabase {
+  final private[driver] case class Live(client: MongoClient, wrapped: JMongoDatabase) extends MongoDatabase {
     override lazy val name: String = wrapped.getName
 
     override lazy val codecRegistry: CodecRegistry = wrapped.getCodecRegistry
@@ -415,23 +414,17 @@ object MongoDatabase {
       wrapped.runCommand[Document](command, implicitly[ClassTag[Document]]).headOption
 
     override def runCommand(command: Bson, readPreference: ReadPreference): Task[Option[Document]] =
-      wrapped
-        .runCommand[Document](command, readPreference, implicitly[ClassTag[Document]])
-        .headOption
+      wrapped.runCommand[Document](command, readPreference, implicitly[ClassTag[Document]]).headOption
 
     override def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]] =
-      wrapped
-        .runCommand[Document](clientSession, command, implicitly[ClassTag[Document]])
-        .headOption
+      wrapped.runCommand[Document](clientSession, command, implicitly[ClassTag[Document]]).headOption
 
     override def runCommand(
       clientSession: ClientSession,
       command: Bson,
       readPreference: ReadPreference,
     ): Task[Option[Document]] =
-      wrapped
-        .runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]])
-        .headOption
+      wrapped.runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]]).headOption
 
     override def drop(): Task[Unit] = wrapped.drop().headOption.unit
 

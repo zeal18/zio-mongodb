@@ -31,12 +31,12 @@ case class EnumCodec[A](
         throw BsonError.CodecError(
           fullName,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
           fullName,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
 
   override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
     try
@@ -44,14 +44,14 @@ case class EnumCodec[A](
       valueByName(name).fold[A](
         throw BsonError.CoproductError(
           name,
-          BsonError.GeneralError("unsupported discriminator value"), // scalafix:ok
+          BsonError.GeneralError("unsupported discriminator value"),
         ),
       )(identity[A])
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 end EnumCodec

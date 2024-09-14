@@ -1,8 +1,8 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
 import org.bson.BsonReader
-import org.bson.codecs.DecoderContext
 import org.bson.codecs.Decoder as JDecoder
+import org.bson.codecs.DecoderContext
 
 trait Decoder[A] { self =>
 

@@ -16,14 +16,14 @@
 
 package io.github.zeal18.zio.mongodb.bson.collection.mutable
 
-import scala.collection.*
-import scala.collection.mutable.ListBuffer
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.*
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.MutableDocumentCodec
 import io.github.zeal18.zio.mongodb.bson.collection.BaseDocument
+
+import scala.collection.*
+import scala.collection.mutable.ListBuffer
+import scala.jdk.CollectionConverters.*
 
 /** Mutable [[Document]] companion object for easy creation.
   */

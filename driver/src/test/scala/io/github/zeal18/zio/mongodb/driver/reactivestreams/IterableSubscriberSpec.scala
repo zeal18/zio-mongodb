@@ -17,8 +17,8 @@ import zio.Unsafe
 import zio.ZEnvironment
 import zio.ZIO
 import zio.durationInt
-import zio.test.Assertion.*
 import zio.test.*
+import zio.test.Assertion.*
 
 object IterableSubscriberSpec extends ZIOSpecDefault {
   override def spec =
@@ -59,7 +59,7 @@ object IterableSubscriberSpec extends ZIOSpecDefault {
             ): Unit =
               if (value.isFailure) failedAFiber = true
 
-            @transient var failedAFiber = false // scalafix:ok
+            @transient var failedAFiber = false
 
             def value(implicit trace: Trace): UIO[Boolean] =
               ZIO.succeed(failedAFiber)

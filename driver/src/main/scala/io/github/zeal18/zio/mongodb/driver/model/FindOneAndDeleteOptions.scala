@@ -1,13 +1,13 @@
 package io.github.zeal18.zio.mongodb.driver.model
 
-import java.time.Duration
-
 import com.mongodb.client.model.FindOneAndDeleteOptions as JFindOneAndDeleteOptions
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.bson.BsonValue
 import org.bson.conversions.Bson
+
+import java.time.Duration
 
 /** The options to apply to an operation that atomically finds a document and deletes it.
   *

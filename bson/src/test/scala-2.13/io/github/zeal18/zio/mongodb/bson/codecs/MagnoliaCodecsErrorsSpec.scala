@@ -1,10 +1,10 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
+
+import scala.annotation.nowarn
 
 @nowarn("cat=unused")
 object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
@@ -39,7 +39,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .underlying
                 .asInstanceOf[BsonError.CodecError]
                 .name == "java.lang.Integer",
-            ), // scalafix:ok
+            ),
       ),
     ),
     suite("enum")(
@@ -75,7 +75,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .asInstanceOf[BsonError.GeneralError]
                 .msg == "unsupported discriminator value",
             ),
-      ), // scalafix:ok
+      ),
     ),
     suite("coproduct")(
       testCodecDecodeError[CoproductWrapper](
@@ -100,7 +100,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .error
                 .getMessage == "Expected element name to be '_t', not 'a'.",
             ),
-      ), // scalafix:ok
+      ),
       testCodecDecodeError[CoproductWrapper](
         "wrong descriminator value",
         """{"c": {"_t": "wrong"}}""",
@@ -133,7 +133,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .asInstanceOf[BsonError.GeneralError]
                 .msg == "unsupported discriminator value",
             ),
-      ), // scalafix:ok
+      ),
       testCodecDecodeError[CoproductWrapper](
         "wrong value type",
         """{"c": {"_t": "A", "a": "wrong"}}""",
@@ -166,7 +166,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .asInstanceOf[BsonError.ProductError]
                 .field == "a",
             ),
-      ), // scalafix:ok
+      ),
     ),
     suite("collection")(
       testCodecDecodeError[WrappedList[Int]](
@@ -190,7 +190,7 @@ object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {
                 .asInstanceOf[BsonError.ArrayError]
                 .index == 1,
             ),
-      ), // scalafix:ok
+      ),
     ),
   )
 }

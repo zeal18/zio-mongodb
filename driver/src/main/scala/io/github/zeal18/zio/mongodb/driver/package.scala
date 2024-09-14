@@ -1,11 +1,11 @@
 package io.github.zeal18.zio.mongodb
 
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import org.bson.BsonDocumentReader
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.DocumentCodec
+
+import scala.reflect.ClassTag
 
 package object driver {
 
@@ -303,7 +303,7 @@ package object driver {
     * @return the classOf[C]
     */
   implicit def classTagToClassOf[C](ct: ClassTag[C]): Class[C] =
-    ct.runtimeClass.asInstanceOf[Class[C]] // scalafix:ok
+    ct.runtimeClass.asInstanceOf[Class[C]]
 
   implicit def bsonDocumentToDocument(doc: BsonDocument): Document = new Document(doc)
 

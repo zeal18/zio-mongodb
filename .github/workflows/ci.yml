@@ -25,15 +25,15 @@ jobs:
           java-version: 17
           check-latest: true
       - name: Lint code
-        run: sbt check
+        run: sbt scalafmtCheckAll
 
   test:
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        java: [ '8', '11', '17' ]
-        scala: [ '2.13.13', '3.3.3' ]
+        java: [ '11', '17', '21' ]
+        scala: [ '2.13.14', '3.3.3' ]
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
           java-version: ${{ matrix.java }}
           check-latest: true
       - name: Run tests
-        run: sbt ++${{ matrix.scala }}! test "It / test"
+        run: sbt ++${{ matrix.scala }}! test
 
   publish:
     runs-on: ubuntu-20.04

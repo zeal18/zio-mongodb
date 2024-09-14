@@ -1,8 +1,4 @@
 package io.github.zeal18.zio.mongodb.driver.projections
-import java.util as ju
-
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
@@ -14,6 +10,9 @@ import org.bson.BsonValue
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+
+import java.util as ju
+import scala.jdk.CollectionConverters.*
 
 sealed trait Projection extends Bson { self =>
   override def toBsonDocument[TDocument <: Object](

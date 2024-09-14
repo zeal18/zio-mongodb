@@ -36,5 +36,5 @@ private[mongodb] case class DocumentCodecProvider() extends CodecProvider {
       case IMMUTABLE => ImmutableDocumentCodec(registry).asInstanceOf[Codec[T]]
       case MUTABLE   => MutableDocumentCodec(registry).asInstanceOf[Codec[T]]
       case _         => null
-    } // scalafix:ok
+    }
 }

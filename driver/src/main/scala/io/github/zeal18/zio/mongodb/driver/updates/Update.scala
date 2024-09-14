@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.updates
 
-import scala.jdk.CollectionConverters.*
-
 import com.mongodb.client.model.Updates as JUpdates
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
@@ -15,6 +13,8 @@ import org.bson.BsonValue
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+
+import scala.jdk.CollectionConverters.*
 
 sealed trait Update extends Bson { self =>
   override def toBsonDocument[TDocument <: Object](
@@ -238,37 +238,35 @@ sealed trait Update extends Bson { self =>
 object Update {
   final case class Raw(bson: Bson) extends Update
 
-  final case class Combine(updates: Seq[Update])                                    extends Update
-  final case class Set[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
-  final case class Unset(fieldName: String)                                         extends Update
-  final case class SetOnInsert[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
-  final case class Rename(fieldName: String, newFieldName: String)                  extends Update
-  final case class Increment[A](fieldName: String, number: A, encoder: Encoder[A])  extends Update
-  final case class Multiply[A](fieldName: String, number: A, encoder: Encoder[A])   extends Update
-  final case class Min[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
-  final case class Max[A](fieldName: String, value: A, encoder: Encoder[A])         extends Update
-  final case class CurrentDate(fieldName: String)                                   extends Update
-  final case class CurrentTimestamp(fieldName: String)                              extends Update
-  final case class AddToSet[A](fieldName: String, value: A, encoder: Encoder[A])    extends Update
-  final case class AddEachToSet[A](fieldName: String, value: Iterable[A], encoder: Encoder[A])
-      extends Update
-  final case class Push[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
+  final case class Combine(updates: Seq[Update])                                               extends Update
+  final case class Set[A](fieldName: String, value: A, encoder: Encoder[A])                    extends Update
+  final case class Unset(fieldName: String)                                                    extends Update
+  final case class SetOnInsert[A](fieldName: String, value: A, encoder: Encoder[A])            extends Update
+  final case class Rename(fieldName: String, newFieldName: String)                             extends Update
+  final case class Increment[A](fieldName: String, number: A, encoder: Encoder[A])             extends Update
+  final case class Multiply[A](fieldName: String, number: A, encoder: Encoder[A])              extends Update
+  final case class Min[A](fieldName: String, value: A, encoder: Encoder[A])                    extends Update
+  final case class Max[A](fieldName: String, value: A, encoder: Encoder[A])                    extends Update
+  final case class CurrentDate(fieldName: String)                                              extends Update
+  final case class CurrentTimestamp(fieldName: String)                                         extends Update
+  final case class AddToSet[A](fieldName: String, value: A, encoder: Encoder[A])               extends Update
+  final case class AddEachToSet[A](fieldName: String, value: Iterable[A], encoder: Encoder[A]) extends Update
+  final case class Push[A](fieldName: String, value: A, encoder: Encoder[A])                   extends Update
   final case class PushEach[A](
     fieldName: String,
     values: Iterable[A],
     options: Option[PushOptions],
     encoder: Encoder[A],
   ) extends Update
-  final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A]) extends Update
-  final case class PullByFilter(filter: Filter)                              extends Update
-  final case class PullAll[A](fieldName: String, values: Iterable[A], encoder: Encoder[A])
-      extends Update
-  final case class PopFirst(fieldName: String)                    extends Update
-  final case class PopLast(fieldName: String)                     extends Update
-  final case class BitwiseAndInt(fieldName: String, value: Int)   extends Update
-  final case class BitwiseAndLong(fieldName: String, value: Long) extends Update
-  final case class BitwiseOrInt(fieldName: String, value: Int)    extends Update
-  final case class BitwiseOrLong(fieldName: String, value: Long)  extends Update
-  final case class BitwiseXorInt(fieldName: String, value: Int)   extends Update
-  final case class BitwiseXorLong(fieldName: String, value: Long) extends Update
+  final case class Pull[A](fieldName: String, value: A, encoder: Encoder[A])               extends Update
+  final case class PullByFilter(filter: Filter)                                            extends Update
+  final case class PullAll[A](fieldName: String, values: Iterable[A], encoder: Encoder[A]) extends Update
+  final case class PopFirst(fieldName: String)                                             extends Update
+  final case class PopLast(fieldName: String)                                              extends Update
+  final case class BitwiseAndInt(fieldName: String, value: Int)                            extends Update
+  final case class BitwiseAndLong(fieldName: String, value: Long)                          extends Update
+  final case class BitwiseOrInt(fieldName: String, value: Int)                             extends Update
+  final case class BitwiseOrLong(fieldName: String, value: Long)                           extends Update
+  final case class BitwiseXorInt(fieldName: String, value: Int)                            extends Update
+  final case class BitwiseXorLong(fieldName: String, value: Long)                          extends Update
 }

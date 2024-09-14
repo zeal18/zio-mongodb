@@ -16,6 +16,13 @@
 
 package io.github.zeal18.zio.mongodb.bson.collection
 
+import io.github.zeal18.zio.mongodb.bson.*
+import io.github.zeal18.zio.mongodb.bson.BsonMagnets
+import io.github.zeal18.zio.mongodb.bson.DefaultHelper.*
+import io.github.zeal18.zio.mongodb.bson.conversions.Bson
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.json.JsonWriterSettings
+
 import scala.annotation.nowarn
 import scala.collection.Iterable
 import scala.jdk.CollectionConverters.*
@@ -23,13 +30,6 @@ import scala.reflect.ClassTag
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
-import io.github.zeal18.zio.mongodb.bson.BsonMagnets
-import io.github.zeal18.zio.mongodb.bson.DefaultHelper.*
-import io.github.zeal18.zio.mongodb.bson.*
-import io.github.zeal18.zio.mongodb.bson.conversions.Bson
-import org.bson.codecs.configuration.CodecRegistry
-import org.bson.json.JsonWriterSettings
 
 /** Base Document trait.
   *
@@ -65,7 +65,7 @@ private[bson] trait BaseDocument[T] extends Iterable[(String, BsonValue)] with B
   )(implicit e: TResult DefaultsTo BsonValue, ct: ClassTag[TResult]): TResult =
     get[TResult](key) match {
       case Some(value) => value
-      case None        => throw new NoSuchElementException("key not found: " + key) // scalafix:ok
+      case None        => throw new NoSuchElementException("key not found: " + key)
     }
 
   /** Returns the value associated with a key, or a default value if the key is not contained in the map.
@@ -147,7 +147,7 @@ private[bson] trait BaseDocument[T] extends Iterable[(String, BsonValue)] with B
     underlying.containsKey(key) match {
       case true =>
         Try(ct.runtimeClass.cast(underlying.get(key))) match {
-          case Success(v) => Some(v.asInstanceOf[TResult]) // scalafix:ok
+          case Success(v) => Some(v.asInstanceOf[TResult])
           case Failure(_) => None
         }
       case false => None

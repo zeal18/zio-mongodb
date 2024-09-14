@@ -30,19 +30,13 @@ object DocumentCodecProviderSpec extends ZIOSpecDefault {
       val registry = fromProviders(provider)
 
       assertTrue(
-        provider
-          .get[Document](classOf[Document], registry)
-          .isInstanceOf[ImmutableDocumentCodec], // scalafix:ok
+        provider.get[Document](classOf[Document], registry).isInstanceOf[ImmutableDocumentCodec],
       ) &&
       assertTrue(
-        provider
-          .get[immutable.Document](classOf[immutable.Document], registry)
-          .isInstanceOf[ImmutableDocumentCodec], // scalafix:ok
+        provider.get[immutable.Document](classOf[immutable.Document], registry).isInstanceOf[ImmutableDocumentCodec],
       ) &&
       assertTrue(
-        provider
-          .get[mutable.Document](classOf[mutable.Document], registry)
-          .isInstanceOf[MutableDocumentCodec], // scalafix:ok
+        provider.get[mutable.Document](classOf[mutable.Document], registry).isInstanceOf[MutableDocumentCodec],
       ) &&
       assertTrue(Option(provider.get[String](classOf[String], registry)).isEmpty)
     },

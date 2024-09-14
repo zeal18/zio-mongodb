@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.annotation.tailrec
-
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
@@ -14,6 +12,8 @@ import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
+
+import scala.annotation.tailrec
 
 private[codecs] trait DerivedCodec {
   type Typeclass[A] = Codec[A]
@@ -34,7 +34,7 @@ private[codecs] trait DerivedCodec {
           BsonError.GeneralError(
             s"Ambiguous subtypes: ${ambiguous._2.map(_.typeName.full).mkString(", ")}",
           ),
-        ) // scalafix:ok
+        )
     }
 
     val isEnum = ctx.subtypes.forall(_.typeclass match {
@@ -57,14 +57,14 @@ object DerivedCodec {
         throw BsonError.CodecError(
           ctx.typeName.full,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
           ctx.typeName.full,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
       case e: BsonError =>
-        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e)
     }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A = try {
@@ -77,14 +77,14 @@ object DerivedCodec {
         throw BsonError.CodecError(
           ctx.typeName.full,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
       case e: BsonInvalidOperationException =>
         throw BsonError.CodecError(
           ctx.typeName.full,
           BsonError.SerializationError(e),
-        ) // scalafix:ok
+        )
       case e: BsonError =>
-        throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+        throw BsonError.CodecError(ctx.typeName.full, e)
     }
 
     val inlined: InlinedCaseClassCodec[A] = InlinedCaseClassCodec(ctx)
@@ -115,13 +115,13 @@ object DerivedCodec {
               childCodec.encode(writer, value, encoderCtx)
             catch {
               case e: BsonError =>
-                throw BsonError.ProductError(param.label, param.typeName.short, e) // scalafix:ok
+                throw BsonError.ProductError(param.label, param.typeName.short, e)
             }
           }
       catch {
-        case e: BsonSerializationException => throw BsonError.SerializationError(e) // scalafix:ok
+        case e: BsonSerializationException => throw BsonError.SerializationError(e)
         case e: BsonInvalidOperationException =>
-          throw BsonError.SerializationError(e) // scalafix:ok
+          throw BsonError.SerializationError(e)
       }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A = {
@@ -131,13 +131,9 @@ object DerivedCodec {
         typ match {
           case BsonType.END_OF_DOCUMENT =>
             ctx
-              .constructEither(param =>
-                values.get(param.label).orElse(param.default).toRight(param.label),
-              )
+              .constructEither(param => values.get(param.label).orElse(param.default).toRight(param.label))
               .fold(
-                e =>
-                  throw BsonError
-                    .GeneralError(s"Missing fields: ${e.mkString(", ")}"), // scalafix:ok
+                e => throw BsonError.GeneralError(s"Missing fields: ${e.mkString(", ")}"),
                 identity,
               )
           case _ =>
@@ -160,7 +156,7 @@ object DerivedCodec {
                     BsonError.GeneralError(
                       s"Field '$name' is ignored but doesn't have a default value",
                     ),
-                  ) // scalafix:ok
+                  )
                 else if (ignored) {
                   reader.skipValue()
                   step(values)
@@ -175,7 +171,7 @@ object DerivedCodec {
                           param.label,
                           param.typeName.short,
                           e,
-                        ) // scalafix:ok
+                        )
                     }
 
                   step(values ++ maybeValue)
@@ -186,9 +182,9 @@ object DerivedCodec {
 
       try step(Map.empty)
       catch {
-        case e: BsonSerializationException => throw BsonError.SerializationError(e) // scalafix:ok
+        case e: BsonSerializationException => throw BsonError.SerializationError(e)
         case e: BsonInvalidOperationException =>
-          throw BsonError.SerializationError(e) // scalafix:ok
+          throw BsonError.SerializationError(e)
       }
     }
   }
@@ -201,12 +197,12 @@ object DerivedCodec {
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -216,20 +212,20 @@ object DerivedCodec {
         else
           throw BsonError.GeneralError(
             s"Expected '${ctx.typeName.short}'', got '$name'.",
-          ) // scalafix:ok
+          )
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
   }
 
@@ -242,7 +238,7 @@ object DerivedCodec {
         param.typeclass.encode(writer, childValue, encoderContext)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -254,20 +250,17 @@ object DerivedCodec {
         ctx.construct(_ => value)
       } catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
   }
 
   private[codecs] case class EnumCodec[A](ctx: SealedTrait[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try
-        ctx.split(value)(subtype =>
-          subtype.typeclass
-            .encode(writer, value.asInstanceOf[subtype.SType], encoderContext), // scalafix:ok
-        )
+        ctx.split(value)(subtype => subtype.typeclass.encode(writer, value.asInstanceOf[subtype.SType], encoderContext))
       catch {
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
@@ -278,7 +271,7 @@ object DerivedCodec {
             st <- ctx.subtypes.find(_.typeName.short == shortName)
             objectCodec <- st.typeclass match {
               case oc: CaseObjectCodec[?] =>
-                Some(oc.asInstanceOf[CaseObjectCodec[A]]) // scalafix:ok
+                Some(oc.asInstanceOf[CaseObjectCodec[A]])
               case _ => None
             }
           } yield objectCodec
@@ -287,21 +280,21 @@ object DerivedCodec {
           throw BsonError.CoproductError(
             shortName,
             BsonError.GeneralError("unsupported discriminator value"),
-          ), // scalafix:ok
+          ),
         )(_.ctx.construct(_ => ()))
       } catch {
         case e: BsonSerializationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
   }
 
@@ -317,17 +310,17 @@ object DerivedCodec {
             subtype.typeclass match {
               case codec: CaseObjectCodec[?] =>
                 writer.writeName(TypeTag)
-                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx) // scalafix:ok
+                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx)
               case codec: CaseClassCodec[?] =>
                 writer.writeString(TypeTag, subtype.typeName.short)
                 codec.inlined.encode(
                   writer,
                   value.asInstanceOf[subtype.SType],
                   encoderCtx,
-                ) // scalafix:ok
+                )
               case codec =>
                 writer.writeString(TypeTag, subtype.typeName.short)
-                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx) // scalafix:ok
+                codec.encode(writer, value.asInstanceOf[subtype.SType], encoderCtx)
             }
             writer.writeEndDocument()
           } catch {
@@ -335,14 +328,14 @@ object DerivedCodec {
               throw BsonError.CoproductError(
                 subtype.typeName.short,
                 BsonError.SerializationError(e),
-              ) // scalafix:ok
+              )
             case e: BsonInvalidOperationException =>
               throw BsonError.CoproductError(
                 subtype.typeName.short,
                 BsonError.SerializationError(e),
-              ) // scalafix:ok
+              )
             case e: BsonError =>
-              throw BsonError.CoproductError(subtype.typeName.short, e) // scalafix:ok
+              throw BsonError.CoproductError(subtype.typeName.short, e)
           }
         }
       catch {
@@ -350,14 +343,14 @@ object DerivedCodec {
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
 
     override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
@@ -379,14 +372,14 @@ object DerivedCodec {
                 }
               catch {
                 case e: BsonError =>
-                  throw BsonError.CoproductError(st.typeName.short, e) // scalafix:ok
+                  throw BsonError.CoproductError(st.typeName.short, e)
               }
           }
           .getOrElse(
             throw BsonError.CoproductError(
               typeTag,
               BsonError.GeneralError("unsupported discriminator value"),
-            ), // scalafix:ok
+            ),
           )
         reader.readEndDocument()
 
@@ -396,14 +389,14 @@ object DerivedCodec {
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonInvalidOperationException =>
           throw BsonError.CodecError(
             ctx.typeName.full,
             BsonError.SerializationError(e),
-          ) // scalafix:ok
+          )
         case e: BsonError =>
-          throw BsonError.CodecError(ctx.typeName.full, e) // scalafix:ok
+          throw BsonError.CodecError(ctx.typeName.full, e)
       }
   }
 }

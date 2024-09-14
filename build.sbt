@@ -1,6 +1,4 @@
-import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
-
-val scala2_13 = "2.13.13"
+val scala2_13 = "2.13.14"
 val scala3    = "3.3.3"
 
 ThisBuild / scalaVersion       := scala2_13
@@ -21,22 +19,15 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 autoCompilerPlugins := true
 
-ThisBuild / parallelExecution        := false
 ThisBuild / Test / parallelExecution := false
 ThisBuild / fork                     := true
 ThisBuild / Test / fork              := true
 
-lazy val IntegrationTest = config("it") extend Test
-
-ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-ThisBuild / scalafixDependencies += "org.scala-lang"       %% "scala-rewrites"   % "0.1.3"
-
 inThisBuild(
   List(
-    organization := "io.github.zeal18",
-    homepage     := Some(url("https://github.com/zeal18/zio-mongodb")),
-    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    organization           := "io.github.zeal18",
+    homepage               := Some(url("https://github.com/zeal18/zio-mongodb")),
+    licenses               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     sonatypeCredentialHost := "s01.oss.sonatype.org",
     sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
     developers := List(
@@ -78,20 +69,12 @@ val commonSettings =
       case _ =>
         Seq(
           compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-          compilerPlugin(scalafixSemanticdb),
         )
     }),
   )
 
-val integrationTestSettings =
-  Defaults.itSettings ++ inConfig(IntegrationTest)(
-    scalafmtConfigSettings ++ scalafixConfigSettings(IntegrationTest),
-  )
-
 lazy val root =
-  (project in file("."))
-    .aggregate(bson, driver, testkit, driverItTests)
-    .settings(publish / skip := true)
+  (project in file(".")).aggregate(bson, driver, testkit, driverItTests).settings(publish / skip := true)
 
 lazy val bson = (project in file("bson")).settings(
   name := "zio-mongodb-bson",
@@ -105,8 +88,8 @@ lazy val bson = (project in file("bson")).settings(
     case Some((3, _)) => Seq.empty
     case _ =>
       Seq(
-        "com.softwaremill.magnolia1_2" %% "magnolia" % magnolia2Version,
-        "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia
+        "com.softwaremill.magnolia1_2" %% "magnolia"      % magnolia2Version,
+        "org.scala-lang"                % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia
       )
   }),
 )
@@ -153,11 +136,8 @@ lazy val testkit = (project in file("testkit"))
 
 // as a separate project to avoid circular dependencies
 lazy val driverItTests = (project in file("driver-it-tests"))
-  .configs(IntegrationTest)
   .settings(
     commonSettings,
-    Defaults.itSettings,
-    integrationTestSettings,
     name           := "zio-mongodb-driver-it-tests",
     publish / skip := true,
     libraryDependencies ++= Seq(
@@ -166,9 +146,3 @@ lazy val driverItTests = (project in file("driver-it-tests"))
   )
   .dependsOn(driver)
   .dependsOn(testkit)
-
-addCommandAlias("fmt", "all scalafmtSbt; scalafmt; Test / scalafmt; scalafix; Test / scalafix")
-addCommandAlias(
-  "check",
-  "all scalafmtSbtCheck; scalafmtCheck; Test / scalafmtCheck; scalafix --check; Test / scalafix --check",
-)
