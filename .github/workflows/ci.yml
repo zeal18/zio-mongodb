@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         run: sbt scalafmtCheckAll
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -51,7 +51,7 @@ jobs:
         run: sbt ++${{ matrix.scala }}! test
 
   publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [lint, test]
     if: github.event_name != 'pull_request'
     steps:
