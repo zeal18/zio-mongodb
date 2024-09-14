@@ -59,7 +59,7 @@ object IterableSubscriberSpec extends ZIOSpecDefault {
             ): Unit =
               if (value.isFailure) failedAFiber = true
 
-            @transient var failedAFiber = false // scalafix:ok
+            @transient var failedAFiber = false
 
             def value(implicit trace: Trace): UIO[Boolean] =
               ZIO.succeed(failedAFiber)

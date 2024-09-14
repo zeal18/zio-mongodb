@@ -27,8 +27,7 @@ sealed trait Aggregation extends Bson { self =>
     codecRegistry: CodecRegistry,
   ): BsonDocument = {
     val documentClass =
-      implicitly[ClassTag[BsonDocument]].runtimeClass
-        .asInstanceOf[Class[BsonDocument]] // scalafix:ok
+      implicitly[ClassTag[BsonDocument]].runtimeClass.asInstanceOf[Class[BsonDocument]]
     val context = EncoderContext.builder().build()
 
     def simplePipelineStage(name: String, value: Bson): BsonDocument =

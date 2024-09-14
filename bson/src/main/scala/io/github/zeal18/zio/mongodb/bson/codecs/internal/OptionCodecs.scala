@@ -53,7 +53,7 @@ private class NestedOptionCodec[A <: Option[?]: Codec] extends Codec[Option[A]] 
         if (name != "_option") {
           throw new BsonSerializationException(
             s"Expected DOCUMENT to contain a field named '_option', but got '$name'",
-          ) // scalafix:ok
+          )
         }
         val value = Decoder[A].decode(reader, decoderContext)
         reader.readEndDocument()
@@ -61,6 +61,6 @@ private class NestedOptionCodec[A <: Option[?]: Codec] extends Codec[Option[A]] 
       case t =>
         throw new BsonSerializationException(
           s"Expected a document or null but found $t",
-        ) // scalafix:ok
+        )
     }
 }

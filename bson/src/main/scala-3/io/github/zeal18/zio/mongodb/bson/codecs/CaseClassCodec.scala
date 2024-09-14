@@ -18,17 +18,11 @@ case class CaseClassCodec[A](fullName: String, flat: FlatCaseClassCodec[A]) exte
       writer.writeEndDocument()
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 
   override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
     try
@@ -38,15 +32,9 @@ case class CaseClassCodec[A](fullName: String, flat: FlatCaseClassCodec[A]) exte
       result
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 end CaseClassCodec

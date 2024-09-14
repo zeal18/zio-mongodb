@@ -47,14 +47,14 @@ object Codec
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonInvalidOperationException =>
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonError =>
-            throw BsonError.CodecError(ct.toString(), e) // scalafix:ok
+            throw BsonError.CodecError(ct.toString(), e)
         }
 
       override def decode(reader: BsonReader, context: DecoderContext): A =
@@ -64,14 +64,14 @@ object Codec
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonInvalidOperationException =>
             throw BsonError.CodecError(
               ct.toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonError =>
-            throw BsonError.CodecError(ct.toString(), e) // scalafix:ok
+            throw BsonError.CodecError(ct.toString(), e)
         }
     }
 
@@ -80,18 +80,18 @@ object Codec
       try c.encode(writer, value, context)
       catch {
         case e: BsonSerializationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
         case e: BsonInvalidOperationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
       }
 
     override def decode(reader: BsonReader, context: DecoderContext): A =
       try c.decode(reader, context)
       catch {
         case e: BsonSerializationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
         case e: BsonInvalidOperationException =>
-          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CodecError(ct.toString(), BsonError.SerializationError(e))
       }
   }
 }

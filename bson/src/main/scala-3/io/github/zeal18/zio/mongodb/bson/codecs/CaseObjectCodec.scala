@@ -19,26 +19,20 @@ case class CaseObjectCodec[A](shortName: String, fullName: String, obj: A) exten
     try writer.writeString(shortName)
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(
-          fullName,
-          BsonError.SerializationError(e),
-        ) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
 
   override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
     try
       val name = reader.readString()
       if name == shortName then obj
-      else throw BsonError.GeneralError(s"Expected '$shortName', got '$name'.") // scalafix:ok
+      else throw BsonError.GeneralError(s"Expected '$shortName', got '$name'.")
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 end CaseObjectCodec
