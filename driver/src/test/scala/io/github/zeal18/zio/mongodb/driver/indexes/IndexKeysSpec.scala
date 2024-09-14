@@ -6,15 +6,12 @@ import io.github.zeal18.zio.mongodb.driver.indexes
 import zio.test.*
 import zio.test.ZIOSpecDefault
 
-import scala.annotation.nowarn
-
 object IndexKeysSpec extends ZIOSpecDefault {
   private def testKey(title: String, index: indexes.IndexKey, expected: String) =
     test(title) {
       assertTrue(index.toBsonDocument().toString == expected)
     }
 
-  @nowarn("cat=deprecation")
   override def spec = suite("IndexKeysSpec")(
     testKey("ascending", indexes.asc("a", "b"), """{"a": 1, "b": 1}"""),
     testKey("descending", indexes.desc("a", "b"), """{"a": -1, "b": -1}"""),
@@ -27,11 +24,6 @@ object IndexKeysSpec extends ZIOSpecDefault {
       "geo2d",
       indexes.geo2d("a", "b"),
       """{"a": "2d", "b": "2d"}""",
-    ),
-    testKey(
-      "geoHaystack",
-      indexes.geoHaystack("a", "additionalField"),
-      """{"a": "geoHaystack", "additionalField": 1}""",
     ),
     testKey("text", indexes.text("a", "b"), """{"a": "text", "b": "text"}"""),
     testKey("hashed", indexes.hashed("a", "b"), """{"a": "hashed", "b": "hashed"}"""),
