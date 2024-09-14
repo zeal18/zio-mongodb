@@ -1,0 +1,24 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "timezone": "Europe/Berlin",
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 5,
+  "schedule": "before 4am on Monday",
+  "rebaseWhen": "conflicted",
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "separateMultipleMajor": false,
+  "labels": [
+    "dependency-update"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": [
+      "security"
+    ],
+    "prPriority": 100
+  }
+}
