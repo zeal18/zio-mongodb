@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '8', '11', '17' ]
+        java: [ '11', '17', '21' ]
         scala: [ '2.13.14', '3.3.3' ]
     steps:
       - name: Checkout current branch
