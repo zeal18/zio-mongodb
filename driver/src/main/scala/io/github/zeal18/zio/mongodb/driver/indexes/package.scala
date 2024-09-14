@@ -42,23 +42,6 @@ package object indexes {
     */
   def geo2d(fieldNames: String*): IndexKey.Geo2d = IndexKey.Geo2d(fieldNames)
 
-  /** Create an index key for a geohaystack index on the given field.
-    *
-    * <p>
-    * <strong>Note: </strong>For queries that use spherical geometry, a 2dsphere index is a better option than a haystack index.
-    * 2dsphere indexes allow field reordering; geoHaystack indexes require the first field to be the location field. Also, geoHaystack
-    * indexes are only usable via commands and so always return all results at once..
-    * </p>
-    *
-    * @param fieldName the field to create a geoHaystack index on
-    * @param additional the additional field that forms the geoHaystack index key
-    * @return the index specification
-    * @see [[https://www.mongodb.com/docs/manual/core/geohaystack geoHaystack index]]
-    */
-  @deprecated("geoHaystack is deprecated in MongoDB 4.4", "4.2.1")
-  def geoHaystack(fieldName: String, additional: String): IndexKey.GeoHaystack =
-    IndexKey.GeoHaystack(fieldName, additional)
-
   /** Create an index key for a text index on the given field.
     *
     * @param fieldName the field to create a text index on
