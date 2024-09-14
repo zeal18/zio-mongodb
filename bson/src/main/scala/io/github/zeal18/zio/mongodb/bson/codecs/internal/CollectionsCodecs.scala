@@ -48,7 +48,7 @@ private[codecs] trait CollectionsCodecs {
                 try
                   elementCodec.decode(reader, ctx)
                 catch {
-                  case e: BsonError => throw BsonError.ArrayError(index, e) // scalafix:ok
+                  case e: BsonError => throw BsonError.ArrayError(index, e)
                 }
               val nextType = reader.readBsonType()
               Some((element, (nextType, index + 1)))
@@ -58,14 +58,14 @@ private[codecs] trait CollectionsCodecs {
             throw BsonError.CodecError(
               implicitly[ClassTag[I[T]]].toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonInvalidOperationException =>
             throw BsonError.CodecError(
               implicitly[ClassTag[I[T]]].toString(),
               BsonError.SerializationError(e),
-            ) // scalafix:ok
+            )
           case e: BsonError =>
-            throw BsonError.CodecError(implicitly[ClassTag[I[T]]].toString(), e) // scalafix:ok
+            throw BsonError.CodecError(implicitly[ClassTag[I[T]]].toString(), e)
         }
 
     }

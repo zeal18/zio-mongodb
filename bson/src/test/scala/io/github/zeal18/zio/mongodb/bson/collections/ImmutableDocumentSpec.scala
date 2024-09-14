@@ -40,7 +40,7 @@ object ImmutableDocumentSpec extends ZIOSpecDefault {
         ZIO
           .attempt(Document("not Json"))
           .cause
-          .map(e => assertTrue(e.failureOption.get.isInstanceOf[JsonParseException])) // scalafix:ok
+          .map(e => assertTrue(e.failureOption.get.isInstanceOf[JsonParseException]))
           .map(_ && assertTrue(Document("{a: 1, b: true}") == Document("a" -> 1, "b" -> true)))
       },
       test("should support get()") {
@@ -53,16 +53,12 @@ object ImmutableDocumentSpec extends ZIOSpecDefault {
           nonexistent <- ZIO
             .attempt(doc("nonexistent"))
             .cause
-            .map(e =>
-              assertTrue(e.failureOption.get.isInstanceOf[NoSuchElementException]), // scalafix:ok
-            )
+            .map(e => assertTrue(e.failureOption.get.isInstanceOf[NoSuchElementException]))
           // When the key exists but the type doesn't match"
           wrongtype <- ZIO
             .attempt(doc[BsonArray]("key"))
             .cause
-            .map(e =>
-              assertTrue(e.failureOption.get.isInstanceOf[NoSuchElementException]), // scalafix:ok
-            )
+            .map(e => assertTrue(e.failureOption.get.isInstanceOf[NoSuchElementException]))
         } yield nonexistent && wrongtype &&
           assertTrue(doc("key") == BsonString("value")) &&
           assertTrue(doc[BsonString]("key") == BsonString("value"))

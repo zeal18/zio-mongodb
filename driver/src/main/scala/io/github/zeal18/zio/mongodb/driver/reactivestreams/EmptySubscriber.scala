@@ -29,7 +29,7 @@ private object EmptySubscriber {
     override def await(): Task[Unit] = promise.await
 
     override def onSubscribe(s: Subscription): Unit =
-      if (s == null) // scalafix:ok
+      if (s == null)
         failNPE("s was null in onSubscribe")
       else {
         val shouldCancel = isSubscribedOrInterrupted.getAndSet(true)
@@ -43,7 +43,7 @@ private object EmptySubscriber {
     override def onNext(t: A): Unit = ()
 
     override def onError(e: Throwable): Unit =
-      if (e == null) // scalafix:ok
+      if (e == null)
         failNPE("t was null in onError")
       else
         fail(e)
@@ -54,7 +54,7 @@ private object EmptySubscriber {
     private def failNPE(msg: String) = {
       val e = new NullPointerException(msg)
       fail(e)
-      throw e // scalafix:ok
+      throw e
     }
 
     private def fail(e: Throwable): Unit =

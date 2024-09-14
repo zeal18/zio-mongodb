@@ -57,7 +57,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
       ImmutableDocumentCodec(registry).encode(writer, original, EncoderContext.builder().build())
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader = new BsonBinaryReader(
         new ByteBufferBsonInput(
           new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray)),
@@ -68,7 +68,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
         ImmutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[Document], // scalafix:ok
+        decodedDocument.isInstanceOf[Document],
       ) &&
       assertTrue(original == decodedDocument)
     },
@@ -90,7 +90,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
       )
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader =
         new BsonBinaryReader(
           new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
@@ -100,7 +100,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
         ImmutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[Document], // scalafix:ok
+        decodedDocument.isInstanceOf[Document],
       ) &&
       assertTrue(original == decodedDocument) &&
       assertTrue(
@@ -130,7 +130,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
     },
     test("should get the document_id") {
       assertTrue(
-        ImmutableDocumentCodec().getDocumentId(Document()) == null, // scalafix:ok
+        ImmutableDocumentCodec().getDocumentId(Document()) == null,
       ) &&
       assertTrue(
         ImmutableDocumentCodec()
@@ -142,7 +142,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
       val document2 = ImmutableDocumentCodec().generateIdIfAbsentFromDocument(document)
 
       assertTrue(document.contains("_id") == false) &&
-      assertTrue(document2("_id").isInstanceOf[BsonObjectId]) // scalafix:ok
+      assertTrue(document2("_id").isInstanceOf[BsonObjectId])
     },
     test("should not generate document id if present") {
       val document = Document("_id" -> new BsonInt32(1))

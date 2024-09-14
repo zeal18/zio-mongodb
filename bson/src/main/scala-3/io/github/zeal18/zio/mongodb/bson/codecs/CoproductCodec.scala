@@ -27,22 +27,22 @@ case class CoproductCodec[A](
       try
         writer.writeStartDocument()
         writer.writeString(discriminator, name)
-        codec.asInstanceOf[Codec[A]].encode(writer, value, encoderCtx) // scalafix:ok
+        codec.asInstanceOf[Codec[A]].encode(writer, value, encoderCtx)
         writer.writeEndDocument()
       catch
         case e: BsonSerializationException =>
-          throw BsonError.CoproductError(name, BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CoproductError(name, BsonError.SerializationError(e))
         case e: BsonInvalidOperationException =>
-          throw BsonError.CoproductError(name, BsonError.SerializationError(e)) // scalafix:ok
+          throw BsonError.CoproductError(name, BsonError.SerializationError(e))
         case e: BsonError =>
-          throw BsonError.CoproductError(name, e) // scalafix:ok
+          throw BsonError.CoproductError(name, e)
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 
   override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
     try
@@ -54,23 +54,23 @@ case class CoproductCodec[A](
           try codec.decode(reader, decoderCtx)
           catch
             case e: BsonError =>
-              throw BsonError.CoproductError(typeTag, e) // scalafix:ok
+              throw BsonError.CoproductError(typeTag, e)
         }
         .getOrElse(
           throw BsonError.CoproductError(
             typeTag,
             BsonError.GeneralError("unsupported discriminator value"),
-          ), // scalafix:ok
+          ),
         )
-        .asInstanceOf[A] // scalafix:ok
+        .asInstanceOf[A]
       reader.readEndDocument()
 
       result
     catch
       case e: BsonSerializationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonInvalidOperationException =>
-        throw BsonError.CodecError(fullName, BsonError.SerializationError(e)) // scalafix:ok
+        throw BsonError.CodecError(fullName, BsonError.SerializationError(e))
       case e: BsonError =>
-        throw BsonError.CodecError(fullName, e) // scalafix:ok
+        throw BsonError.CodecError(fullName, e)
 end CoproductCodec

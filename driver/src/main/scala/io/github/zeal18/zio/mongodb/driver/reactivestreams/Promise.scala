@@ -56,10 +56,10 @@ final private[reactivestreams] class Promise[E, A](
   def await(implicit trace: Trace): IO[E, A] =
     ZIO.asyncInterrupt[Any, E, A](
       k => {
-        var result = null.asInstanceOf[Either[UIO[Any], IO[E, A]]] // scalafix:ok
-        var retry  = true                                          // scalafix:ok
+        var result = null.asInstanceOf[Either[UIO[Any], IO[E, A]]]
+        var retry  = true
 
-        while (retry) { // scalafix:ok
+        while (retry) {
           val oldState = state.get
 
           val newState = oldState match {
@@ -104,10 +104,10 @@ final private[reactivestreams] class Promise[E, A](
     */
   def completeWith(io: IO[E, A])(implicit trace: Trace): UIO[Boolean] =
     ZIO.succeed {
-      var action: () => Boolean = null.asInstanceOf[() => Boolean] // scalafix:ok
-      var retry                 = true                             // scalafix:ok
+      var action: () => Boolean = null.asInstanceOf[() => Boolean]
+      var retry                 = true
 
-      while (retry) { // scalafix:ok
+      while (retry) {
         val oldState = state.get
 
         val newState = oldState match {
@@ -183,9 +183,9 @@ final private[reactivestreams] class Promise[E, A](
 
   private def interruptJoiner(joiner: IO[E, A] => Any)(implicit trace: Trace): UIO[Any] =
     ZIO.succeed {
-      var retry = true // scalafix:ok
+      var retry = true
 
-      while (retry) { // scalafix:ok
+      while (retry) {
         val oldState = state.get
 
         val newState = oldState match {
@@ -207,10 +207,10 @@ final private[reactivestreams] class Promise[E, A](
   @transient val unsafe: UnsafeAPI =
     new UnsafeAPI {
       def done(io: IO[E, A]): Unit = {
-        var retry: Boolean                 = true // scalafix:ok
-        var joiners: List[IO[E, A] => Any] = null // scalafix:ok
+        var retry: Boolean                 = true
+        var joiners: List[IO[E, A] => Any] = null
 
-        while (retry) { // scalafix:ok
+        while (retry) {
           val oldState = state.get
 
           val newState = oldState match {
@@ -223,7 +223,7 @@ final private[reactivestreams] class Promise[E, A](
           retry = !state.compareAndSet(oldState, newState)
         }
 
-        if (joiners ne null) joiners.foreach(_(io)) // scalafix:ok
+        if (joiners ne null) joiners.foreach(_(io))
       }
     }
 }

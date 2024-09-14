@@ -303,7 +303,7 @@ package object driver {
     * @return the classOf[C]
     */
   implicit def classTagToClassOf[C](ct: ClassTag[C]): Class[C] =
-    ct.runtimeClass.asInstanceOf[Class[C]] // scalafix:ok
+    ct.runtimeClass.asInstanceOf[Class[C]]
 
   implicit def bsonDocumentToDocument(doc: BsonDocument): Document = new Document(doc)
 

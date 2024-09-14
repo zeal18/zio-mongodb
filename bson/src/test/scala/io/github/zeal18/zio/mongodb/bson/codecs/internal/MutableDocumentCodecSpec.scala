@@ -58,7 +58,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
       MutableDocumentCodec(registry).encode(writer, original, EncoderContext.builder().build())
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader = new BsonBinaryReader(
         new ByteBufferBsonInput(
           new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray)),
@@ -69,7 +69,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
         MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+        decodedDocument.isInstanceOf[mutable.Document],
       ) &&
       assertTrue(original == decodedDocument)
     },
@@ -91,7 +91,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
       )
 
       val buffer: BasicOutputBuffer =
-        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer]; // scalafix:ok
+        writer.getBsonOutput().asInstanceOf[BasicOutputBuffer];
       val reader: BsonBinaryReader =
         new BsonBinaryReader(
           new ByteBufferBsonInput(new ByteBufNIO(ByteBuffer.wrap(buffer.toByteArray))),
@@ -101,7 +101,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
         MutableDocumentCodec().decode(reader, DecoderContext.builder().build())
 
       assertTrue(
-        decodedDocument.isInstanceOf[mutable.Document], // scalafix:ok
+        decodedDocument.isInstanceOf[mutable.Document],
       ) &&
       assertTrue(original == decodedDocument) &&
       assertTrue(
@@ -131,7 +131,7 @@ object MutableDocumentCodecSpec extends ZIOSpecDefault {
     },
     test("should get the document_id") {
       assertTrue(
-        MutableDocumentCodec().getDocumentId(Document()) == null, // scalafix:ok
+        MutableDocumentCodec().getDocumentId(Document()) == null,
       ) &&
       assertTrue(
         MutableDocumentCodec().getDocumentId(Document("_id" -> new BsonInt32(1))) == new BsonInt32(

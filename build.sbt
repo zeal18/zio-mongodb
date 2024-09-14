@@ -1,5 +1,3 @@
-import org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
-
 val scala2_13 = "2.13.13"
 val scala3    = "3.3.3"
 
@@ -27,10 +25,6 @@ ThisBuild / fork                     := true
 ThisBuild / Test / fork              := true
 
 lazy val IntegrationTest = config("it") extend Test
-
-ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-ThisBuild / scalafixDependencies += "org.scala-lang"       %% "scala-rewrites"   % "0.1.3"
 
 inThisBuild(
   List(
@@ -78,15 +72,12 @@ val commonSettings =
       case _ =>
         Seq(
           compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-          compilerPlugin(scalafixSemanticdb),
         )
     }),
   )
 
 val integrationTestSettings =
-  Defaults.itSettings ++ inConfig(IntegrationTest)(
-    scalafmtConfigSettings ++ scalafixConfigSettings(IntegrationTest),
-  )
+  Defaults.itSettings ++ inConfig(IntegrationTest)(Seq.empty)
 
 lazy val root =
   (project in file("."))
@@ -166,9 +157,3 @@ lazy val driverItTests = (project in file("driver-it-tests"))
   )
   .dependsOn(driver)
   .dependsOn(testkit)
-
-addCommandAlias("fmt", "all scalafmtSbt; scalafmt; Test / scalafmt; scalafix; Test / scalafix")
-addCommandAlias(
-  "check",
-  "all scalafmtSbtCheck; scalafmtCheck; Test / scalafmtCheck; scalafix --check; Test / scalafix --check",
-)

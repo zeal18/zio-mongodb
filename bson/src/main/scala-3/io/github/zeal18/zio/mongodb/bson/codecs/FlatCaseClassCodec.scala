@@ -28,11 +28,11 @@ class FlatCaseClassCodec[A](ctx: CaseClass[A]) extends Codec[A]:
         try childCodec.encode(writer, value, encoderCtx)
         catch
           case e: BsonError =>
-            throw BsonError.ProductError(param.label, ctx.shortName, e) // scalafix:ok
+            throw BsonError.ProductError(param.label, ctx.shortName, e)
       }
     catch
-      case e: BsonSerializationException    => throw BsonError.SerializationError(e) // scalafix:ok
-      case e: BsonInvalidOperationException => throw BsonError.SerializationError(e) // scalafix:ok
+      case e: BsonSerializationException    => throw BsonError.SerializationError(e)
+      case e: BsonInvalidOperationException => throw BsonError.SerializationError(e)
 
   override def decode(reader: BsonReader, decoderCtx: DecoderContext): A =
     @tailrec
@@ -54,13 +54,13 @@ class FlatCaseClassCodec[A](ctx: CaseClass[A]) extends Codec[A]:
                 try Some(field.label -> codec.decode(reader, decoderCtx))
                 catch
                   case e: BsonError =>
-                    throw BsonError.ProductError(field.label, ctx.shortName, e) // scalafix:ok
+                    throw BsonError.ProductError(field.label, ctx.shortName, e)
 
               step(values ++ maybeValue)
     end step
 
     try step(Map.empty)
     catch
-      case e: BsonSerializationException    => throw BsonError.SerializationError(e) // scalafix:ok
-      case e: BsonInvalidOperationException => throw BsonError.SerializationError(e) // scalafix:ok
+      case e: BsonSerializationException    => throw BsonError.SerializationError(e)
+      case e: BsonInvalidOperationException => throw BsonError.SerializationError(e)
 end FlatCaseClassCodec

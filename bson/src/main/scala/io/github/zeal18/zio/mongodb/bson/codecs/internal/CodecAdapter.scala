@@ -18,7 +18,7 @@ private[mongodb] case class CodecAdapter[A](adapted: Codec[A])(implicit ct: Clas
   ): Unit = adapted.encode(writer, value, encoderContext)
 
   override def getEncoderClass(): Class[A] =
-    implicitly[ClassTag[A]].runtimeClass.asInstanceOf[Class[A]] // scalafix:ok
+    implicitly[ClassTag[A]].runtimeClass.asInstanceOf[Class[A]]
 
   override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
     adapted.decode(reader, decoderContext)
