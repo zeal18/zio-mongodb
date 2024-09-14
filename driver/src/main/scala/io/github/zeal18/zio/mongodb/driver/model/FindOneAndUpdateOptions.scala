@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.model
 
-import java.time.Duration
-
-import scala.jdk.CollectionConverters.*
-
 import com.mongodb.client.model.FindOneAndUpdateOptions as JFindOneAndUpdateOptions
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
@@ -11,6 +7,9 @@ import io.github.zeal18.zio.mongodb.driver.projections.Projection
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.bson.BsonValue
 import org.bson.conversions.Bson
+
+import java.time.Duration
+import scala.jdk.CollectionConverters.*
 
 /** The options to apply to an operation that atomically finds a document and updates it.
   *

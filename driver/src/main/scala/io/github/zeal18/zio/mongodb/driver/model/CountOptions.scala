@@ -1,10 +1,10 @@
 package io.github.zeal18.zio.mongodb.driver.model
 
-import java.time.Duration
-
 import com.mongodb.client.model.CountOptions as JCountOptions
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import org.bson.BsonValue
+
+import java.time.Duration
 
 /** The options for a count operation.
   *

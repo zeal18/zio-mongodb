@@ -35,8 +35,7 @@ private[mongodb] object MutableDocumentCodec {
 
 /** A Codec for mutable Document instances.
   */
-private[mongodb] case class MutableDocumentCodec(registry: Option[CodecRegistry])
-    extends CollectibleCodec[Document] {
+private[mongodb] case class MutableDocumentCodec(registry: Option[CodecRegistry]) extends CollectibleCodec[Document] {
 
   lazy val underlying: BsonDocumentCodec =
     registry.map(new BsonDocumentCodec(_)).getOrElse(new BsonDocumentCodec)

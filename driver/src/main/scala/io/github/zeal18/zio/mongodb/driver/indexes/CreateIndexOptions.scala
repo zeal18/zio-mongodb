@@ -1,9 +1,9 @@
 package io.github.zeal18.zio.mongodb.driver.indexes
 
+import com.mongodb.client.model.CreateIndexOptions as JCreateIndexOptions
+
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-
-import com.mongodb.client.model.CreateIndexOptions as JCreateIndexOptions
 
 /** The options to apply to the command when creating indexes.
   *

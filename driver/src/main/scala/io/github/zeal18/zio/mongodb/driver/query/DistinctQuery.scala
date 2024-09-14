@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-
 import com.mongodb.reactivestreams.client.DistinctPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
@@ -12,13 +8,15 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+
 /** Observable for distinct
   *
   * @param wrapped the underlying java DistinctQuery
   * @tparam TResult The type of the result.
   */
-case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult])
-    extends Query[TResult] {
+case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult]) extends Query[TResult] {
 
   /** Sets the query filter to apply to the query.
     *

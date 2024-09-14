@@ -1,10 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-import scala.reflect.ClassTag
-
 import com.mongodb.ExplainVerbosity
 import com.mongodb.reactivestreams.client.AggregatePublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
@@ -16,13 +11,16 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+import scala.reflect.ClassTag
+
 /** Observable for aggregate
   *
   * @param wrapped the underlying java AggregateQuery
   * @tparam TResult The type of the result.
   */
-case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResult])
-    extends Query[TResult] {
+case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResult]) extends Query[TResult] {
 
   /** Enables writing to temporary files. A null value indicates that it's unspecified.
     *

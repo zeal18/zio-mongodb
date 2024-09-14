@@ -65,8 +65,7 @@ object UpdatesSpec extends ZIOSpecDefault {
       ),
       testUpdate(
         "with non-document sorting options",
-        updates
-          .pushEach("a", Seq(1, 2, 4), updates.PushOptions(Some(1), Some(2), Some(Left(false)))),
+        updates.pushEach("a", Seq(1, 2, 4), updates.PushOptions(Some(1), Some(2), Some(Left(false)))),
         """{"$push": {"a": {"$each": [1, 2, 4], "$position": 1, "$slice": 2, "$sort": -1}}}""",
       ),
       testUpdate(

@@ -31,7 +31,7 @@ object EmbeddedMongo {
   def live(
     version: IFeatureAwareVersion = Version.Main.V4_4,
   ): ZLayer[Any, Throwable, ReachedState[RunningMongodProcess]] =
-    ZLayer.scoped(ZIO.acquireRelease((for {
+    ZLayer.scoped(ZIO.acquireRelease(for {
       dir <- Live.live(persistentDir)
 
       mongodProcess <- ZIO.attemptBlocking {
@@ -42,5 +42,5 @@ object EmbeddedMongo {
           .build()
           .start(version)
       }
-    } yield mongodProcess))(p => ZIO.succeed(p.close())))
+    } yield mongodProcess)(p => ZIO.succeed(p.close())))
 }

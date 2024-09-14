@@ -16,11 +16,11 @@
 
 package io.github.zeal18.zio.mongodb.bson
 
-import java.util.Date
-
 import io.github.zeal18.zio.mongodb.bson.collection.immutable
 import io.github.zeal18.zio.mongodb.bson.collection.mutable
 import zio.test.*
+
+import java.util.Date
 
 object BsonTransformerSpec extends ZIOSpecDefault {
   override def spec = suite("BsonTransformerSpec")(

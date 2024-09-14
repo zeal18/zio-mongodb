@@ -1,20 +1,15 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import java.io.Closeable
-
-import scala.jdk.CollectionConverters.*
-import scala.reflect.ClassTag
-
 import com.mongodb.connection.ClusterDescription
 import com.mongodb.reactivestreams.client.ClientSession
-import com.mongodb.reactivestreams.client.MongoClients
 import com.mongodb.reactivestreams.client.MongoClient as JMongoClient
+import com.mongodb.reactivestreams.client.MongoClients
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.DocumentCodecProvider
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
+import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.ClientSessionOptions
 import io.github.zeal18.zio.mongodb.driver.MongoClientSettings
 import io.github.zeal18.zio.mongodb.driver.MongoDriverInformation
-import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
@@ -26,6 +21,10 @@ import zio.ZIO
 import zio.ZLayer
 import zio.interop.reactivestreams.*
 import zio.stream.ZStream
+
+import java.io.Closeable
+import scala.jdk.CollectionConverters.*
+import scala.reflect.ClassTag
 
 /** A client-side representation of a MongoDB cluster.  Instances can represent either a standalone MongoDB instance, a replica set,
   * or a sharded cluster.  Instance of this class are responsible for maintaining an up-to-date state of the cluster,
@@ -155,7 +154,7 @@ object MongoClient {
   /** Create a MongoClient instance from the MongoClientSettings
     */
   val live: ZLayer[MongoClientSettings, Throwable, MongoClient] =
-    ZLayer.scoped((for {
+    ZLayer.scoped(for {
       clientSettings <- ZIO.service[MongoClientSettings]
 
       driverInfo = MongoDriverInformation
@@ -167,7 +166,7 @@ object MongoClient {
       mongoClient <- ZIO.acquireRelease(
         ZIO.succeed(Live(MongoClients.create(clientSettings, driverInfo))),
       )(client => ZIO.succeed(client.close()))
-    } yield mongoClient))
+    } yield mongoClient)
 
   private[driver] val DEFAULT_CODEC_REGISTRY: CodecRegistry = fromRegistries(
     fromProviders(DocumentCodecProvider()),

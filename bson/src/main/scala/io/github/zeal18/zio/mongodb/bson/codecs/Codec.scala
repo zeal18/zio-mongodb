@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.BsonCodecs
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.CollectionsCodecs
@@ -12,9 +10,11 @@ import org.bson.BsonInvalidOperationException
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
 import org.bson.BsonWriter
+import org.bson.codecs.Codec as JCodec
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import org.bson.codecs.Codec as JCodec
+
+import scala.reflect.ClassTag
 
 abstract class Codec[A] extends Encoder[A] with Decoder[A] { self =>
 

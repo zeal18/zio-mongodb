@@ -1,8 +1,8 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
 import org.bson.BsonWriter
-import org.bson.codecs.EncoderContext
 import org.bson.codecs.Encoder as JEncoder
+import org.bson.codecs.EncoderContext
 
 abstract class Encoder[A] { self =>
 

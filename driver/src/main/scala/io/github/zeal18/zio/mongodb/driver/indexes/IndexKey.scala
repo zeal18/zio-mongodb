@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.indexes
 
-import java.util as ju
-
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonElement
 import io.github.zeal18.zio.mongodb.bson.BsonInt32
@@ -12,6 +8,9 @@ import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.indexes.IndexKey.Raw
 import org.bson.BsonValue
 import org.bson.codecs.configuration.CodecRegistry
+
+import java.util as ju
+import scala.jdk.CollectionConverters.*
 
 sealed trait IndexKey extends Bson { self =>
   override def toBsonDocument[TDocument <: Object](

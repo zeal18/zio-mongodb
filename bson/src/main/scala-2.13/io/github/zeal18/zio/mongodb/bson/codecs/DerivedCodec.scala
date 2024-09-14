@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.annotation.tailrec
-
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
@@ -14,6 +12,8 @@ import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
+
+import scala.annotation.tailrec
 
 private[codecs] trait DerivedCodec {
   type Typeclass[A] = Codec[A]
@@ -131,9 +131,7 @@ object DerivedCodec {
         typ match {
           case BsonType.END_OF_DOCUMENT =>
             ctx
-              .constructEither(param =>
-                values.get(param.label).orElse(param.default).toRight(param.label),
-              )
+              .constructEither(param => values.get(param.label).orElse(param.default).toRight(param.label))
               .fold(
                 e => throw BsonError.GeneralError(s"Missing fields: ${e.mkString(", ")}"),
                 identity,
@@ -259,9 +257,7 @@ object DerivedCodec {
   private[codecs] case class EnumCodec[A](ctx: SealedTrait[Codec, A]) extends Codec[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       try
-        ctx.split(value)(subtype =>
-          subtype.typeclass.encode(writer, value.asInstanceOf[subtype.SType], encoderContext),
-        )
+        ctx.split(value)(subtype => subtype.typeclass.encode(writer, value.asInstanceOf[subtype.SType], encoderContext))
       catch {
         case e: BsonError =>
           throw BsonError.CodecError(ctx.typeName.full, e)

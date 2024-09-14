@@ -11,8 +11,8 @@ import io.github.zeal18.zio.mongodb.driver.model.InsertManyOptions
 import io.github.zeal18.zio.mongodb.driver.model.InsertOneOptions
 import io.github.zeal18.zio.mongodb.testkit.MongoClientTest
 import io.github.zeal18.zio.mongodb.testkit.MongoCollectionTest
-import zio.Chunk
 import zio.*
+import zio.Chunk
 import zio.test.*
 
 object MongoCollectionSpec extends ZIOSpecDefault {
@@ -308,9 +308,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             for {
               _ <- collection.insertOne(
                 model,
-                InsertOneOptions()
-                  .withBypassDocumentValidation(true)
-                  .withComment(new BsonString("foo")),
+                InsertOneOptions().withBypassDocumentValidation(true).withComment(new BsonString("foo")),
               )
 
               result <- collection.find().runToChunk
@@ -344,9 +342,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
                   collection.insertOne(
                     session,
                     model,
-                    InsertOneOptions()
-                      .withBypassDocumentValidation(true)
-                      .withComment(new BsonString("foo")),
+                    InsertOneOptions().withBypassDocumentValidation(true).withComment(new BsonString("foo")),
                   )
                 }
               }

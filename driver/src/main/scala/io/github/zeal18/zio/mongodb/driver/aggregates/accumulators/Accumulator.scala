@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.accumulators
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
@@ -9,6 +7,8 @@ import org.bson.BsonDocument
 import org.bson.BsonDocumentReader
 import org.bson.BsonDocumentWriter
 import org.bson.codecs.configuration.CodecRegistry
+
+import scala.annotation.nowarn
 
 @nowarn("msg=possible missing interpolator")
 sealed trait Accumulator extends Bson { self =>

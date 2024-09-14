@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-
 import com.mongodb.reactivestreams.client.ListDatabasesPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
@@ -11,13 +7,15 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+
 /** Observable interface for ListDatabases.
   *
   * @param wrapped the underlying java ListDatabasesQuery
   * @tparam TResult The type of the result.
   */
-case class ListDatabasesQuery[TResult](wrapped: ListDatabasesPublisher[TResult])
-    extends Query[TResult] {
+case class ListDatabasesQuery[TResult](wrapped: ListDatabasesPublisher[TResult]) extends Query[TResult] {
 
   /** Sets the maximum execution time on the server for this operation.
     *

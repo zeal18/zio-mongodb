@@ -16,14 +16,13 @@
 
 package io.github.zeal18.zio.mongodb.bson
 
-import java.util.Date
+import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document as IDocument
+import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document as MDocument
 
+import java.util.Date
 import scala.annotation.implicitNotFound
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
-
-import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document as IDocument
-import io.github.zeal18.zio.mongodb.bson.collection.mutable.Document as MDocument
 
 /** BsonTransformers allow the transformation of type `T` to their corresponding [[BsonValue]].
   *

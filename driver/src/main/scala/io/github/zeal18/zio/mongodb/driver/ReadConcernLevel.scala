@@ -16,9 +16,9 @@
 
 package io.github.zeal18.zio.mongodb.driver
 
-import scala.util.Try
-
 import com.mongodb.ReadConcernLevel as JReadConcernLevel
+
+import scala.util.Try
 
 /** The readConcern level of isolation for reads.
   *

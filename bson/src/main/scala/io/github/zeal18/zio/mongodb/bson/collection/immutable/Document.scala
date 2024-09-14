@@ -16,6 +16,11 @@
 
 package io.github.zeal18.zio.mongodb.bson.collection.immutable
 
+import io.github.zeal18.zio.mongodb.bson.*
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
+import io.github.zeal18.zio.mongodb.bson.codecs.internal.ImmutableDocumentCodec
+import io.github.zeal18.zio.mongodb.bson.collection.BaseDocument
+
 import scala.collection.Iterable
 import scala.collection.IterableOps
 import scala.collection.SpecificIterableFactory
@@ -23,11 +28,6 @@ import scala.collection.StrictOptimizedIterableOps
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.*
-
-import io.github.zeal18.zio.mongodb.bson.*
-import io.github.zeal18.zio.mongodb.bson.codecs.Codec
-import io.github.zeal18.zio.mongodb.bson.codecs.internal.ImmutableDocumentCodec
-import io.github.zeal18.zio.mongodb.bson.collection.BaseDocument
 
 /** The immutable [[Document]] companion object for easy creation.
   */

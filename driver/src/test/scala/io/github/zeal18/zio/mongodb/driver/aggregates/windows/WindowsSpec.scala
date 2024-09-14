@@ -1,13 +1,13 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.windows
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.driver.aggregates.windows
 import io.github.zeal18.zio.mongodb.driver.sorts
-import zio.test.ZIOSpecDefault
 import zio.test.*
+import zio.test.ZIOSpecDefault
+
+import scala.annotation.nowarn
 
 @nowarn("msg=possible missing interpolator")
 object WindowsSpec extends ZIOSpecDefault {

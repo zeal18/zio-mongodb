@@ -1,13 +1,13 @@
 package io.github.zeal18.zio.mongodb.driver.reactivestreams
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 import org.reactivestreams.Subscription
 import zio.Scope
 import zio.Task
 import zio.UIO
 import zio.URIO
 import zio.ZIO
+
+import java.util.concurrent.atomic.AtomicBoolean
 
 private object SingleElementSubscriber {
   def make[A]: URIO[Scope, InterruptibleSubscriber[A, Option[A]]] = for {

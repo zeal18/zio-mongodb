@@ -16,11 +16,6 @@
 
 package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
-import java.nio.ByteBuffer
-import java.util.Date
-
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.Registry.DEFAULT_CODEC_REGISTRY
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import org.bson.*
@@ -31,6 +26,10 @@ import org.bson.io.BasicOutputBuffer
 import org.bson.io.ByteBufferBsonInput
 import org.bson.types.ObjectId
 import zio.test.*
+
+import java.nio.ByteBuffer
+import java.util.Date
+import scala.jdk.CollectionConverters.*
 
 object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
   val registry: CodecRegistry = DEFAULT_CODEC_REGISTRY
@@ -50,7 +49,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
         "string"       -> new BsonString("string"),
         "symbol"       -> new BsonSymbol(Symbol("bson").name),
         "bsonDocument" -> new BsonDocument("a", new BsonString("string")),
-        "array" -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
+        "array"        -> new BsonArray(List(new BsonString("string"), new BsonBoolean(false)).asJava),
       )
 
       val writer: BsonBinaryWriter = new BsonBinaryWriter(new BasicOutputBuffer())
@@ -133,8 +132,7 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
         ImmutableDocumentCodec().getDocumentId(Document()) == null,
       ) &&
       assertTrue(
-        ImmutableDocumentCodec()
-          .getDocumentId(Document("_id" -> new BsonInt32(1))) == new BsonInt32(1),
+        ImmutableDocumentCodec().getDocumentId(Document("_id" -> new BsonInt32(1))) == new BsonInt32(1),
       )
     },
     test("should generate document id if absent but not mutate original document") {

@@ -16,6 +16,13 @@
 
 package io.github.zeal18.zio.mongodb.bson.collection
 
+import io.github.zeal18.zio.mongodb.bson.*
+import io.github.zeal18.zio.mongodb.bson.BsonMagnets
+import io.github.zeal18.zio.mongodb.bson.DefaultHelper.*
+import io.github.zeal18.zio.mongodb.bson.conversions.Bson
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.json.JsonWriterSettings
+
 import scala.annotation.nowarn
 import scala.collection.Iterable
 import scala.jdk.CollectionConverters.*
@@ -23,13 +30,6 @@ import scala.reflect.ClassTag
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
-import io.github.zeal18.zio.mongodb.bson.BsonMagnets
-import io.github.zeal18.zio.mongodb.bson.DefaultHelper.*
-import io.github.zeal18.zio.mongodb.bson.*
-import io.github.zeal18.zio.mongodb.bson.conversions.Bson
-import org.bson.codecs.configuration.CodecRegistry
-import org.bson.json.JsonWriterSettings
 
 /** Base Document trait.
   *

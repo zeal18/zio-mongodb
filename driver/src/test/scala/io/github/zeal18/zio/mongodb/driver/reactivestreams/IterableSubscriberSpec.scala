@@ -17,8 +17,8 @@ import zio.Unsafe
 import zio.ZEnvironment
 import zio.ZIO
 import zio.durationInt
-import zio.test.Assertion.*
 import zio.test.*
+import zio.test.Assertion.*
 
 object IterableSubscriberSpec extends ZIOSpecDefault {
   override def spec =

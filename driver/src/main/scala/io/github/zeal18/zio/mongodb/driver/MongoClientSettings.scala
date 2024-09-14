@@ -16,8 +16,8 @@
 
 package io.github.zeal18.zio.mongodb.driver
 
-import com.mongodb.reactivestreams.client.MongoClients as JMongoClients
 import com.mongodb.MongoClientSettings as JMongoClientSettings
+import com.mongodb.reactivestreams.client.MongoClients as JMongoClients
 import zio.ZIO
 import zio.ZLayer
 

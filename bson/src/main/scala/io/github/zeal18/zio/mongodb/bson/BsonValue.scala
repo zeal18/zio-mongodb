@@ -16,12 +16,11 @@
 
 package io.github.zeal18.zio.mongodb.bson
 
-import java.util.Date
+import org.bson.BsonDocument as JBsonDocument
 
+import java.util.Date
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
-
-import org.bson.BsonDocument as JBsonDocument
 
 /** Companion helper for a BsonArray
   */

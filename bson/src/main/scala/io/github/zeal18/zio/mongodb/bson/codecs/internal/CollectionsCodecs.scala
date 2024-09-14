@@ -1,8 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs.internal
 
-import scala.collection.IterableFactory
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import org.bson.BsonInvalidOperationException
@@ -12,6 +9,9 @@ import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
+
+import scala.collection.IterableFactory
+import scala.reflect.ClassTag
 
 private[codecs] trait CollectionsCodecs {
   implicit def list[A: Codec]: Codec[List[A]]     = iterable(List)

@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
@@ -9,6 +7,8 @@ import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
 import io.github.zeal18.zio.mongodb.driver.sorts
 import zio.test.*
+
+import scala.annotation.nowarn
 
 object AggregatesSpec extends ZIOSpecDefault {
   private def testAggregate(
@@ -32,8 +32,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     testAggregate("filter", aggregates.filter(filters.eq("a", 8)), """{"$match": {"a": 8}}"""),
     testAggregate(
       "facet",
-      aggregates
-        .facet(Facet("a", aggregates.count()), Facet("b", aggregates.filter(filters.eq(42)))),
+      aggregates.facet(Facet("a", aggregates.count()), Facet("b", aggregates.filter(filters.eq(42)))),
       """{"$facet": {"a": [{"$count": "count"}], "b": [{"$match": {"_id": 42}}]}}""",
     ),
     testAggregate("limit", aggregates.limit(43), """{"$limit": 43}"""),
@@ -44,8 +43,7 @@ object AggregatesSpec extends ZIOSpecDefault {
     ),
     testAggregate(
       "group",
-      aggregates
-        .group(expressions.fieldPath("$item"), Map("b" -> accumulators.sum(expressions.const(1)))),
+      aggregates.group(expressions.fieldPath("$item"), Map("b" -> accumulators.sum(expressions.const(1)))),
       """{"$group": {"_id": "$item", "b": {"$sum": 1}}}""",
     ),
     testAggregate(
