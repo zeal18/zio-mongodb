@@ -32,7 +32,6 @@ import zio.Task
 import zio.ZIO
 import zio.ZLayer
 
-import scala.annotation.nowarn
 import scala.jdk.CollectionConverters.*
 import scala.reflect.ClassTag
 
@@ -1457,7 +1456,6 @@ trait MongoCollection[A] {
 
 object MongoCollection {
 
-  @nowarn("cat=unused")
   def live[A: izumi.reflect.Tag: ClassTag](name: String)(implicit
     codec: Codec[A],
   ): ZLayer[MongoDatabase, Nothing, MongoCollection[A]] =
