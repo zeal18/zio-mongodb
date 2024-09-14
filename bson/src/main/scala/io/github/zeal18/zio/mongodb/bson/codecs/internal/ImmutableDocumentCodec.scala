@@ -40,8 +40,7 @@ private[mongodb] object ImmutableDocumentCodec {
   * As the underlying driver expects documents to be mutable the driver has direct access to the Documents underlying
   * mutable `BsonDocument` instance and therefore will mutate the document when adding an `_id`
   */
-private[mongodb] case class ImmutableDocumentCodec(registry: Option[CodecRegistry])
-    extends CollectibleCodec[Document] {
+private[mongodb] case class ImmutableDocumentCodec(registry: Option[CodecRegistry]) extends CollectibleCodec[Document] {
 
   lazy val underlying: BsonDocumentCodec =
     registry.map(new BsonDocumentCodec(_)).getOrElse(new BsonDocumentCodec)

@@ -1,22 +1,20 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-
 import com.mongodb.reactivestreams.client.ListIndexesPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+
 /** Observable interface for ListIndexes.
   *
   * @param wrapped the underlying java ListIndexesQuery
   * @tparam TResult The type of the result.
   */
-case class ListIndexesQuery[TResult](wrapped: ListIndexesPublisher[TResult])
-    extends Query[TResult] {
+case class ListIndexesQuery[TResult](wrapped: ListIndexesPublisher[TResult]) extends Query[TResult] {
 
   /** Sets the maximum execution time on the server for this operation.
     *

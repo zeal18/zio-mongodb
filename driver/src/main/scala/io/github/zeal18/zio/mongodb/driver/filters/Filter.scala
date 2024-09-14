@@ -1,9 +1,7 @@
 package io.github.zeal18.zio.mongodb.driver.filters
 
-import scala.annotation.nowarn
-
-import com.mongodb.client.model.TextSearchOptions
 import com.mongodb.client.model.Filters as JFilters
+import com.mongodb.client.model.TextSearchOptions
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
@@ -17,6 +15,8 @@ import org.bson.BsonValue
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+
+import scala.annotation.nowarn
 
 sealed trait Filter extends Bson { self =>
   @nowarn("msg=possible missing interpolator")

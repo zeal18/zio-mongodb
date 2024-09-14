@@ -28,9 +28,9 @@ lazy val IntegrationTest = config("it") extend Test
 
 inThisBuild(
   List(
-    organization := "io.github.zeal18",
-    homepage     := Some(url("https://github.com/zeal18/zio-mongodb")),
-    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    organization           := "io.github.zeal18",
+    homepage               := Some(url("https://github.com/zeal18/zio-mongodb")),
+    licenses               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     sonatypeCredentialHost := "s01.oss.sonatype.org",
     sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
     developers := List(
@@ -80,9 +80,7 @@ val integrationTestSettings =
   Defaults.itSettings ++ inConfig(IntegrationTest)(Seq.empty)
 
 lazy val root =
-  (project in file("."))
-    .aggregate(bson, driver, testkit, driverItTests)
-    .settings(publish / skip := true)
+  (project in file(".")).aggregate(bson, driver, testkit, driverItTests).settings(publish / skip := true)
 
 lazy val bson = (project in file("bson")).settings(
   name := "zio-mongodb-bson",
@@ -96,8 +94,8 @@ lazy val bson = (project in file("bson")).settings(
     case Some((3, _)) => Seq.empty
     case _ =>
       Seq(
-        "com.softwaremill.magnolia1_2" %% "magnolia" % magnolia2Version,
-        "org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia
+        "com.softwaremill.magnolia1_2" %% "magnolia"      % magnolia2Version,
+        "org.scala-lang"                % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia
       )
   }),
 )

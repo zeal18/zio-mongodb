@@ -1,9 +1,9 @@
 package io.github.zeal18.zio.mongodb.driver.indexes
 
+import com.mongodb.client.model.DropIndexOptions as JDropIndexOptions
+
 import java.time.Duration
 import java.util.concurrent.TimeUnit
-
-import com.mongodb.client.model.DropIndexOptions as JDropIndexOptions
 
 /** The options to apply to the command when dropping indexes.
   *

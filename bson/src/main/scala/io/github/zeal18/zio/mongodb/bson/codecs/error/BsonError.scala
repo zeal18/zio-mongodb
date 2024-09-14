@@ -8,7 +8,7 @@ sealed trait BsonError extends Exception { self =>
   def getMessage(depth: Int): String = {
     val prefix = "\t" * depth
 
-    (self match {
+    self match {
       case BsonError.GeneralError(message) =>
         s"\n$prefix$message"
       case BsonError.SerializationError(error) =>
@@ -21,7 +21,7 @@ sealed trait BsonError extends Exception { self =>
         s"\n${prefix}Error processing subtype '$subtype': ${error.getMessage(depth + 1)}"
       case BsonError.CodecError(name, error) =>
         s"\n${prefix}Codec '$name' failed with: ${error.getMessage(depth + 1)}"
-    })
+    }
   }
 }
 

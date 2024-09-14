@@ -1,10 +1,10 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
+
+import scala.annotation.nowarn
 
 @nowarn("cat=unused")
 object MagnoliaCodecsErrorsSpec extends ZIOSpecDefault {

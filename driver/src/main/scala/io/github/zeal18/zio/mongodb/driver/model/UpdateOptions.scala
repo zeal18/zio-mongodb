@@ -1,12 +1,12 @@
 package io.github.zeal18.zio.mongodb.driver.model
 
-import scala.jdk.CollectionConverters.*
-
 import com.mongodb.client.model.UpdateOptions as JUpdateOptions
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 import io.github.zeal18.zio.mongodb.driver.hints.Hint
 import org.bson.BsonValue
 import org.bson.conversions.Bson
+
+import scala.jdk.CollectionConverters.*
 
 /** The options to apply when updating documents.
   *

@@ -1,11 +1,11 @@
 package io.github.zeal18.zio.mongodb.driver
 
-import scala.collection.IterableFactory
-
 import org.reactivestreams.Publisher
 import zio.Chunk
 import zio.Task
 import zio.ZIO
+
+import scala.collection.IterableFactory
 
 package object reactivestreams {
   implicit class PublisherOps[A](private val publisher: Publisher[A]) extends AnyVal {

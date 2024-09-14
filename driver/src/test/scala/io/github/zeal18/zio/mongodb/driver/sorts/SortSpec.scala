@@ -3,8 +3,8 @@ package io.github.zeal18.zio.mongodb.driver.sorts
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.sorts
-import zio.test.ZIOSpecDefault
 import zio.test.*
+import zio.test.ZIOSpecDefault
 
 object SortSpec extends ZIOSpecDefault {
   private def testSort(title: String, sort: sorts.Sort, expected: String) =

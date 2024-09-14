@@ -1,16 +1,16 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
-import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.*
+import io.github.zeal18.zio.mongodb.driver.aggregates.expressions.Expression.*
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.bson.BsonDocumentWriter
 import zio.test.ZIOSpecDefault
 import zio.test.assertTrue
+
+import scala.annotation.nowarn
 
 @nowarn("msg=possible missing interpolator")
 object ExpressionsSpec extends ZIOSpecDefault {

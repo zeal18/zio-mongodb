@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.BsonArray
 import io.github.zeal18.zio.mongodb.bson.BsonBoolean
 import io.github.zeal18.zio.mongodb.bson.BsonDateTime
@@ -28,6 +26,8 @@ import org.bson.BsonValue
 import org.bson.types.Decimal128
 import org.bson.types.ObjectId
 import zio.test.ZIOSpecDefault
+
+import scala.jdk.CollectionConverters.*
 
 object BsonCodecsSpec extends ZIOSpecDefault {
   override def spec = suite("BsonCodecsSpec")(

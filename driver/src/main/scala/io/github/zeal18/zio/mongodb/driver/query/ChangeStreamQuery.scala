@@ -1,9 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-
 import com.mongodb.reactivestreams.client.ChangeStreamPublisher
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonTimestamp
@@ -14,6 +10,9 @@ import io.github.zeal18.zio.mongodb.driver.model.changestream.FullDocument
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
+
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
 
 /** Observable for change streams.
   *

@@ -1,13 +1,12 @@
 package io.github.zeal18.zio.mongodb.driver.indexes
 
-import java.util.concurrent.TimeUnit
-
-import scala.annotation.nowarn
-
 import com.mongodb.client.model.Collation
 import com.mongodb.client.model.IndexOptions as JIndexOptions
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
+
+import java.util.concurrent.TimeUnit
+import scala.annotation.nowarn
 
 @nowarn("cat=deprecation")
 final case class IndexOptions(

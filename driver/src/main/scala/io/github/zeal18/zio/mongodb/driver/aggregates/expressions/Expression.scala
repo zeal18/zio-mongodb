@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.codecs.Encoder
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.bson.BsonDocument
@@ -11,6 +9,8 @@ import org.bson.BsonWriter
 import org.bson.codecs.EncoderContext
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+
+import scala.annotation.nowarn
 
 /** Expressions can include field paths, literals, system variables, expression objects and expression operators.
   * Expressions can be nested.
@@ -1386,26 +1386,22 @@ object Expression {
       start: Option[Expression] = None,
       end: Option[Expression] = None,
     ) extends Array
-    final case class IsArray(expr: Expression)               extends Array
-    final case class Last(array: Expression)                 extends Array
-    final case class LastN(array: Expression, n: Expression) extends Array
-    final case class Map(input: Expression, in: Expression, as: Option[scala.Predef.String] = None)
-        extends Array
-    final case class MaxN(array: Expression, n: Expression) extends Array
-    final case class MinN(array: Expression, n: Expression) extends Array
-    final case class ObjectToArray(obj: Expression)         extends Array with Object
-    final case class Range(start: Expression, end: Expression, step: Option[Expression] = None)
-        extends Array
-    final case class Reduce(input: Expression, initialValue: Expression, in: Expression)
-        extends Array
-    final case class ReverseArray(array: Expression) extends Array
-    final case class Size(array: Expression)         extends Array
-    final case class Slice(array: Expression, position: Option[Expression], n: Expression)
-        extends Array
-    final case class SortArrayByField(array: Expression, sort: Sort)           extends Array
-    final case class SortArrayByValue(array: Expression, asc: scala.Boolean)   extends Array
-    final case class ZipShortest(inputs: Seq[Expression])                      extends Array
-    final case class ZipLongest(inputs: Seq[Expression], defaults: Expression) extends Array
+    final case class IsArray(expr: Expression)                                                      extends Array
+    final case class Last(array: Expression)                                                        extends Array
+    final case class LastN(array: Expression, n: Expression)                                        extends Array
+    final case class Map(input: Expression, in: Expression, as: Option[scala.Predef.String] = None) extends Array
+    final case class MaxN(array: Expression, n: Expression)                                         extends Array
+    final case class MinN(array: Expression, n: Expression)                                         extends Array
+    final case class ObjectToArray(obj: Expression) extends Array with Object
+    final case class Range(start: Expression, end: Expression, step: Option[Expression] = None) extends Array
+    final case class Reduce(input: Expression, initialValue: Expression, in: Expression)        extends Array
+    final case class ReverseArray(array: Expression)                                            extends Array
+    final case class Size(array: Expression)                                                    extends Array
+    final case class Slice(array: Expression, position: Option[Expression], n: Expression)      extends Array
+    final case class SortArrayByField(array: Expression, sort: Sort)                            extends Array
+    final case class SortArrayByValue(array: Expression, asc: scala.Boolean)                    extends Array
+    final case class ZipShortest(inputs: Seq[Expression])                                       extends Array
+    final case class ZipLongest(inputs: Seq[Expression], defaults: Expression)                  extends Array
 
     final case class And(expressions: Seq[Expression]) extends Boolean
     final case class Not(expression: Expression)       extends Boolean
@@ -1419,15 +1415,11 @@ object Expression {
     final case class Lte(expression1: Expression, expression2: Expression) extends Comparison
     final case class Ne(expression1: Expression, expression2: Expression)  extends Comparison
 
-    final case class Cond(predicate: Expression, ifTrue: Expression, ifFalse: Expression)
-        extends Conditional
-    final case class IfNull(expressions: Seq[Expression], replacement: Expression)
-        extends Conditional
-    final case class Switch(branches: Seq[(Expression, Expression)], default: Option[Expression])
-        extends Conditional
+    final case class Cond(predicate: Expression, ifTrue: Expression, ifFalse: Expression)         extends Conditional
+    final case class IfNull(expressions: Seq[Expression], replacement: Expression)                extends Conditional
+    final case class Switch(branches: Seq[(Expression, Expression)], default: Option[Expression]) extends Conditional
 
-    final case class Function(body: scala.Predef.String, args: Option[Expression] = None)
-        extends Custom
+    final case class Function(body: scala.Predef.String, args: Option[Expression] = None) extends Custom
 
     final case class BinarySize(expression: Expression) extends DataSize
     final case class BsonSize(expression: Expression)   extends DataSize
@@ -1517,9 +1509,8 @@ object Expression {
     final object Rand                                                              extends Misc
     final case class SampleRate(rate: Expression)                                  extends Misc
 
-    final case class MergeObjects(expressions: Seq[Expression]) extends Object
-    final case class SetField(field: Expression, input: Expression, value: Expression)
-        extends Object
+    final case class MergeObjects(expressions: Seq[Expression])                        extends Object
+    final case class SetField(field: Expression, input: Expression, value: Expression) extends Object
 
     final case class AllElementsTrue(array: Expression)                   extends Set
     final case class AnyElementTrue(array: Expression)                    extends Set
@@ -1568,17 +1559,15 @@ object Expression {
       find: Expression,
       replacement: Expression,
     ) extends String
-    final case class RTrim(string: Expression, chars: Option[Expression] = None) extends String
-    final case class Split(string: Expression, delimiter: Expression)            extends String
-    final case class StrLenBytes(string: Expression)                             extends String
-    final case class StrLenCP(string: Expression)                                extends String
-    final case class StrCaseCmp(string1: Expression, string2: Expression)        extends String
-    final case class SubstrBytes(string: Expression, start: Expression, count: Expression)
-        extends String
-    final case class SubstrCP(string: Expression, start: Expression, count: Expression)
-        extends String
-    final case class ToLower(string: Expression) extends String
-    final case class ToString(value: Expression) extends String with TypeOperator
+    final case class RTrim(string: Expression, chars: Option[Expression] = None)           extends String
+    final case class Split(string: Expression, delimiter: Expression)                      extends String
+    final case class StrLenBytes(string: Expression)                                       extends String
+    final case class StrLenCP(string: Expression)                                          extends String
+    final case class StrCaseCmp(string1: Expression, string2: Expression)                  extends String
+    final case class SubstrBytes(string: Expression, start: Expression, count: Expression) extends String
+    final case class SubstrCP(string: Expression, start: Expression, count: Expression)    extends String
+    final case class ToLower(string: Expression)                                           extends String
+    final case class ToString(value: Expression)                                extends String with TypeOperator
     final case class Trim(string: Expression, chars: Option[Expression] = None) extends String
     final case class ToUpper(string: Expression)                                extends String
     final case class Meta(keyword: Expression)                                  extends Text

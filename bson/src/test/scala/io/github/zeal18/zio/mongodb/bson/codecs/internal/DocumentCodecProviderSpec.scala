@@ -33,14 +33,10 @@ object DocumentCodecProviderSpec extends ZIOSpecDefault {
         provider.get[Document](classOf[Document], registry).isInstanceOf[ImmutableDocumentCodec],
       ) &&
       assertTrue(
-        provider
-          .get[immutable.Document](classOf[immutable.Document], registry)
-          .isInstanceOf[ImmutableDocumentCodec],
+        provider.get[immutable.Document](classOf[immutable.Document], registry).isInstanceOf[ImmutableDocumentCodec],
       ) &&
       assertTrue(
-        provider
-          .get[mutable.Document](classOf[mutable.Document], registry)
-          .isInstanceOf[MutableDocumentCodec],
+        provider.get[mutable.Document](classOf[mutable.Document], registry).isInstanceOf[MutableDocumentCodec],
       ) &&
       assertTrue(Option(provider.get[String](classOf[String], registry)).isEmpty)
     },

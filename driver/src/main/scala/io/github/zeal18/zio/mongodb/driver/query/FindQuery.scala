@@ -1,10 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.query
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
-import scala.reflect.ClassTag
-
 import com.mongodb.CursorType
 import com.mongodb.ExplainVerbosity
 import com.mongodb.reactivestreams.client.FindPublisher
@@ -19,6 +14,10 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.reactivestreams.Publisher
 import zio.Task
+
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
+import scala.reflect.ClassTag
 
 /** Observable interface for Find.
   *

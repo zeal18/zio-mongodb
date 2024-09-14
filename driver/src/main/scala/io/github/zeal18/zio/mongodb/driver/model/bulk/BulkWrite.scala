@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.driver.model.bulk
 
-import scala.jdk.CollectionConverters.*
-
 import com.mongodb.client.model.DeleteManyModel
 import com.mongodb.client.model.DeleteOneModel
 import com.mongodb.client.model.InsertOneModel
@@ -14,6 +12,8 @@ import io.github.zeal18.zio.mongodb.driver.model.DeleteOptions
 import io.github.zeal18.zio.mongodb.driver.model.ReplaceOptions
 import io.github.zeal18.zio.mongodb.driver.model.UpdateOptions
 import io.github.zeal18.zio.mongodb.driver.updates.Update
+
+import scala.jdk.CollectionConverters.*
 
 sealed trait BulkWrite[A] {
   private[driver] def toJava: WriteModel[A] = this match {
@@ -44,8 +44,7 @@ object BulkWrite {
     *           other write models
     * @mongodb.driver.manual tutorial/remove-documents/ Remove
     */
-  final case class DeleteMany[A](filter: Filter, options: DeleteOptions = DeleteOptions())
-      extends BulkWrite[A]
+  final case class DeleteMany[A](filter: Filter, options: DeleteOptions = DeleteOptions()) extends BulkWrite[A]
 
   /** A model describing the removal of at most one document matching the query filter.
     *
@@ -53,8 +52,7 @@ object BulkWrite {
     *           other write models
     * @mongodb.driver.manual tutorial/remove-documents/ Remove
     */
-  final case class DeleteOne[A](filter: Filter, options: DeleteOptions = DeleteOptions())
-      extends BulkWrite[A]
+  final case class DeleteOne[A](filter: Filter, options: DeleteOptions = DeleteOptions()) extends BulkWrite[A]
 
   /** A model describing an insert of a single document.
     *

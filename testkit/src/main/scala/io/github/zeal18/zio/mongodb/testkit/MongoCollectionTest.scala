@@ -1,7 +1,5 @@
 package io.github.zeal18.zio.mongodb.testkit
 
-import scala.reflect.ClassTag
-
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.MongoClient
 import io.github.zeal18.zio.mongodb.driver.MongoCollection
@@ -9,6 +7,8 @@ import izumi.reflect.Tag
 import zio.ZIO
 import zio.ZLayer
 import zio.test.Live
+
+import scala.reflect.ClassTag
 
 object MongoCollectionTest {
   def withRandomName[A: Tag: ClassTag, B](

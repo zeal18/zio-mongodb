@@ -1,12 +1,12 @@
 package io.github.zeal18.zio.mongodb.driver.indexes
 
-import scala.annotation.nowarn
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.driver.indexes
-import zio.test.ZIOSpecDefault
 import zio.test.*
+import zio.test.ZIOSpecDefault
+
+import scala.annotation.nowarn
 
 object IndexKeysSpec extends ZIOSpecDefault {
   private def testKey(title: String, index: indexes.IndexKey, expected: String) =

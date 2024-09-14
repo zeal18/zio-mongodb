@@ -1,16 +1,15 @@
 package io.github.zeal18.zio.mongodb.driver.reactivestreams
 
-import java.util.concurrent.atomic.AtomicBoolean
-
-import scala.collection.IterableFactory
-import scala.collection.mutable.Builder
-
 import org.reactivestreams.Subscription
 import zio.Scope
 import zio.Task
 import zio.UIO
 import zio.URIO
 import zio.ZIO
+
+import java.util.concurrent.atomic.AtomicBoolean
+import scala.collection.IterableFactory
+import scala.collection.mutable.Builder
 
 private object IterableSubscriber {
   def make[A, I[B] <: Iterable[B], B](

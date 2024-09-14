@@ -16,9 +16,9 @@
 
 package io.github.zeal18.zio.mongodb.driver.model.changestream
 
-import scala.util.Try
-
 import com.mongodb.client.model.changestream.FullDocument as JFullDocument
+
+import scala.util.Try
 
 /** Change Stream fullDocument configuration.
   *

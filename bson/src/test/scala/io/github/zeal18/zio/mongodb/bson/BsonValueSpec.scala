@@ -16,11 +16,10 @@
 
 package io.github.zeal18.zio.mongodb.bson
 
-import java.util.Date
-
-import scala.jdk.CollectionConverters.*
-
 import zio.test.*
+
+import java.util.Date
+import scala.jdk.CollectionConverters.*
 
 object BsonValueSpec extends ZIOSpecDefault {
   override def spec = suite("BsonValueSpec")(

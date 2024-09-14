@@ -16,8 +16,6 @@
 
 package io.github.zeal18.zio.mongodb.bson.collections
 
-import scala.collection.mutable
-
 import io.github.zeal18.zio.mongodb.bson.BsonBoolean
 import io.github.zeal18.zio.mongodb.bson.BsonInt32
 import io.github.zeal18.zio.mongodb.bson.BsonString
@@ -29,10 +27,12 @@ import org.bson.json.JsonParseException
 import zio.ZIO
 import zio.test.*
 
+import scala.collection.mutable
+
 object MutableDocumentSpec extends ZIOSpecDefault {
 
-  val emptyDoc: Document = Document.empty
-  val doc: Document      = Document("key" -> "value", "key2" -> "value2", "key3" -> "value3")
+  val emptyDoc: Document             = Document.empty
+  val doc: Document                  = Document("key" -> "value", "key2" -> "value2", "key3" -> "value3")
   val docMap: Map[String, BsonValue] = doc.toMap
 
   override def spec = suite("MutableDocumentSpec")(

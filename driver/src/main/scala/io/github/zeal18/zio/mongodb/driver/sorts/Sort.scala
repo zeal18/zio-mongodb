@@ -1,12 +1,12 @@
 package io.github.zeal18.zio.mongodb.driver.sorts
 
-import scala.jdk.CollectionConverters.*
-
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonString
 import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+
+import scala.jdk.CollectionConverters.*
 
 sealed trait Sort extends Bson { self =>
   override def toBsonDocument[TDocument <: Object](

@@ -18,8 +18,6 @@ package io.github.zeal18.zio.mongodb.driver.reactivestreams
  * limitations under the License.
  */
 
-import java.util.concurrent.atomic.AtomicReference
-
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.Promise.internal.*
 import zio.Cause
 import zio.Exit
@@ -28,6 +26,8 @@ import zio.IO
 import zio.Trace
 import zio.UIO
 import zio.ZIO
+
+import java.util.concurrent.atomic.AtomicReference
 
 /** A promise represents an asynchronous variable, of [[zio.ZIO]] type, that can
   * be set exactly once, with the ability for an arbitrary number of fibers to
