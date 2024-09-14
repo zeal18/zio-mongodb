@@ -6,9 +6,7 @@ import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.filters.Filter
 
 import java.util.concurrent.TimeUnit
-import scala.annotation.nowarn
 
-@nowarn("cat=deprecation")
 final case class IndexOptions(
   name: Option[String] = None,
   background: Boolean = false,
@@ -26,8 +24,6 @@ final case class IndexOptions(
   bits: Option[Int] = None,
   min: Option[Double] = None,
   max: Option[Double] = None,
-  @deprecated("geoHaystack is deprecated in MongoDB 4.4", "4.4")
-  bucketSize: Option[Long] = None,
   collation: Option[Collation] = None,
   wildcardProjection: Option[Document] = None,
 ) {
@@ -47,7 +43,6 @@ final case class IndexOptions(
     bits.foreach(options.bits(_))
     min.foreach(options.min(_))
     max.foreach(options.max(_))
-    bucketSize.foreach(size => options.bucketSize(size.toDouble))
     collation.foreach(options.collation(_))
     wildcardProjection.foreach(options.wildcardProjection(_))
 
