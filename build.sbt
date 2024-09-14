@@ -19,12 +19,9 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 autoCompilerPlugins := true
 
-ThisBuild / parallelExecution        := false
 ThisBuild / Test / parallelExecution := false
 ThisBuild / fork                     := true
 ThisBuild / Test / fork              := true
-
-lazy val IntegrationTest = config("it") extend Test
 
 inThisBuild(
   List(
@@ -75,9 +72,6 @@ val commonSettings =
         )
     }),
   )
-
-val integrationTestSettings =
-  Defaults.itSettings ++ inConfig(IntegrationTest)(Seq.empty)
 
 lazy val root =
   (project in file(".")).aggregate(bson, driver, testkit, driverItTests).settings(publish / skip := true)
@@ -142,11 +136,8 @@ lazy val testkit = (project in file("testkit"))
 
 // as a separate project to avoid circular dependencies
 lazy val driverItTests = (project in file("driver-it-tests"))
-  .configs(IntegrationTest)
   .settings(
     commonSettings,
-    Defaults.itSettings,
-    integrationTestSettings,
     name           := "zio-mongodb-driver-it-tests",
     publish / skip := true,
     libraryDependencies ++= Seq(
