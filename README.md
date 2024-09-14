@@ -119,7 +119,6 @@ object UsersDalSpec extends ZIOSpecDefault {
 
 NOTE: we provide `MongoClientTest` as a shared layer to prevent relaunching the MongoDB instance for every test case. At the same time we want to recreate databases with random names to isolate test cases from each other.
 
-# ZIO 1.x and ZIO 2.x support
+# ZIO 1.x support
 
-ZIO 2.x is the main ZIO version supported by the library starting from the `0.6.0` version. 
-ZIO 1.x will be supported for some time in `0.5.x` releases.
+ZIO 1.x is not supported anymore. The latest version based on ZIO 1 is `0.5.1`.
