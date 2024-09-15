@@ -6,7 +6,6 @@ import scala.jdk.CollectionConverters.*
 import scala.reflect.ClassTag
 
 import com.mongodb.connection.ClusterDescription
-import com.mongodb.reactivestreams.client.ClientSession
 import com.mongodb.reactivestreams.client.MongoClients
 import com.mongodb.reactivestreams.client.MongoClient as JMongoClient
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.DocumentCodecProvider
@@ -18,6 +17,7 @@ import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
+import io.github.zeal18.zio.mongodb.driver.session.ClientSession
 import org.bson.codecs.configuration.CodecRegistries.fromProviders
 import org.bson.codecs.configuration.CodecRegistries.fromRegistries
 import org.bson.codecs.configuration.CodecRegistry
@@ -176,12 +176,16 @@ object MongoClient {
 
   final private case class Live(wrapped: JMongoClient) extends MongoClient with Closeable {
     override def startSession(): ZIO[Scope, Throwable, ClientSession] =
-      ZIO.acquireRelease(wrapped.startSession().head)(s => ZIO.succeed(s.close()))
+      ZIO.acquireRelease(wrapped.startSession().head.map(ClientSession(_)))(s =>
+        ZIO.succeed(s.underlying.close()),
+      )
 
     override def startSession(
       options: ClientSessionOptions,
     ): ZIO[Scope, Throwable, ClientSession] =
-      ZIO.acquireRelease(wrapped.startSession(options).head)(s => ZIO.succeed(s.close()))
+      ZIO.acquireRelease(wrapped.startSession(options).head.map(ClientSession(_)))(s =>
+        ZIO.succeed(s.underlying.close()),
+      )
 
     override def getDatabase(name: String): MongoDatabase =
       MongoDatabase.Live(this, wrapped.getDatabase(name))
@@ -192,7 +196,7 @@ object MongoClient {
       wrapped.listDatabaseNames().toZIOStream()
 
     override def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String] =
-      wrapped.listDatabaseNames(clientSession).toZIOStream()
+      wrapped.listDatabaseNames(clientSession.underlying).toZIOStream()
 
     override def listDatabases(): ListDatabasesQuery[Document] =
       ListDatabasesQuery(wrapped.listDatabases(implicitly[ClassTag[Document]]))
@@ -200,7 +204,9 @@ object MongoClient {
     override def listDatabases(
       clientSession: ClientSession,
     ): ListDatabasesQuery[Document] =
-      ListDatabasesQuery(wrapped.listDatabases(clientSession, implicitly[ClassTag[Document]]))
+      ListDatabasesQuery(
+        wrapped.listDatabases(clientSession.underlying, implicitly[ClassTag[Document]]),
+      )
 
     override def watch(): ChangeStreamQuery[Document] =
       ChangeStreamQuery(wrapped.watch(implicitly[ClassTag[Document]]))
@@ -211,14 +217,14 @@ object MongoClient {
       )
 
     override def watch(clientSession: ClientSession): ChangeStreamQuery[Document] =
-      ChangeStreamQuery(wrapped.watch(clientSession, implicitly[ClassTag[Document]]))
+      ChangeStreamQuery(wrapped.watch(clientSession.underlying, implicitly[ClassTag[Document]]))
 
     override def watch(
       clientSession: ClientSession,
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(clientSession, pipeline.asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(clientSession.underlying, pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def getClusterDescription: ClusterDescription = wrapped.getClusterDescription

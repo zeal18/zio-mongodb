@@ -13,7 +13,7 @@ import zio.ZLayer
 import zio.test.Live
 
 object EmbeddedMongo {
-  private val persistentDir: Task[PersistentDir] =
+  private[testkit] val persistentDir: Task[PersistentDir] =
     for {
       system    <- ZIO.system
       gitlabDir <- system.env("CI_PROJECT_DIR")

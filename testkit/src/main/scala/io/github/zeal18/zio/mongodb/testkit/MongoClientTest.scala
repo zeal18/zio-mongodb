@@ -16,4 +16,14 @@ object MongoClientTest {
 
       MongoClient.live(connectionString)
     }
+
+  def liveSharded(
+    version: IFeatureAwareVersion = Version.Main.V6_0,
+  ): ZLayer[Live, Throwable, MongoClient] =
+    EmbeddedMongoSharded.live(version).flatMap { process =>
+      val address          = process.get.current().getServerAddress()
+      val connectionString = s"mongodb://${address.getHost()}:${address.getPort()}"
+
+      MongoClient.live(connectionString)
+    }
 }

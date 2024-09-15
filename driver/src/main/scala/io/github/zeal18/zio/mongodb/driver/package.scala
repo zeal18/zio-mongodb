@@ -117,10 +117,6 @@ package object driver {
     */
   type MongoClientSettings = com.mongodb.MongoClientSettings
 
-  /** A Client Session
-    */
-  type ClientSession = com.mongodb.reactivestreams.client.ClientSession
-
   /** Options for creating ClientSessions
     */
   type ClientSessionOptions = com.mongodb.ClientSessionOptions

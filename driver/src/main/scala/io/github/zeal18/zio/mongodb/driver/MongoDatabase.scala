@@ -8,7 +8,6 @@ import com.mongodb.reactivestreams.client.MongoDatabase as JMongoDatabase
 import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.bson.codecs.internal.CodecAdapter
 import io.github.zeal18.zio.mongodb.bson.conversions.Bson
-import io.github.zeal18.zio.mongodb.driver.ClientSession
 import io.github.zeal18.zio.mongodb.driver.Document
 import io.github.zeal18.zio.mongodb.driver.ReadConcern
 import io.github.zeal18.zio.mongodb.driver.ReadPreference
@@ -18,6 +17,7 @@ import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.model.CreateCollectionOptions
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
+import io.github.zeal18.zio.mongodb.driver.session.ClientSession
 import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Scope
@@ -421,7 +421,7 @@ object MongoDatabase {
 
     override def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]] =
       wrapped
-        .runCommand[Document](clientSession, command, implicitly[ClassTag[Document]])
+        .runCommand[Document](clientSession.underlying, command, implicitly[ClassTag[Document]])
         .headOption
 
     override def runCommand(
@@ -430,13 +430,18 @@ object MongoDatabase {
       readPreference: ReadPreference,
     ): Task[Option[Document]] =
       wrapped
-        .runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]])
+        .runCommand(
+          clientSession.underlying,
+          command,
+          readPreference,
+          implicitly[ClassTag[Document]],
+        )
         .headOption
 
     override def drop(): Task[Unit] = wrapped.drop().headOption.unit
 
     override def drop(clientSession: ClientSession): Task[Unit] =
-      wrapped.drop(clientSession).unit
+      wrapped.drop(clientSession.underlying).unit
 
     override def listCollectionNames(): ZStream[Any, Throwable, String] =
       wrapped.listCollectionNames().toZIOStream()
@@ -447,10 +452,12 @@ object MongoDatabase {
     override def listCollectionNames(
       clientSession: ClientSession,
     ): ZStream[Any, Throwable, String] =
-      wrapped.listCollectionNames(clientSession).toZIOStream()
+      wrapped.listCollectionNames(clientSession.underlying).toZIOStream()
 
     override def listCollections(clientSession: ClientSession): ListCollectionsQuery[Document] =
-      ListCollectionsQuery(wrapped.listCollections(clientSession, implicitly[ClassTag[Document]]))
+      ListCollectionsQuery(
+        wrapped.listCollections(clientSession.underlying, implicitly[ClassTag[Document]]),
+      )
 
     override def createCollection(collectionName: String): Task[Unit] =
       wrapped.createCollection(collectionName).unit
@@ -465,14 +472,14 @@ object MongoDatabase {
       clientSession: ClientSession,
       collectionName: String,
     ): Task[Unit] =
-      wrapped.createCollection(clientSession, collectionName).unit
+      wrapped.createCollection(clientSession.underlying, collectionName).unit
 
     override def createCollection(
       clientSession: ClientSession,
       collectionName: String,
       options: CreateCollectionOptions,
     ): Task[Unit] =
-      wrapped.createCollection(clientSession, collectionName, options.toJava).unit
+      wrapped.createCollection(clientSession.underlying, collectionName, options.toJava).unit
 
     override def createView(
       viewName: String,
@@ -495,7 +502,7 @@ object MongoDatabase {
       viewOn: String,
       pipeline: Seq[Aggregation],
     ): Task[Unit] =
-      wrapped.createView(clientSession, viewName, viewOn, pipeline.asJava).unit
+      wrapped.createView(clientSession.underlying, viewName, viewOn, pipeline.asJava).unit
 
     override def createView(
       clientSession: ClientSession,
@@ -506,7 +513,7 @@ object MongoDatabase {
     ): Task[Unit] =
       wrapped
         .createView(
-          clientSession,
+          clientSession.underlying,
           viewName,
           viewOn,
           pipeline.asJava,
@@ -527,14 +534,14 @@ object MongoDatabase {
     override def watch(
       clientSession: ClientSession,
     ): ChangeStreamQuery[Document] =
-      ChangeStreamQuery(wrapped.watch(clientSession, implicitly[ClassTag[Document]]))
+      ChangeStreamQuery(wrapped.watch(clientSession.underlying, implicitly[ClassTag[Document]]))
 
     override def watch(
       clientSession: ClientSession,
       pipeline: Seq[Aggregation],
     ): ChangeStreamQuery[Document] =
       ChangeStreamQuery(
-        wrapped.watch(clientSession, pipeline.asJava, implicitly[ClassTag[Document]]),
+        wrapped.watch(clientSession.underlying, pipeline.asJava, implicitly[ClassTag[Document]]),
       )
 
     override def aggregate(pipeline: Seq[Aggregation]): AggregateQuery[Document] =
@@ -548,7 +555,7 @@ object MongoDatabase {
     ): AggregateQuery[Document] =
       AggregateQuery(
         wrapped.aggregate[Document](
-          clientSession,
+          clientSession.underlying,
           pipeline.asJava,
           implicitly[ClassTag[Document]],
         ),
