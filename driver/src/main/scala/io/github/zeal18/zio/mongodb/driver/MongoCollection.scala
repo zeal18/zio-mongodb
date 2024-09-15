@@ -29,6 +29,7 @@ import org.bson.codecs.configuration.CodecRegistry
 import zio.Chunk
 import zio.Scope
 import zio.Task
+import zio.Trace
 import zio.ZIO
 import zio.ZLayer
 
@@ -78,7 +79,7 @@ trait MongoCollection[A] {
     */
   def readConcern: ReadConcern
 
-  /** Create a new MongoCollection instance with a different default class to cast any documents returned from the database into..
+  /** Create a new MongoCollection instance with a different default class to cast any documents returned from the database into.
     *
     * @tparam C   The type that the new collection will encode documents from and decode documents to
     * @return a new MongoCollection instance with the different default class
@@ -112,7 +113,7 @@ trait MongoCollection[A] {
     *
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(): ZIO[Scope, Throwable, ClientSession]
+  def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Creates a client session.
     *
@@ -121,20 +122,20 @@ trait MongoCollection[A] {
     * @param options  the options for the client session
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(options: ClientSessionOptions): ZIO[Scope, Throwable, ClientSession]
+  def startSession(options: ClientSessionOptions)(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Gets an estimate of the count of documents in a collection using collection metadata.
     *
     * @return a publisher with a single element indicating the estimated number of documents
     */
-  def estimatedDocumentCount(): Task[Long]
+  def estimatedDocumentCount()(implicit trace: Trace): Task[Long]
 
   /** Gets an estimate of the count of documents in a collection using collection metadata.
     *
     * @param options the options describing the count
     * @return a publisher with a single element indicating the estimated number of documents
     */
-  def estimatedDocumentCount(options: EstimatedDocumentCountOptions): Task[Long]
+  def estimatedDocumentCount(options: EstimatedDocumentCountOptions)(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection.
     *
@@ -156,7 +157,7 @@ trait MongoCollection[A] {
     *
     * @return a publisher with a single element indicating the number of documents
     */
-  def countDocuments(): Task[Long]
+  def countDocuments()(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection according to the given options.
     *
@@ -179,7 +180,7 @@ trait MongoCollection[A] {
     * @param filter the query filter
     * @return a publisher with a single element indicating the number of documents
     */
-  def countDocuments(filter: Filter): Task[Long]
+  def countDocuments(filter: Filter)(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection according to the given options.
     *
@@ -203,7 +204,7 @@ trait MongoCollection[A] {
     * @param options the options describing the count
     * @return a publisher with a single element indicating the number of documents
     */
-  def countDocuments(filter: Filter, options: CountOptions): Task[Long]
+  def countDocuments(filter: Filter, options: CountOptions)(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection.
     *
@@ -227,7 +228,7 @@ trait MongoCollection[A] {
     * @return a publisher with a single element indicating the number of documents
     * @note Requires MongoDB 3.6 or greater
     */
-  def countDocuments(clientSession: ClientSession): Task[Long]
+  def countDocuments(clientSession: ClientSession)(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection according to the given options.
     *
@@ -252,7 +253,7 @@ trait MongoCollection[A] {
     * @return a publisher with a single element indicating the number of documents
     * @note Requires MongoDB 3.6 or greater
     */
-  def countDocuments(clientSession: ClientSession, filter: Filter): Task[Long]
+  def countDocuments(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[Long]
 
   /** Counts the number of documents in the collection according to the given options.
     *
@@ -282,7 +283,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     options: CountOptions,
-  ): Task[Long]
+  )(implicit trace: Trace): Task[Long]
 
   /** Gets the distinct values of the specified field name.
     *
@@ -385,7 +386,7 @@ trait MongoCollection[A] {
     * @param requests the writes to execute
     * @return a Observable with a single element the BulkWriteResult
     */
-  def bulkWrite(requests: Seq[BulkWrite[A]]): Task[BulkWriteResult]
+  def bulkWrite(requests: Seq[BulkWrite[A]])(implicit trace: Trace): Task[BulkWriteResult]
 
   /** Executes a mix of inserts, updates, replaces, and deletes.
     *
@@ -396,7 +397,7 @@ trait MongoCollection[A] {
   def bulkWrite(
     requests: Seq[BulkWrite[A]],
     options: BulkWriteOptions,
-  ): Task[BulkWriteResult]
+  )(implicit trace: Trace): Task[BulkWriteResult]
 
   /** Executes a mix of inserts, updates, replaces, and deletes.
     *
@@ -408,7 +409,7 @@ trait MongoCollection[A] {
   def bulkWrite(
     clientSession: ClientSession,
     requests: Seq[BulkWrite[A]],
-  ): Task[BulkWriteResult]
+  )(implicit trace: Trace): Task[BulkWriteResult]
 
   /** Executes a mix of inserts, updates, replaces, and deletes.
     *
@@ -422,7 +423,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     requests: Seq[BulkWrite[A]],
     options: BulkWriteOptions,
-  ): Task[BulkWriteResult]
+  )(implicit trace: Trace): Task[BulkWriteResult]
 
   /** Inserts the provided document. If the document is missing an identifier, the driver should generate one.
     *
@@ -430,7 +431,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the InsertOneResult or with either a
     *         com.mongodb.DuplicateKeyException or com.mongodb.MongoException
     */
-  def insertOne(document: A): Task[InsertOneResult]
+  def insertOne(document: A)(implicit trace: Trace): Task[InsertOneResult]
 
   /** Inserts the provided document. If the document is missing an identifier, the driver should generate one.
     *
@@ -439,7 +440,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the InsertOneResult or with either a
     *         com.mongodb.DuplicateKeyException or com.mongodb.MongoException
     */
-  def insertOne(document: A, options: InsertOneOptions): Task[InsertOneResult]
+  def insertOne(document: A, options: InsertOneOptions)(implicit trace: Trace): Task[InsertOneResult]
 
   /** Inserts the provided document. If the document is missing an identifier, the driver should generate one.
     *
@@ -452,7 +453,7 @@ trait MongoCollection[A] {
   def insertOne(
     clientSession: ClientSession,
     document: A,
-  ): Task[InsertOneResult]
+  )(implicit trace: Trace): Task[InsertOneResult]
 
   /** Inserts the provided document. If the document is missing an identifier, the driver should generate one.
     *
@@ -467,7 +468,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     document: A,
     options: InsertOneOptions,
-  ): Task[InsertOneResult]
+  )(implicit trace: Trace): Task[InsertOneResult]
 
   /** Inserts a batch of documents. The preferred way to perform bulk inserts is to use the BulkWrite API. However, when talking with a
     * server &lt; 2.6, using this method will be faster due to constraints in the bulk API related to error handling.
@@ -476,7 +477,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the InsertManyResult or with either a
     *         com.mongodb.DuplicateKeyException or com.mongodb.MongoException
     */
-  def insertMany(documents: Seq[? <: A]): Task[InsertManyResult]
+  def insertMany(documents: Seq[? <: A])(implicit trace: Trace): Task[InsertManyResult]
 
   /** Inserts a batch of documents. The preferred way to perform bulk inserts is to use the BulkWrite API. However, when talking with a
     * server &lt; 2.6, using this method will be faster due to constraints in the bulk API related to error handling.
@@ -489,7 +490,7 @@ trait MongoCollection[A] {
   def insertMany(
     documents: Seq[? <: A],
     options: InsertManyOptions,
-  ): Task[InsertManyResult]
+  )(implicit trace: Trace): Task[InsertManyResult]
 
   /** Inserts a batch of documents. The preferred way to perform bulk inserts is to use the BulkWrite API.
     *
@@ -502,7 +503,7 @@ trait MongoCollection[A] {
   def insertMany(
     clientSession: ClientSession,
     documents: Seq[? <: A],
-  ): Task[InsertManyResult]
+  )(implicit trace: Trace): Task[InsertManyResult]
 
   /** Inserts a batch of documents. The preferred way to perform bulk inserts is to use the BulkWrite API.
     *
@@ -517,7 +518,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     documents: Seq[? <: A],
     options: InsertManyOptions,
-  ): Task[InsertManyResult]
+  )(implicit trace: Trace): Task[InsertManyResult]
 
   /** Removes at most one document from the collection that matches the given filter.  If no documents match, the collection is not
     * modified.
@@ -525,7 +526,7 @@ trait MongoCollection[A] {
     * @param filter the query filter to apply the delete operation
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     */
-  def deleteOne(filter: Filter): Task[DeleteResult]
+  def deleteOne(filter: Filter)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes at most one document from the collection that matches the given filter.  If no documents match, the collection is not
     * modified.
@@ -534,7 +535,7 @@ trait MongoCollection[A] {
     * @param options the options to apply to the delete operation
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     */
-  def deleteOne(filter: Filter, options: DeleteOptions): Task[DeleteResult]
+  def deleteOne(filter: Filter, options: DeleteOptions)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes at most one document from the collection that matches the given filter.  If no documents match, the collection is not
     * modified.
@@ -544,7 +545,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     * @note Requires MongoDB 3.6 or greater
     */
-  def deleteOne(clientSession: ClientSession, filter: Filter): Task[DeleteResult]
+  def deleteOne(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes at most one document from the collection that matches the given filter.  If no documents match, the collection is not
     * modified.
@@ -559,14 +560,14 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     options: DeleteOptions,
-  ): Task[DeleteResult]
+  )(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes all documents from the collection that match the given query filter.  If no documents match, the collection is not modified.
     *
     * @param filter the query filter to apply the delete operation
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     */
-  def deleteMany(filter: Filter): Task[DeleteResult]
+  def deleteMany(filter: Filter)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes all documents from the collection that match the given query filter.  If no documents match, the collection is not modified.
     *
@@ -574,7 +575,7 @@ trait MongoCollection[A] {
     * @param options the options to apply to the delete operation
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     */
-  def deleteMany(filter: Filter, options: DeleteOptions): Task[DeleteResult]
+  def deleteMany(filter: Filter, options: DeleteOptions)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes all documents from the collection that match the given query filter.  If no documents match, the collection is not modified.
     *
@@ -583,7 +584,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the DeleteResult or with an com.mongodb.MongoException
     * @note Requires MongoDB 3.6 or greater
     */
-  def deleteMany(clientSession: ClientSession, filter: Filter): Task[DeleteResult]
+  def deleteMany(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[DeleteResult]
 
   /** Removes all documents from the collection that match the given query filter.  If no documents match, the collection is not modified.
     *
@@ -597,7 +598,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     options: DeleteOptions,
-  ): Task[DeleteResult]
+  )(implicit trace: Trace): Task[DeleteResult]
 
   /** Replace a document in the collection according to the specified arguments.
     *
@@ -606,7 +607,7 @@ trait MongoCollection[A] {
     * @param replacement the replacement document
     * @return a Observable with a single element the UpdateResult
     */
-  def replaceOne(filter: Filter, replacement: A): Task[UpdateResult]
+  def replaceOne(filter: Filter, replacement: A)(implicit trace: Trace): Task[UpdateResult]
 
   /** Replace a document in the collection according to the specified arguments.
     *
@@ -621,7 +622,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     replacement: A,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Replace a document in the collection according to the specified arguments.
     *
@@ -635,7 +636,7 @@ trait MongoCollection[A] {
     filter: Filter,
     replacement: A,
     options: ReplaceOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Replace a document in the collection according to the specified arguments.
     *
@@ -652,7 +653,7 @@ trait MongoCollection[A] {
     filter: Filter,
     replacement: A,
     options: ReplaceOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -664,7 +665,7 @@ trait MongoCollection[A] {
     *                can be of any type for which a `Codec` is registered
     * @return a Observable with a single element the UpdateResult
     */
-  def updateOne(filter: Filter, update: Update): Task[UpdateResult]
+  def updateOne(filter: Filter, update: Update)(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -681,7 +682,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -699,7 +700,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Update,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -719,7 +720,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -731,7 +732,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the UpdateResult
     * @note Requires MongoDB 4.2 or greater
     */
-  def updateOne(filter: Filter, update: Seq[Update]): Task[UpdateResult]
+  def updateOne(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -744,7 +745,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the UpdateResult
     * @note Requires MongoDB 4.2 or greater
     */
-  def updateOne(filter: Filter, update: Seq[Update], options: UpdateOptions): Task[UpdateResult]
+  def updateOne(filter: Filter, update: Seq[Update], options: UpdateOptions)(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -761,7 +762,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Seq[Update],
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update a single document in the collection according to the specified arguments.
     *
@@ -780,7 +781,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Seq[Update],
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -792,7 +793,7 @@ trait MongoCollection[A] {
     *                can be of any type for which a `Codec` is registered
     * @return a Observable with a single element the UpdateResult
     */
-  def updateMany(filter: Filter, update: Update): Task[UpdateResult]
+  def updateMany(filter: Filter, update: Update)(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -809,7 +810,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -827,7 +828,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Update,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -847,7 +848,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -859,7 +860,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the UpdateResult
     * @note Requires MongoDB 4.2 or greater
     */
-  def updateMany(filter: Filter, update: Seq[Update]): Task[UpdateResult]
+  def updateMany(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -872,7 +873,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the UpdateResult
     * @note Requires MongoDB 4.2 or greater
     */
-  def updateMany(filter: Filter, update: Seq[Update], options: UpdateOptions): Task[UpdateResult]
+  def updateMany(filter: Filter, update: Seq[Update], options: UpdateOptions)(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -889,7 +890,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Seq[Update],
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Update all documents in the collection according to the specified arguments.
     *
@@ -908,7 +909,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Seq[Update],
     options: UpdateOptions,
-  ): Task[UpdateResult]
+  )(implicit trace: Trace): Task[UpdateResult]
 
   /** Atomically find a document and remove it.
     *
@@ -916,7 +917,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the document that was removed.  If no documents matched the query filter, then null will be
     *         returned
     */
-  def findOneAndDelete(filter: Filter): Task[Option[A]]
+  def findOneAndDelete(filter: Filter)(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and remove it.
     *
@@ -925,7 +926,7 @@ trait MongoCollection[A] {
     * @return a Observable with a single element the document that was removed.  If no documents matched the query filter, then null will be
     *         returned
     */
-  def findOneAndDelete(filter: Filter, options: FindOneAndDeleteOptions): Task[Option[A]]
+  def findOneAndDelete(filter: Filter, options: FindOneAndDeleteOptions)(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and remove it.
     *
@@ -935,7 +936,7 @@ trait MongoCollection[A] {
     *         returned
     * @note Requires MongoDB 3.6 or greater
     */
-  def findOneAndDelete(clientSession: ClientSession, filter: Filter): Task[Option[A]]
+  def findOneAndDelete(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and remove it.
     *
@@ -950,7 +951,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     options: FindOneAndDeleteOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and replace it.
     *
@@ -960,7 +961,7 @@ trait MongoCollection[A] {
     *         property, this will either be the document as it was before the update or as it is after the update.  If no documents matched the
     *         query filter, then null will be returned
     */
-  def findOneAndReplace(filter: Filter, replacement: A): Task[Option[A]]
+  def findOneAndReplace(filter: Filter, replacement: A)(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and replace it.
     *
@@ -975,7 +976,7 @@ trait MongoCollection[A] {
     filter: Filter,
     replacement: A,
     options: FindOneAndReplaceOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and replace it.
     *
@@ -991,7 +992,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     replacement: A,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and replace it.
     *
@@ -1009,7 +1010,7 @@ trait MongoCollection[A] {
     filter: Filter,
     replacement: A,
     options: FindOneAndReplaceOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1021,7 +1022,7 @@ trait MongoCollection[A] {
     *         property, this will either be the document as it was before the update or as it is after the update.  If no documents matched the
     *         query filter, then null will be returned
     */
-  def findOneAndUpdate(filter: Filter, update: Update): Task[Option[A]]
+  def findOneAndUpdate(filter: Filter, update: Update)(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1038,7 +1039,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: FindOneAndUpdateOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1056,7 +1057,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Update,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1076,7 +1077,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Update,
     options: FindOneAndUpdateOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1088,7 +1089,7 @@ trait MongoCollection[A] {
     *         query filter, then null will be returned
     * @note Requires MongoDB 4.2 or greater
     */
-  def findOneAndUpdate(filter: Filter, update: Seq[Update]): Task[Option[A]]
+  def findOneAndUpdate(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1105,7 +1106,7 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Seq[Update],
     options: FindOneAndUpdateOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1122,7 +1123,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     filter: Filter,
     update: Seq[Update],
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Atomically find a document and update it.
     *
@@ -1141,14 +1142,14 @@ trait MongoCollection[A] {
     filter: Filter,
     update: Seq[Update],
     options: FindOneAndUpdateOptions,
-  ): Task[Option[A]]
+  )(implicit trace: Trace): Task[Option[A]]
 
   /** Drops this collection from the Database.
     *
     * @return an empty Observable that indicates when the operation has completed
     *         [[https://www.mongodb.com/docs/manual/reference/command/drop/ Drop Collection]]
     */
-  def drop(): Task[Unit]
+  def drop()(implicit trace: Trace): Task[Unit]
 
   /** Drops this collection from the Database.
     *
@@ -1157,20 +1158,20 @@ trait MongoCollection[A] {
     *         [[https://www.mongodb.com/docs/manual/reference/command/drop/ Drop Collection]]
     * @note Requires MongoDB 3.6 or greater
     */
-  def drop(clientSession: ClientSession): Task[Unit]
+  def drop(clientSession: ClientSession)(implicit trace: Trace): Task[Unit]
 
   /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param key an object describing the index key(s)
     * @return created index name
     */
-  def createIndex(key: IndexKey): Task[String]
+  def createIndex(key: IndexKey)(implicit trace: Trace): Task[String]
 
   /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param key     an object describing the index key(s)
     * @param options the options for the index
     * @return created index name
     */
-  def createIndex(key: IndexKey, options: IndexOptions): Task[String]
+  def createIndex(key: IndexKey, options: IndexOptions)(implicit trace: Trace): Task[String]
 
   /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
@@ -1179,7 +1180,7 @@ trait MongoCollection[A] {
     * @return created index name
     * @note Requires MongoDB 3.6 or greater
     */
-  def createIndex(clientSession: ClientSession, key: IndexKey): Task[String]
+  def createIndex(clientSession: ClientSession, key: IndexKey)(implicit trace: Trace): Task[String]
 
   /** [[https://www.mongodb.com/docs/manual/reference/command/createIndexes Create IndexKey]]
     * @param clientSession the client session with which to associate this operation
@@ -1193,7 +1194,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     key: IndexKey,
     options: IndexOptions,
-  ): Task[String]
+  )(implicit trace: Trace): Task[String]
 
   /** Create multiple indexes.
     *
@@ -1201,7 +1202,7 @@ trait MongoCollection[A] {
     * @param indexes the list of indexes to create
     * @return names of the indexes
     */
-  def createIndexes(indexes: Index*): Task[Chunk[String]]
+  def createIndexes(indexes: Index*)(implicit trace: Trace): Task[Chunk[String]]
 
   /** Create multiple indexes.
     *
@@ -1213,7 +1214,7 @@ trait MongoCollection[A] {
   def createIndexes(
     indexes: Seq[Index],
     createIndexOptions: CreateIndexOptions,
-  ): Task[Chunk[String]]
+  )(implicit trace: Trace): Task[Chunk[String]]
 
   /** Create multiple indexes.
     *
@@ -1223,7 +1224,7 @@ trait MongoCollection[A] {
     * @return names of the indexes
     * @note Requires MongoDB 3.6 or greater
     */
-  def createIndexes(clientSession: ClientSession, indexes: Index*): Task[Chunk[String]]
+  def createIndexes(clientSession: ClientSession, indexes: Index*)(implicit trace: Trace): Task[Chunk[String]]
 
   /** Create multiple indexes.
     *
@@ -1238,7 +1239,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     indexes: Seq[Index],
     createIndexOptions: CreateIndexOptions,
-  ): Task[Chunk[String]]
+  )(implicit trace: Trace): Task[Chunk[String]]
 
   /** Get all the indexes in this collection.
     *
@@ -1262,7 +1263,7 @@ trait MongoCollection[A] {
     * @param indexName the name of the index to remove
     * @return an empty Task
     */
-  def dropIndex(indexName: String): Task[Unit]
+  def dropIndex(indexName: String)(implicit trace: Trace): Task[Unit]
 
   /** Drops the given index.
     *
@@ -1271,14 +1272,14 @@ trait MongoCollection[A] {
     * @param dropIndexOptions options to use when dropping indexes
     * @return an empty Task
     */
-  def dropIndex(indexName: String, dropIndexOptions: DropIndexOptions): Task[Unit]
+  def dropIndex(indexName: String, dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit]
 
   /** Drops the index given the keys used to create it.
     *
     * @param keys the keys of the index to remove
     * @return an empty Task
     */
-  def dropIndex(keys: IndexKey): Task[Unit]
+  def dropIndex(keys: IndexKey)(implicit trace: Trace): Task[Unit]
 
   /** Drops the index given the keys used to create it.
     *
@@ -1286,7 +1287,7 @@ trait MongoCollection[A] {
     * @param dropIndexOptions options to use when dropping indexes
     * @return an empty Task
     */
-  def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions): Task[Unit]
+  def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit]
 
   /** Drops the given index.
     *
@@ -1296,7 +1297,7 @@ trait MongoCollection[A] {
     * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
-  def dropIndex(clientSession: ClientSession, indexName: String): Task[Unit]
+  def dropIndex(clientSession: ClientSession, indexName: String)(implicit trace: Trace): Task[Unit]
 
   /** Drops the given index.
     *
@@ -1311,7 +1312,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     indexName: String,
     dropIndexOptions: DropIndexOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Drops the index given the keys used to create it.
     *
@@ -1320,7 +1321,7 @@ trait MongoCollection[A] {
     * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
-  def dropIndex(clientSession: ClientSession, keys: IndexKey): Task[Unit]
+  def dropIndex(clientSession: ClientSession, keys: IndexKey)(implicit trace: Trace): Task[Unit]
 
   /** Drops the index given the keys used to create it.
     *
@@ -1334,14 +1335,14 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     keys: IndexKey,
     dropIndexOptions: DropIndexOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
     * [[https://www.mongodb.com/docs/manual/reference/command/dropIndexes/ Drop Indexes]]
     * @return an empty Task
     */
-  def dropIndexes(): Task[Unit]
+  def dropIndexes()(implicit trace: Trace): Task[Unit]
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
@@ -1349,7 +1350,7 @@ trait MongoCollection[A] {
     * @param dropIndexOptions options to use when dropping indexes
     * @return an empty Task
     */
-  def dropIndexes(dropIndexOptions: DropIndexOptions): Task[Unit]
+  def dropIndexes(dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit]
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
@@ -1358,7 +1359,7 @@ trait MongoCollection[A] {
     * @return an empty Task
     * @note Requires MongoDB 3.6 or greater
     */
-  def dropIndexes(clientSession: ClientSession): Task[Unit]
+  def dropIndexes(clientSession: ClientSession)(implicit trace: Trace): Task[Unit]
 
   /** Drop all the indexes on this collection, except for the default on _id.
     *
@@ -1371,7 +1372,7 @@ trait MongoCollection[A] {
   def dropIndexes(
     clientSession: ClientSession,
     dropIndexOptions: DropIndexOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Rename the collection with oldCollectionName to the newCollectionName.
     *
@@ -1379,7 +1380,7 @@ trait MongoCollection[A] {
     * @param newCollectionNamespace the name the collection will be renamed to
     * @return an empty Observable that indicates when the operation has completed
     */
-  def renameCollection(newCollectionNamespace: MongoNamespace): Task[Unit]
+  def renameCollection(newCollectionNamespace: MongoNamespace)(implicit trace: Trace): Task[Unit]
 
   /** Rename the collection with oldCollectionName to the newCollectionName.
     *
@@ -1391,7 +1392,7 @@ trait MongoCollection[A] {
   def renameCollection(
     newCollectionNamespace: MongoNamespace,
     options: RenameCollectionOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Rename the collection with oldCollectionName to the newCollectionName.
     *
@@ -1404,7 +1405,7 @@ trait MongoCollection[A] {
   def renameCollection(
     clientSession: ClientSession,
     newCollectionNamespace: MongoNamespace,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Rename the collection with oldCollectionName to the newCollectionName.
     *
@@ -1419,7 +1420,7 @@ trait MongoCollection[A] {
     clientSession: ClientSession,
     newCollectionNamespace: MongoNamespace,
     options: RenameCollectionOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Creates a change stream for this collection.
     *
@@ -1458,6 +1459,7 @@ object MongoCollection {
 
   def live[A: izumi.reflect.Tag: ClassTag](name: String)(implicit
     codec: Codec[A],
+    trace: Trace,
   ): ZLayer[MongoDatabase, Nothing, MongoCollection[A]] =
     ZLayer.fromFunction[MongoDatabase => MongoCollection[A]](_.getCollection[A](name))
 
@@ -1497,42 +1499,42 @@ object MongoCollection {
     override def withWriteConcern(writeConcern: WriteConcern): MongoCollection[A] =
       Live[A](database, wrapped.withWriteConcern(writeConcern))
 
-    override def startSession(): ZIO[Scope, Throwable, ClientSession] = database.startSession()
+    override def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] = database.startSession()
 
     override def startSession(
       options: ClientSessionOptions,
-    ): ZIO[Scope, Throwable, ClientSession] =
+    )(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] =
       database.startSession(options)
 
     override def withReadConcern(readConcern: ReadConcern): MongoCollection[A] =
       Live[A](database, wrapped.withReadConcern(readConcern))
 
-    override def estimatedDocumentCount(): Task[Long] =
+    override def estimatedDocumentCount()(implicit trace: Trace): Task[Long] =
       wrapped.estimatedDocumentCount().head.map(identity[Long](_))
 
-    override def estimatedDocumentCount(options: EstimatedDocumentCountOptions): Task[Long] =
+    override def estimatedDocumentCount(options: EstimatedDocumentCountOptions)(implicit trace: Trace): Task[Long] =
       wrapped.estimatedDocumentCount(options.toJava).head.map(identity[Long](_))
 
-    override def countDocuments(): Task[Long] =
+    override def countDocuments()(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments().head.map(identity[Long](_))
 
-    override def countDocuments(filter: Filter): Task[Long] =
+    override def countDocuments(filter: Filter)(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments(filter).head.map(identity[Long](_))
 
-    override def countDocuments(filter: Filter, options: CountOptions): Task[Long] =
+    override def countDocuments(filter: Filter, options: CountOptions)(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments(filter, options.toJava).head.map(identity[Long](_))
 
-    override def countDocuments(clientSession: ClientSession): Task[Long] =
+    override def countDocuments(clientSession: ClientSession)(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments(clientSession).head.map(identity[Long](_))
 
-    override def countDocuments(clientSession: ClientSession, filter: Filter): Task[Long] =
+    override def countDocuments(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments(clientSession, filter).head.map(identity[Long](_))
 
     override def countDocuments(
       clientSession: ClientSession,
       filter: Filter,
       options: CountOptions,
-    ): Task[Long] =
+    )(implicit trace: Trace): Task[Long] =
       wrapped.countDocuments(clientSession, filter, options.toJava).head.map(identity[Long](_))
 
     override def distinct(fieldName: String): DistinctQuery[A] =
@@ -1574,115 +1576,115 @@ object MongoCollection {
         wrapped.aggregate[A](clientSession, pipeline.asJava, documentClass),
       )
 
-    override def bulkWrite(requests: Seq[BulkWrite[A]]): Task[BulkWriteResult] =
+    override def bulkWrite(requests: Seq[BulkWrite[A]])(implicit trace: Trace): Task[BulkWriteResult] =
       wrapped.bulkWrite(requests.map(_.toJava).asJava).head
 
     override def bulkWrite(
       requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
-    ): Task[BulkWriteResult] =
+    )(implicit trace: Trace): Task[BulkWriteResult] =
       wrapped.bulkWrite(requests.map(_.toJava).asJava, options.toJava).head
 
     override def bulkWrite(
       clientSession: ClientSession,
       requests: Seq[BulkWrite[A]],
-    ): Task[BulkWriteResult] =
+    )(implicit trace: Trace): Task[BulkWriteResult] =
       wrapped.bulkWrite(clientSession, requests.map(_.toJava).asJava).head
 
     override def bulkWrite(
       clientSession: ClientSession,
       requests: Seq[BulkWrite[A]],
       options: BulkWriteOptions,
-    ): Task[BulkWriteResult] =
+    )(implicit trace: Trace): Task[BulkWriteResult] =
       wrapped.bulkWrite(clientSession, requests.map(_.toJava).asJava, options.toJava).head
 
-    override def insertOne(document: A): Task[InsertOneResult] = wrapped.insertOne(document).head
+    override def insertOne(document: A)(implicit trace: Trace): Task[InsertOneResult] = wrapped.insertOne(document).head
 
-    override def insertOne(document: A, options: InsertOneOptions): Task[InsertOneResult] =
+    override def insertOne(document: A, options: InsertOneOptions)(implicit trace: Trace): Task[InsertOneResult] =
       wrapped.insertOne(document, options.toJava).head
 
     override def insertOne(
       clientSession: ClientSession,
       document: A,
-    ): Task[InsertOneResult] =
+    )(implicit trace: Trace): Task[InsertOneResult] =
       wrapped.insertOne(clientSession, document).head
 
     override def insertOne(
       clientSession: ClientSession,
       document: A,
       options: InsertOneOptions,
-    ): Task[InsertOneResult] =
+    )(implicit trace: Trace): Task[InsertOneResult] =
       wrapped.insertOne(clientSession, document, options.toJava).head
 
-    override def insertMany(documents: Seq[? <: A]): Task[InsertManyResult] =
+    override def insertMany(documents: Seq[? <: A])(implicit trace: Trace): Task[InsertManyResult] =
       wrapped.insertMany(documents.asJava).head
 
     override def insertMany(
       documents: Seq[? <: A],
       options: InsertManyOptions,
-    ): Task[InsertManyResult] =
+    )(implicit trace: Trace): Task[InsertManyResult] =
       wrapped.insertMany(documents.asJava, options.toJava).head
 
     override def insertMany(
       clientSession: ClientSession,
       documents: Seq[? <: A],
-    ): Task[InsertManyResult] =
+    )(implicit trace: Trace): Task[InsertManyResult] =
       wrapped.insertMany(clientSession, documents.asJava).head
 
     override def insertMany(
       clientSession: ClientSession,
       documents: Seq[? <: A],
       options: InsertManyOptions,
-    ): Task[InsertManyResult] =
+    )(implicit trace: Trace): Task[InsertManyResult] =
       wrapped.insertMany(clientSession, documents.asJava, options.toJava).head
 
-    override def deleteOne(filter: Filter): Task[DeleteResult] =
+    override def deleteOne(filter: Filter)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteOne(filter).head
 
-    override def deleteOne(filter: Filter, options: DeleteOptions): Task[DeleteResult] =
+    override def deleteOne(filter: Filter, options: DeleteOptions)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteOne(filter, options.toJava).head
 
-    override def deleteOne(clientSession: ClientSession, filter: Filter): Task[DeleteResult] =
+    override def deleteOne(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteOne(clientSession, filter).head
 
     override def deleteOne(
       clientSession: ClientSession,
       filter: Filter,
       options: DeleteOptions,
-    ): Task[DeleteResult] =
+    )(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteOne(clientSession, filter, options.toJava).head
 
-    override def deleteMany(filter: Filter): Task[DeleteResult] =
+    override def deleteMany(filter: Filter)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteMany(filter).head
 
-    override def deleteMany(filter: Filter, options: DeleteOptions): Task[DeleteResult] =
+    override def deleteMany(filter: Filter, options: DeleteOptions)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteMany(filter, options.toJava).head
 
-    override def deleteMany(clientSession: ClientSession, filter: Filter): Task[DeleteResult] =
+    override def deleteMany(clientSession: ClientSession, filter: Filter)(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteMany(clientSession, filter).head
 
     override def deleteMany(
       clientSession: ClientSession,
       filter: Filter,
       options: DeleteOptions,
-    ): Task[DeleteResult] =
+    )(implicit trace: Trace): Task[DeleteResult] =
       wrapped.deleteMany(clientSession, filter, options.toJava).head
 
-    override def replaceOne(filter: Filter, replacement: A): Task[UpdateResult] =
+    override def replaceOne(filter: Filter, replacement: A)(implicit trace: Trace): Task[UpdateResult] =
       wrapped.replaceOne(filter, replacement).head
 
     override def replaceOne(
       clientSession: ClientSession,
       filter: Filter,
       replacement: A,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.replaceOne(clientSession, filter, replacement).head
 
     override def replaceOne(
       filter: Filter,
       replacement: A,
       options: ReplaceOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.replaceOne(filter, replacement, options.toJava).head
 
     override def replaceOne(
@@ -1690,24 +1692,24 @@ object MongoCollection {
       filter: Filter,
       replacement: A,
       options: ReplaceOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.replaceOne(clientSession, filter, replacement, options.toJava).head
 
-    override def updateOne(filter: Filter, update: Update): Task[UpdateResult] =
+    override def updateOne(filter: Filter, update: Update)(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(filter, update).head
 
     override def updateOne(
       filter: Filter,
       update: Update,
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(filter, update, options.toJava).head
 
     override def updateOne(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(clientSession, filter, update).head
 
     override def updateOne(
@@ -1715,24 +1717,24 @@ object MongoCollection {
       filter: Filter,
       update: Update,
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(clientSession, filter, update, options.toJava).head
 
-    override def updateOne(filter: Filter, update: Seq[Update]): Task[UpdateResult] =
+    override def updateOne(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(filter, update.asJava).head
 
     override def updateOne(
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(filter, update.asJava, options.toJava).head
 
     override def updateOne(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(clientSession, filter, update.asJava).head
 
     override def updateOne(
@@ -1740,24 +1742,24 @@ object MongoCollection {
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateOne(clientSession, filter, update.asJava, options.toJava).head
 
-    override def updateMany(filter: Filter, update: Update): Task[UpdateResult] =
+    override def updateMany(filter: Filter, update: Update)(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(filter, update).head
 
     override def updateMany(
       filter: Filter,
       update: Update,
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(filter, update, options.toJava).head
 
     override def updateMany(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(clientSession, filter, update).head
 
     override def updateMany(
@@ -1765,24 +1767,24 @@ object MongoCollection {
       filter: Filter,
       update: Update,
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(clientSession, filter, update, options.toJava).head
 
-    override def updateMany(filter: Filter, update: Seq[Update]): Task[UpdateResult] =
+    override def updateMany(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(filter, update.asJava).head
 
     override def updateMany(
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(filter, update.asJava, options.toJava).head
 
     override def updateMany(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(clientSession, filter, update.asJava).head
 
     override def updateMany(
@@ -1790,43 +1792,45 @@ object MongoCollection {
       filter: Filter,
       update: Seq[Update],
       options: UpdateOptions,
-    ): Task[UpdateResult] =
+    )(implicit trace: Trace): Task[UpdateResult] =
       wrapped.updateMany(clientSession, filter, update.asJava, options.toJava).head
 
-    override def findOneAndDelete(filter: Filter): Task[Option[A]] =
+    override def findOneAndDelete(filter: Filter)(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndDelete(filter).headOption
 
     override def findOneAndDelete(
       filter: Filter,
       options: FindOneAndDeleteOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndDelete(filter, options.toJava).headOption
 
-    override def findOneAndDelete(clientSession: ClientSession, filter: Filter): Task[Option[A]] =
+    override def findOneAndDelete(clientSession: ClientSession, filter: Filter)(implicit
+      trace: Trace,
+    ): Task[Option[A]] =
       wrapped.findOneAndDelete(clientSession, filter).headOption
 
     override def findOneAndDelete(
       clientSession: ClientSession,
       filter: Filter,
       options: FindOneAndDeleteOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndDelete(clientSession, filter, options.toJava).headOption
 
-    override def findOneAndReplace(filter: Filter, replacement: A): Task[Option[A]] =
+    override def findOneAndReplace(filter: Filter, replacement: A)(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndReplace(filter, replacement).headOption
 
     override def findOneAndReplace(
       filter: Filter,
       replacement: A,
       options: FindOneAndReplaceOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndReplace(filter, replacement, options.toJava).headOption
 
     override def findOneAndReplace(
       clientSession: ClientSession,
       filter: Filter,
       replacement: A,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndReplace(clientSession, filter, replacement).headOption
 
     override def findOneAndReplace(
@@ -1834,24 +1838,24 @@ object MongoCollection {
       filter: Filter,
       replacement: A,
       options: FindOneAndReplaceOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndReplace(clientSession, filter, replacement, options.toJava).headOption
 
-    override def findOneAndUpdate(filter: Filter, update: Update): Task[Option[A]] =
+    override def findOneAndUpdate(filter: Filter, update: Update)(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(filter, update).headOption
 
     override def findOneAndUpdate(
       filter: Filter,
       update: Update,
       options: FindOneAndUpdateOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(filter, update, options.toJava).headOption
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
       filter: Filter,
       update: Update,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(clientSession, filter, update).headOption
 
     override def findOneAndUpdate(
@@ -1859,24 +1863,24 @@ object MongoCollection {
       filter: Filter,
       update: Update,
       options: FindOneAndUpdateOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(clientSession, filter, update, options.toJava).headOption
 
-    override def findOneAndUpdate(filter: Filter, update: Seq[Update]): Task[Option[A]] =
+    override def findOneAndUpdate(filter: Filter, update: Seq[Update])(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(filter, update.asJava).headOption
 
     override def findOneAndUpdate(
       filter: Filter,
       update: Seq[Update],
       options: FindOneAndUpdateOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(filter, update.asJava, options.toJava).headOption
 
     override def findOneAndUpdate(
       clientSession: ClientSession,
       filter: Filter,
       update: Seq[Update],
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(clientSession, filter, update.asJava).headOption
 
     override def findOneAndUpdate(
@@ -1884,30 +1888,30 @@ object MongoCollection {
       filter: Filter,
       update: Seq[Update],
       options: FindOneAndUpdateOptions,
-    ): Task[Option[A]] =
+    )(implicit trace: Trace): Task[Option[A]] =
       wrapped.findOneAndUpdate(clientSession, filter, update.asJava, options.toJava).headOption
 
-    override def drop(): Task[Unit] = wrapped.drop().headOption.unit
+    override def drop()(implicit trace: Trace): Task[Unit] = wrapped.drop().headOption.unit
 
-    override def drop(clientSession: ClientSession): Task[Unit] =
+    override def drop(clientSession: ClientSession)(implicit trace: Trace): Task[Unit] =
       wrapped.drop(clientSession).headOption.unit
 
-    override def createIndex(key: IndexKey): Task[String] = wrapped.createIndex(key).head
+    override def createIndex(key: IndexKey)(implicit trace: Trace): Task[String] = wrapped.createIndex(key).head
 
-    override def createIndex(key: IndexKey, options: IndexOptions): Task[String] =
+    override def createIndex(key: IndexKey, options: IndexOptions)(implicit trace: Trace): Task[String] =
       wrapped.createIndex(key, options.toJava).head
 
-    override def createIndex(clientSession: ClientSession, key: IndexKey): Task[String] =
+    override def createIndex(clientSession: ClientSession, key: IndexKey)(implicit trace: Trace): Task[String] =
       wrapped.createIndex(clientSession, key).head
 
     override def createIndex(
       clientSession: ClientSession,
       key: IndexKey,
       options: IndexOptions,
-    ): Task[String] =
+    )(implicit trace: Trace): Task[String] =
       wrapped.createIndex(clientSession, key, options.toJava).head
 
-    override def createIndexes(indexes: Index*): Task[Chunk[String]] = {
+    override def createIndexes(indexes: Index*)(implicit trace: Trace): Task[Chunk[String]] = {
       val models = indexes.map(_.toJava).asJava
 
       wrapped.createIndexes(models).toChunk
@@ -1916,7 +1920,7 @@ object MongoCollection {
     override def createIndexes(
       indexes: Seq[Index],
       createIndexOptions: CreateIndexOptions,
-    ): Task[Chunk[String]] = {
+    )(implicit trace: Trace): Task[Chunk[String]] = {
       val models = indexes.map(_.toJava).asJava
 
       wrapped.createIndexes(models, createIndexOptions.toJava).toChunk
@@ -1925,7 +1929,7 @@ object MongoCollection {
     override def createIndexes(
       clientSession: ClientSession,
       indexes: Index*,
-    ): Task[Chunk[String]] = {
+    )(implicit trace: Trace): Task[Chunk[String]] = {
       val models = indexes.map(_.toJava).asJava
 
       wrapped.createIndexes(clientSession, models).toChunk
@@ -1935,7 +1939,7 @@ object MongoCollection {
       clientSession: ClientSession,
       indexes: Seq[Index],
       createIndexOptions: CreateIndexOptions,
-    ): Task[Chunk[String]] = {
+    )(implicit trace: Trace): Task[Chunk[String]] = {
       val models = indexes.map(_.toJava).asJava
 
       wrapped.createIndexes(clientSession, models, createIndexOptions.toJava).toChunk
@@ -1947,72 +1951,72 @@ object MongoCollection {
     override def listIndexes(clientSession: ClientSession): ListIndexesQuery[Document] =
       ListIndexesQuery(wrapped.listIndexes(clientSession, implicitly[ClassTag[Document]]))
 
-    override def dropIndex(indexName: String): Task[Unit] =
+    override def dropIndex(indexName: String)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(indexName).headOption.unit
 
-    override def dropIndex(indexName: String, dropIndexOptions: DropIndexOptions): Task[Unit] =
+    override def dropIndex(indexName: String, dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(indexName, dropIndexOptions.toJava).headOption.unit
 
-    override def dropIndex(keys: IndexKey): Task[Unit] =
+    override def dropIndex(keys: IndexKey)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(keys).headOption.unit
 
-    override def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions): Task[Unit] =
+    override def dropIndex(keys: IndexKey, dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(keys, dropIndexOptions.toJava).headOption.unit
 
-    override def dropIndex(clientSession: ClientSession, indexName: String): Task[Unit] =
+    override def dropIndex(clientSession: ClientSession, indexName: String)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(clientSession, indexName).headOption.unit
 
     override def dropIndex(
       clientSession: ClientSession,
       indexName: String,
       dropIndexOptions: DropIndexOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(clientSession, indexName, dropIndexOptions.toJava).headOption.unit
 
-    override def dropIndex(clientSession: ClientSession, keys: IndexKey): Task[Unit] =
+    override def dropIndex(clientSession: ClientSession, keys: IndexKey)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(clientSession, keys).headOption.unit
 
     override def dropIndex(
       clientSession: ClientSession,
       keys: IndexKey,
       dropIndexOptions: DropIndexOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndex(clientSession, keys, dropIndexOptions.toJava).headOption.unit
 
-    override def dropIndexes(): Task[Unit] = wrapped.dropIndexes().headOption.unit
+    override def dropIndexes()(implicit trace: Trace): Task[Unit] = wrapped.dropIndexes().headOption.unit
 
-    override def dropIndexes(dropIndexOptions: DropIndexOptions): Task[Unit] =
+    override def dropIndexes(dropIndexOptions: DropIndexOptions)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndexes(dropIndexOptions.toJava).headOption.unit
 
-    override def dropIndexes(clientSession: ClientSession): Task[Unit] =
+    override def dropIndexes(clientSession: ClientSession)(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndexes(clientSession).headOption.unit
 
     override def dropIndexes(
       clientSession: ClientSession,
       dropIndexOptions: DropIndexOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.dropIndexes(clientSession, dropIndexOptions.toJava).headOption.unit
 
-    override def renameCollection(newCollectionNamespace: MongoNamespace): Task[Unit] =
+    override def renameCollection(newCollectionNamespace: MongoNamespace)(implicit trace: Trace): Task[Unit] =
       wrapped.renameCollection(newCollectionNamespace).headOption.unit
 
     override def renameCollection(
       newCollectionNamespace: MongoNamespace,
       options: RenameCollectionOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.renameCollection(newCollectionNamespace, options.toJava).headOption.unit
 
     override def renameCollection(
       clientSession: ClientSession,
       newCollectionNamespace: MongoNamespace,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.renameCollection(clientSession, newCollectionNamespace).headOption.unit
 
     override def renameCollection(
       clientSession: ClientSession,
       newCollectionNamespace: MongoNamespace,
       options: RenameCollectionOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.renameCollection(clientSession, newCollectionNamespace, options.toJava).headOption.unit
 
     override def watch(): ChangeStreamQuery[A] =

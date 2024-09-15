@@ -4,12 +4,13 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Chunk
 import zio.Task
+import zio.Trace
 import zio.interop.reactivestreams.*
 import zio.stream.ZStream
 
 trait Query[A] {
   @deprecated("use runToZStream", "0.8.0")
-  def execute: ZStream[Any, Throwable, A] = runToZStream()
+  def execute(implicit trace: Trace): ZStream[Any, Throwable, A] = runToZStream()
 
   /** Runs query returning low level reactive Publisher
     *
@@ -38,7 +39,7 @@ trait Query[A] {
     *   [[runToSet]]
     *   [[runToChunk]]
     */
-  def runToZStream(qSize: Int = 16): ZStream[Any, Throwable, A] = run.toZIOStream(qSize)
+  def runToZStream(qSize: Int = 16)(implicit trace: Trace): ZStream[Any, Throwable, A] = run.toZIOStream(qSize)
 
   /** Runs query to a [[List]]
     *
@@ -51,7 +52,7 @@ trait Query[A] {
     *   [[runToSet]]
     *   [[runToChunk]]
     */
-  def runToList: Task[List[A]] = run.toList
+  def runToList(implicit trace: Trace): Task[List[A]] = run.toList
 
   /** Runs query to a [[Seq]]
     *
@@ -64,7 +65,7 @@ trait Query[A] {
     *   [[runToSet]]
     *   [[runToChunk]]
     */
-  def runToSeq: Task[Seq[A]] = run.toSeq
+  def runToSeq(implicit trace: Trace): Task[Seq[A]] = run.toSeq
 
   /** Runs query to a [[Vector]]
     *
@@ -77,7 +78,7 @@ trait Query[A] {
     *   [[runToSet]]
     *   [[runToChunk]]
     */
-  def runToVector: Task[Vector[A]] = run.toVector
+  def runToVector(implicit trace: Trace): Task[Vector[A]] = run.toVector
 
   /** Runs query to a [[Set]]
     *
@@ -90,7 +91,7 @@ trait Query[A] {
     *   [[runToVector]]
     *   [[runToChunk]]
     */
-  def runToSet: Task[Set[A]] = run.toSet
+  def runToSet(implicit trace: Trace): Task[Set[A]] = run.toSet
 
   /** Runs query to a [[zio.Chunk]]
     *
@@ -103,7 +104,7 @@ trait Query[A] {
     *   [[runToVector]]
     *   [[runToSet]]
     */
-  def runToChunk: Task[Chunk[A]] = run.toChunk
+  def runToChunk(implicit trace: Trace): Task[Chunk[A]] = run.toChunk
 
   /** Runs query returning the first element
     *
@@ -115,8 +116,8 @@ trait Query[A] {
     *   [[runToSet]]
     *   [[runToChunk]]
     */
-  def runHead: Task[Option[A]]
+  def runHead(implicit trace: Trace): Task[Option[A]]
 
   @deprecated("use runHead", "0.8.0")
-  def first(): Task[Option[A]] = runHead
+  def first()(implicit trace: Trace): Task[Option[A]] = runHead
 }

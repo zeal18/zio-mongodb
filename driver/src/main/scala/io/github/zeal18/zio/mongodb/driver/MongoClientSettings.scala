@@ -18,6 +18,7 @@ package io.github.zeal18.zio.mongodb.driver
 
 import com.mongodb.MongoClientSettings as JMongoClientSettings
 import com.mongodb.reactivestreams.client.MongoClients as JMongoClients
+import zio.Trace
 import zio.ZIO
 import zio.ZLayer
 
@@ -50,12 +51,12 @@ object MongoClientSettings {
 
   /** Create a default MongoClientSettings at localhost:27017
     */
-  def localhost: ZLayer[Any, Throwable, MongoClientSettings] =
+  def localhost(implicit trace: Trace): ZLayer[Any, Throwable, MongoClientSettings] =
     fromUri("mongodb://localhost:27017")
 
   /** Create a MongoClientSettings instance from a connection string uri
     */
-  def fromUri(uri: String): ZLayer[Any, Throwable, MongoClientSettings] =
+  def fromUri(uri: String)(implicit trace: Trace): ZLayer[Any, Throwable, MongoClientSettings] =
     ZLayer.fromZIO(
       ZIO.attempt(
         JMongoClientSettings

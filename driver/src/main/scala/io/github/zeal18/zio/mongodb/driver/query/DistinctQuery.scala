@@ -7,6 +7,7 @@ import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
+import zio.Trace
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
@@ -84,7 +85,7 @@ case class DistinctQuery[TResult](private val wrapped: DistinctPublisher[TResult
     this
   }
 
-  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
+  override def runHead(implicit trace: Trace): Task[Option[TResult]] = wrapped.first().headOption
 
   override def run: Publisher[TResult] = wrapped
 }

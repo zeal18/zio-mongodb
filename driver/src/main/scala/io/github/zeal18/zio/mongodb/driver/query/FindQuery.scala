@@ -14,6 +14,7 @@ import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import io.github.zeal18.zio.mongodb.driver.sorts.Sort
 import org.reactivestreams.Publisher
 import zio.Task
+import zio.Trace
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
@@ -26,7 +27,7 @@ import scala.reflect.ClassTag
   */
 case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) extends Query[TResult] {
 
-  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
+  override def runHead(implicit trace: Trace): Task[Option[TResult]] = wrapped.first().headOption
 
   /** Sets the query filter to apply to the query.
     *
@@ -277,7 +278,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     * @return the execution plan
     * @note Requires MongoDB 3.2 or greater
     */
-  def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
+  def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult], trace: Trace): Task[ExplainResult] =
     wrapped.explain[ExplainResult](ct).head
 
   /** Explain the execution plan for this operation with the given verbosity level
@@ -289,7 +290,7 @@ case class FindQuery[TResult](private val wrapped: FindPublisher[TResult]) exten
     */
   def explain[ExplainResult](
     verbosity: ExplainVerbosity,
-  )(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
+  )(implicit ct: ClassTag[ExplainResult], trace: Trace): Task[ExplainResult] =
     wrapped.explain[ExplainResult](ct, verbosity).head
 
   override def run: Publisher[TResult] = wrapped

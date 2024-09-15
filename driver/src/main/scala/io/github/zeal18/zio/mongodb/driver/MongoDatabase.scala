@@ -19,6 +19,7 @@ import org.bson.codecs.configuration.CodecRegistries.*
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Scope
 import zio.Task
+import zio.Trace
 import zio.ZIO
 import zio.ZLayer
 import zio.interop.reactivestreams.*
@@ -93,7 +94,7 @@ trait MongoDatabase {
     *
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(): ZIO[Scope, Throwable, ClientSession]
+  def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Creates a client session.
     *
@@ -102,7 +103,7 @@ trait MongoDatabase {
     * @param options  the options for the client session
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(options: ClientSessionOptions): ZIO[Scope, Throwable, ClientSession]
+  def startSession(options: ClientSessionOptions)(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Gets a collection, with a specific default document class.
     *
@@ -119,7 +120,7 @@ trait MongoDatabase {
     * @param command  the command to be run
     * @return a Observable containing the command result
     */
-  def runCommand(command: Bson): Task[Option[Document]]
+  def runCommand(command: Bson)(implicit trace: Trace): Task[Option[Document]]
 
   /** Executes command in the context of the current database.
     *
@@ -127,7 +128,7 @@ trait MongoDatabase {
     * @param readPreference the [[ReadPreference]] to be used when executing the command
     * @return a Observable containing the command result
     */
-  def runCommand(command: Bson, readPreference: ReadPreference): Task[Option[Document]]
+  def runCommand(command: Bson, readPreference: ReadPreference)(implicit trace: Trace): Task[Option[Document]]
 
   /** Executes command in the context of the current database using the primary server.
     *
@@ -136,7 +137,7 @@ trait MongoDatabase {
     * @return a Observable containing the command result
     * @note Requires MongoDB 3.6 or greater
     */
-  def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]]
+  def runCommand(clientSession: ClientSession, command: Bson)(implicit trace: Trace): Task[Option[Document]]
 
   /** Executes command in the context of the current database.
     *
@@ -150,14 +151,14 @@ trait MongoDatabase {
     clientSession: ClientSession,
     command: Bson,
     readPreference: ReadPreference,
-  ): Task[Option[Document]]
+  )(implicit trace: Trace): Task[Option[Document]]
 
   /** Drops this database.
     *
     * [[https://www.mongodb.com/docs/manual/reference/commands/dropDatabase/#dbcmd.dropDatabase Drop database]]
     * @return a Observable identifying when the database has been dropped
     */
-  def drop(): Task[Unit]
+  def drop()(implicit trace: Trace): Task[Unit]
 
   /** Drops this database.
     *
@@ -166,13 +167,13 @@ trait MongoDatabase {
     * @return a Observable identifying when the database has been dropped
     * @note Requires MongoDB 3.6 or greater
     */
-  def drop(clientSession: ClientSession): Task[Unit]
+  def drop(clientSession: ClientSession)(implicit trace: Trace): Task[Unit]
 
   /** Gets the names of all the collections in this database.
     *
     * @return a Observable with all the names of all the collections in this database
     */
-  def listCollectionNames(): ZStream[Any, Throwable, String]
+  def listCollectionNames()(implicit trace: Trace): ZStream[Any, Throwable, String]
 
   /** Finds all the collections in this database.
     *
@@ -187,7 +188,7 @@ trait MongoDatabase {
     * @return a Observable with all the names of all the collections in this database
     * @note Requires MongoDB 3.6 or greater
     */
-  def listCollectionNames(clientSession: ClientSession): ZStream[Any, Throwable, String]
+  def listCollectionNames(clientSession: ClientSession)(implicit trace: Trace): ZStream[Any, Throwable, String]
 
   /** Finds all the collections in this database.
     *
@@ -204,7 +205,7 @@ trait MongoDatabase {
     * @param collectionName the name for the new collection to create
     * @return a Observable identifying when the collection has been created
     */
-  def createCollection(collectionName: String): Task[Unit]
+  def createCollection(collectionName: String)(implicit trace: Trace): Task[Unit]
 
   /** Create a new collection with the selected options
     *
@@ -213,7 +214,7 @@ trait MongoDatabase {
     * @param options        various options for creating the collection
     * @return a Observable identifying when the collection has been created
     */
-  def createCollection(collectionName: String, options: CreateCollectionOptions): Task[Unit]
+  def createCollection(collectionName: String, options: CreateCollectionOptions)(implicit trace: Trace): Task[Unit]
 
   /** Create a new collection with the given name.
     *
@@ -223,7 +224,7 @@ trait MongoDatabase {
     * @return a Observable identifying when the collection has been created
     * @note Requires MongoDB 3.6 or greater
     */
-  def createCollection(clientSession: ClientSession, collectionName: String): Task[Unit]
+  def createCollection(clientSession: ClientSession, collectionName: String)(implicit trace: Trace): Task[Unit]
 
   /** Create a new collection with the selected options
     *
@@ -238,7 +239,7 @@ trait MongoDatabase {
     clientSession: ClientSession,
     collectionName: String,
     options: CreateCollectionOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
     *
@@ -248,7 +249,7 @@ trait MongoDatabase {
     * @param pipeline the pipeline that defines the view
     * @note Requires MongoDB 3.4 or greater
     */
-  def createView(viewName: String, viewOn: String, pipeline: Seq[Aggregation]): Task[Unit]
+  def createView(viewName: String, viewOn: String, pipeline: Seq[Aggregation])(implicit trace: Trace): Task[Unit]
 
   /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
     *
@@ -264,7 +265,7 @@ trait MongoDatabase {
     viewOn: String,
     pipeline: Seq[Aggregation],
     createViewOptions: CreateViewOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Creates a view with the given name, backing collection/view name, and aggregation pipeline that defines the view.
     *
@@ -280,7 +281,7 @@ trait MongoDatabase {
     viewName: String,
     viewOn: String,
     pipeline: Seq[Aggregation],
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Creates a view with the given name, backing collection/view name, aggregation pipeline, and options that defines the view.
     *
@@ -298,7 +299,7 @@ trait MongoDatabase {
     viewOn: String,
     pipeline: Seq[Aggregation],
     createViewOptions: CreateViewOptions,
-  ): Task[Unit]
+  )(implicit trace: Trace): Task[Unit]
 
   /** Creates a change stream for this collection.
     *
@@ -362,7 +363,7 @@ object MongoDatabase {
     * @param name the name of the database
     * @return the database
     */
-  def live(name: String): ZLayer[MongoClient, Nothing, MongoDatabase] =
+  def live(name: String)(implicit trace: Trace): ZLayer[MongoClient, Nothing, MongoDatabase] =
     ZLayer.fromFunction[MongoClient => MongoDatabase](_.getDatabase(name))
 
   final private[driver] case class Live(client: MongoClient, wrapped: JMongoDatabase) extends MongoDatabase {
@@ -388,11 +389,11 @@ object MongoDatabase {
     override def withReadConcern(readConcern: ReadConcern): MongoDatabase =
       Live(client, wrapped.withReadConcern(readConcern))
 
-    override def startSession(): ZIO[Scope, Throwable, ClientSession] = client.startSession()
+    override def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] = client.startSession()
 
     override def startSession(
       options: ClientSessionOptions,
-    ): ZIO[Scope, Throwable, ClientSession] =
+    )(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] =
       client.startSession(options)
 
     override def getCollection[A: ClassTag](
@@ -410,28 +411,32 @@ object MongoDatabase {
       )
     }
 
-    override def runCommand(command: Bson): Task[Option[Document]] =
+    override def runCommand(command: Bson)(implicit trace: Trace): Task[Option[Document]] =
       wrapped.runCommand[Document](command, implicitly[ClassTag[Document]]).headOption
 
-    override def runCommand(command: Bson, readPreference: ReadPreference): Task[Option[Document]] =
+    override def runCommand(command: Bson, readPreference: ReadPreference)(implicit
+      trace: Trace,
+    ): Task[Option[Document]] =
       wrapped.runCommand[Document](command, readPreference, implicitly[ClassTag[Document]]).headOption
 
-    override def runCommand(clientSession: ClientSession, command: Bson): Task[Option[Document]] =
+    override def runCommand(clientSession: ClientSession, command: Bson)(implicit
+      trace: Trace,
+    ): Task[Option[Document]] =
       wrapped.runCommand[Document](clientSession, command, implicitly[ClassTag[Document]]).headOption
 
     override def runCommand(
       clientSession: ClientSession,
       command: Bson,
       readPreference: ReadPreference,
-    ): Task[Option[Document]] =
+    )(implicit trace: Trace): Task[Option[Document]] =
       wrapped.runCommand(clientSession, command, readPreference, implicitly[ClassTag[Document]]).headOption
 
-    override def drop(): Task[Unit] = wrapped.drop().headOption.unit
+    override def drop()(implicit trace: Trace): Task[Unit] = wrapped.drop().headOption.unit
 
-    override def drop(clientSession: ClientSession): Task[Unit] =
+    override def drop(clientSession: ClientSession)(implicit trace: Trace): Task[Unit] =
       wrapped.drop(clientSession).unit
 
-    override def listCollectionNames(): ZStream[Any, Throwable, String] =
+    override def listCollectionNames()(implicit trace: Trace): ZStream[Any, Throwable, String] =
       wrapped.listCollectionNames().toZIOStream()
 
     override def listCollections(): ListCollectionsQuery[Document] =
@@ -439,39 +444,39 @@ object MongoDatabase {
 
     override def listCollectionNames(
       clientSession: ClientSession,
-    ): ZStream[Any, Throwable, String] =
+    )(implicit trace: Trace): ZStream[Any, Throwable, String] =
       wrapped.listCollectionNames(clientSession).toZIOStream()
 
     override def listCollections(clientSession: ClientSession): ListCollectionsQuery[Document] =
       ListCollectionsQuery(wrapped.listCollections(clientSession, implicitly[ClassTag[Document]]))
 
-    override def createCollection(collectionName: String): Task[Unit] =
+    override def createCollection(collectionName: String)(implicit trace: Trace): Task[Unit] =
       wrapped.createCollection(collectionName).unit
 
     override def createCollection(
       collectionName: String,
       options: CreateCollectionOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createCollection(collectionName, options.toJava).unit
 
     override def createCollection(
       clientSession: ClientSession,
       collectionName: String,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createCollection(clientSession, collectionName).unit
 
     override def createCollection(
       clientSession: ClientSession,
       collectionName: String,
       options: CreateCollectionOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createCollection(clientSession, collectionName, options.toJava).unit
 
     override def createView(
       viewName: String,
       viewOn: String,
       pipeline: Seq[Aggregation],
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createView(viewName, viewOn, pipeline.asJava).unit
 
     override def createView(
@@ -479,7 +484,7 @@ object MongoDatabase {
       viewOn: String,
       pipeline: Seq[Aggregation],
       createViewOptions: CreateViewOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createView(viewName, viewOn, pipeline.asJava, createViewOptions).unit
 
     override def createView(
@@ -487,7 +492,7 @@ object MongoDatabase {
       viewName: String,
       viewOn: String,
       pipeline: Seq[Aggregation],
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped.createView(clientSession, viewName, viewOn, pipeline.asJava).unit
 
     override def createView(
@@ -496,7 +501,7 @@ object MongoDatabase {
       viewOn: String,
       pipeline: Seq[Aggregation],
       createViewOptions: CreateViewOptions,
-    ): Task[Unit] =
+    )(implicit trace: Trace): Task[Unit] =
       wrapped
         .createView(
           clientSession,
