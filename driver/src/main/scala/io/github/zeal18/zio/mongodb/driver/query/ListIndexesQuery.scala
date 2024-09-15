@@ -5,6 +5,7 @@ import io.github.zeal18.zio.mongodb.bson.BsonValue
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
+import zio.Trace
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
@@ -59,7 +60,7 @@ case class ListIndexesQuery[TResult](wrapped: ListIndexesPublisher[TResult]) ext
     this
   }
 
-  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
+  override def runHead(implicit trace: Trace): Task[Option[TResult]] = wrapped.first().headOption
 
   override def run: Publisher[TResult] = wrapped
 }

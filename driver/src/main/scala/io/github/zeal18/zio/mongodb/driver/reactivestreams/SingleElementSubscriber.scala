@@ -3,6 +3,7 @@ package io.github.zeal18.zio.mongodb.driver.reactivestreams
 import org.reactivestreams.Subscription
 import zio.Scope
 import zio.Task
+import zio.Trace
 import zio.UIO
 import zio.URIO
 import zio.ZIO
@@ -10,7 +11,7 @@ import zio.ZIO
 import java.util.concurrent.atomic.AtomicBoolean
 
 private object SingleElementSubscriber {
-  def make[A]: URIO[Scope, InterruptibleSubscriber[A, Option[A]]] = for {
+  def make[A](implicit trace: Trace): URIO[Scope, InterruptibleSubscriber[A, Option[A]]] = for {
     subscriptionP <- ZIO.acquireRelease(
       Promise.make[Throwable, Subscription],
     )(
@@ -21,12 +22,12 @@ private object SingleElementSubscriber {
 
     val isSubscribedOrInterrupted = new AtomicBoolean
 
-    override def interrupt(): UIO[Unit] = {
+    override def interrupt(implicit trace: Trace): UIO[Unit] = {
       isSubscribedOrInterrupted.set(true)
       promise.interrupt.unit
     }
 
-    override def await(): Task[Option[A]] = promise.await
+    override def await(implicit trace: Trace): Task[Option[A]] = promise.await
 
     override def onSubscribe(s: Subscription): Unit =
       if (s == null)

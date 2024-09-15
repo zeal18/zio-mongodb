@@ -10,6 +10,7 @@ import io.github.zeal18.zio.mongodb.driver.model.changestream.FullDocument
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
+import zio.Trace
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
@@ -143,7 +144,7 @@ case class ChangeStreamQuery[TResult](private val wrapped: ChangeStreamPublisher
   // def withDocumentClass[T](clazz: Class[T]): Observable[T] =
   //   wrapped.withDocumentClass(clazz).toObservable()
 
-  override def runHead: Task[Option[ChangeStreamDocument[TResult]]] = wrapped.first().headOption
+  override def runHead(implicit trace: Trace): Task[Option[ChangeStreamDocument[TResult]]] = wrapped.first().headOption
 
   override def run: Publisher[ChangeStreamDocument[TResult]] = wrapped
 }

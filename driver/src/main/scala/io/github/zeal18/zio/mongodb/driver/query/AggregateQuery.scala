@@ -10,6 +10,7 @@ import io.github.zeal18.zio.mongodb.driver.model.Collation
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*
 import org.reactivestreams.Publisher
 import zio.Task
+import zio.Trace
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
@@ -152,9 +153,9 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * [[https://www.mongodb.com/docs/manual/aggregation/ Aggregation]]
     * @return an empty Observable that indicates when the operation has completed
     */
-  def toCollection(): Task[Unit] = wrapped.toCollection().unit
+  def toCollection()(implicit trace: Trace): Task[Unit] = wrapped.toCollection().unit
 
-  override def runHead: Task[Option[TResult]] = wrapped.first().headOption
+  override def runHead(implicit trace: Trace): Task[Option[TResult]] = wrapped.first().headOption
 
   /** Explain the execution plan for this operation with the server's default verbosity level
     *
@@ -162,7 +163,7 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     * @return the execution plan
     * @note Requires MongoDB 3.6 or greater
     */
-  def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
+  def explain[ExplainResult]()(implicit ct: ClassTag[ExplainResult], trace: Trace): Task[ExplainResult] =
     wrapped.explain[ExplainResult](ct).head
 
   /** Explain the execution plan for this operation with the given verbosity level
@@ -174,7 +175,7 @@ case class AggregateQuery[TResult](private val wrapped: AggregatePublisher[TResu
     */
   def explain[ExplainResult](
     verbosity: ExplainVerbosity,
-  )(implicit ct: ClassTag[ExplainResult]): Task[ExplainResult] =
+  )(implicit ct: ClassTag[ExplainResult], trace: Trace): Task[ExplainResult] =
     wrapped.explain[ExplainResult](ct, verbosity).head
 
   override def run: Publisher[TResult] = wrapped

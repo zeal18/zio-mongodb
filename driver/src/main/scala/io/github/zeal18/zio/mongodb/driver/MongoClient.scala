@@ -17,6 +17,7 @@ import org.bson.codecs.configuration.CodecRegistries.fromProviders
 import org.bson.codecs.configuration.CodecRegistries.fromRegistries
 import org.bson.codecs.configuration.CodecRegistry
 import zio.Scope
+import zio.Trace
 import zio.ZIO
 import zio.ZLayer
 import zio.interop.reactivestreams.*
@@ -38,7 +39,7 @@ trait MongoClient {
     *
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(): ZIO[Scope, Throwable, ClientSession]
+  def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Creates a client session.
     *
@@ -47,7 +48,7 @@ trait MongoClient {
     * @param options  the options for the client session
     * @note Requires MongoDB 3.6 or greater
     */
-  def startSession(options: ClientSessionOptions): ZIO[Scope, Throwable, ClientSession]
+  def startSession(options: ClientSessionOptions)(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession]
 
   /** Gets the database with the given name.
     *
@@ -61,7 +62,7 @@ trait MongoClient {
     * [[https://www.mongodb.com/docs/manual/reference/commands/listDatabases List Databases]]
     * @return an iterable containing all the names of all the databases
     */
-  def listDatabaseNames(): ZStream[Any, Throwable, String]
+  def listDatabaseNames()(implicit trace: Trace): ZStream[Any, Throwable, String]
 
   /** Get a list of the database names
     *
@@ -71,7 +72,7 @@ trait MongoClient {
     * @return an iterable containing all the names of all the databases
     * @note Requires MongoDB 3.6 or greater
     */
-  def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String]
+  def listDatabaseNames(clientSession: ClientSession)(implicit trace: Trace): ZStream[Any, Throwable, String]
 
   /** Gets the list of databases
     *
@@ -141,19 +142,19 @@ object MongoClient {
     *
     * @return MongoClient
     */
-  val localhost: ZLayer[Any, Throwable, MongoClient] =
+  def localhost(implicit trace: Trace): ZLayer[Any, Throwable, MongoClient] =
     MongoClientSettings.localhost >>> MongoClient.live
 
   /** Create a MongoClient instance from a connection string uri
     *
     * @param uri the connection string
     */
-  def live(uri: String): ZLayer[Any, Throwable, MongoClient] =
+  def live(uri: String)(implicit trace: Trace): ZLayer[Any, Throwable, MongoClient] =
     MongoClientSettings.fromUri(uri) >>> MongoClient.live
 
   /** Create a MongoClient instance from the MongoClientSettings
     */
-  val live: ZLayer[MongoClientSettings, Throwable, MongoClient] =
+  def live(implicit trace: Trace): ZLayer[MongoClientSettings, Throwable, MongoClient] =
     ZLayer.scoped(for {
       clientSettings <- ZIO.service[MongoClientSettings]
 
@@ -174,12 +175,12 @@ object MongoClient {
   )
 
   final private case class Live(wrapped: JMongoClient) extends MongoClient with Closeable {
-    override def startSession(): ZIO[Scope, Throwable, ClientSession] =
+    override def startSession()(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] =
       ZIO.acquireRelease(wrapped.startSession().head)(s => ZIO.succeed(s.close()))
 
     override def startSession(
       options: ClientSessionOptions,
-    ): ZIO[Scope, Throwable, ClientSession] =
+    )(implicit trace: Trace): ZIO[Scope, Throwable, ClientSession] =
       ZIO.acquireRelease(wrapped.startSession(options).head)(s => ZIO.succeed(s.close()))
 
     override def getDatabase(name: String): MongoDatabase =
@@ -187,10 +188,12 @@ object MongoClient {
 
     override def close(): Unit = wrapped.close()
 
-    override def listDatabaseNames(): ZStream[Any, Throwable, String] =
+    override def listDatabaseNames()(implicit trace: Trace): ZStream[Any, Throwable, String] =
       wrapped.listDatabaseNames().toZIOStream()
 
-    override def listDatabaseNames(clientSession: ClientSession): ZStream[Any, Throwable, String] =
+    override def listDatabaseNames(clientSession: ClientSession)(implicit
+      trace: Trace,
+    ): ZStream[Any, Throwable, String] =
       wrapped.listDatabaseNames(clientSession).toZIOStream()
 
     override def listDatabases(): ListDatabasesQuery[Document] =
