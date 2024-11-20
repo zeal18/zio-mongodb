@@ -1,7 +1,7 @@
 val scala2_13 = "2.13.14"
 val scala3    = "3.3.3"
 
-ThisBuild / scalaVersion       := scala2_13
+ThisBuild / scalaVersion       := scala3
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 
 val zioVersion          = "2.1.9"
