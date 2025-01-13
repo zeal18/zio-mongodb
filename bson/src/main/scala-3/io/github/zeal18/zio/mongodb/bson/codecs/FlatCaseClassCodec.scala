@@ -1,13 +1,13 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import org.bson.BsonType
-import org.bson.BsonReader
-import org.bson.BsonWriter
-import org.bson.BsonSerializationException
+import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import org.bson.BsonInvalidOperationException
+import org.bson.BsonReader
+import org.bson.BsonSerializationException
+import org.bson.BsonType
+import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 
 import scala.annotation.tailrec
 
