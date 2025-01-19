@@ -60,7 +60,7 @@ package object utils {
     title: String,
     bson: String,
     assertion: BsonError => TestResult,
-  ) =
+  ): Spec[Any, Nothing] =
     test(title) {
       val codec = Codec[A]
 

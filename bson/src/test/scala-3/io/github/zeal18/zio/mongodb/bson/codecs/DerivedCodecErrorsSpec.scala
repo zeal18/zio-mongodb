@@ -4,8 +4,6 @@ import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
 
-import scala.annotation.nowarn
-
 object DerivedCodecErrorsSpec extends ZIOSpecDefault {
   private case class Simple(a: Int)
 
