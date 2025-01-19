@@ -1,10 +1,13 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.quoted.*
 import EasierValDef.*
 
+import scala.quoted.*
+
 object Init:
-  def apply(using qq: Quotes)(
+  def apply(using
+    qq: Quotes,
+  )(
     freshNameFn: Int => String = "i" + _,
     flags: qq.reflect.Flags = qq.reflect.Flags.EmptyFlags,
   ): Init { val q: qq.type } =

@@ -1,8 +1,10 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.quoted.*
-import scala.compiletime
-import scala.deriving.Mirror
+import EasierValDef.*
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
+import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
+import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 import org.bson.BsonInvalidOperationException
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
@@ -10,14 +12,12 @@ import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
+
 import scala.annotation.tailrec
+import scala.compiletime
 import scala.deriving.*
+import scala.deriving.Mirror
 import scala.quoted.*
-import EasierValDef.*
-import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
-import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
-import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 
 object Macro:
   inline def delayedSummonInline[A] = scala.compiletime.summonInline[A]
@@ -33,8 +33,8 @@ object Macro:
       derivedADTWithPreparations(logCode, preparations)
     }
 
-  private def derivedADTWithPreparations[A: Type](logCode: Boolean, preparations: Preparations)(
-    using Quotes,
+  private def derivedADTWithPreparations[A: Type](logCode: Boolean, preparations: Preparations)(using
+    Quotes,
   ): Prepared[A] =
     Expr.summonOrError[Mirror.Of[A]] match
       case '{ $m: Mirror.ProductOf[A] } =>
@@ -202,9 +202,7 @@ object Macro:
           defaults.get(f.name) match
             case None =>
               '{
-                $data
-                  .getOrElse($name, throw new org.bson.BsonSerializationException($notFound))
-                  .asInstanceOf[F]
+                $data.getOrElse($name, throw new org.bson.BsonSerializationException($notFound)).asInstanceOf[F]
               }
             case Some(default) => '{ $data.getOrElse($name, $default).asInstanceOf[F] }
       }
@@ -247,9 +245,7 @@ object Macro:
               defaults.get(field.name) match
                 case None =>
                   '{
-                    $data
-                      .getOrElse($name, throw new org.bson.BsonSerializationException($notFound))
-                      .asInstanceOf[t]
+                    $data.getOrElse($name, throw new org.bson.BsonSerializationException($notFound)).asInstanceOf[t]
                   }
                 case Some(default) => '{ $data.getOrElse($name, $default).asInstanceOf[t] }
 
@@ -341,8 +337,7 @@ object Macro:
     if logCode then println(s"Deriving coproduct type: ${Type.show[A]}")
 
     val fields = flattenCoproductSubtypes(mirror).zipWithIndex
-    if logCode then
-      println(s"Flattened coproduct subtypes are: ${fields.map(_._1.name).mkString(", ")}")
+    if logCode then println(s"Flattened coproduct subtypes are: ${fields.map(_._1.name).mkString(", ")}")
 
     fields.map(_._1.name).groupBy(identity).filter(_._2.size > 1).toList match
       case Nil => ()

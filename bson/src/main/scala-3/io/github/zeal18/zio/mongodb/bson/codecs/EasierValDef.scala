@@ -18,7 +18,9 @@ object EasierValDef {
   object UntypedValDef:
     type WithQuotes[Q <: Quotes] = UntypedValDef { val q: Q }
 
-    def apply(using q: Quotes)(
+    def apply(using
+      q: Quotes,
+    )(
       symbol: q.reflect.Symbol,
       valDef: q.reflect.ValDef,
       ref: q.reflect.Ident,

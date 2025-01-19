@@ -1,9 +1,10 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import scala.quoted.*
-import io.github.zeal18.zio.mongodb.bson.codecs.Macro.summonLater
-import io.github.zeal18.zio.mongodb.bson.codecs.Macro.printResult
 import io.github.zeal18.zio.mongodb.bson.codecs.Macro.FakeCodec
+import io.github.zeal18.zio.mongodb.bson.codecs.Macro.printResult
+import io.github.zeal18.zio.mongodb.bson.codecs.Macro.summonLater
+
+import scala.quoted.*
 
 private class Preparations(logCode: Boolean)(using q: Quotes) {
   import q.reflect.*
@@ -59,9 +60,7 @@ private class Preparations(logCode: Boolean)(using q: Quotes) {
       get[A] match
         case Some(p) => p.varRef
         case None    => init2.valDef(Expr.summonLater[Codec[A]]).ref
-    stable
-      .getOrElseUpdate(TypeRepr.of[A], target.asInstanceOf[Expr[Codec[Any]]])
-      .asInstanceOf[Expr[Codec[A]]]
+    stable.getOrElseUpdate(TypeRepr.of[A], target.asInstanceOf[Expr[Codec[Any]]]).asInstanceOf[Expr[Codec[A]]]
 
   def stabliseInstance[A: Type](e: Expr[Codec[A]]): Expr[Codec[A]] =
     init2.valDef(e).ref

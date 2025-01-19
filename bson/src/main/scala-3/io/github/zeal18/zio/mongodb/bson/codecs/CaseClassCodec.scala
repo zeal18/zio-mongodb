@@ -1,12 +1,12 @@
 package io.github.zeal18.zio.mongodb.bson.codecs
 
-import org.bson.BsonWriter
+import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
+import org.bson.BsonInvalidOperationException
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
-import org.bson.BsonInvalidOperationException
+import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
-import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
 
 /** "Normal" case class codec which just wraps the flatten version creating a document for it.
   */
