@@ -29,7 +29,7 @@ object EmbeddedMongo {
     } yield path
 
   def live(
-    version: IFeatureAwareVersion = Version.Main.V4_4,
+    version: IFeatureAwareVersion = Version.Main.V5_0,
   ): ZLayer[Any, Throwable, ReachedState[RunningMongodProcess]] =
     ZLayer.scoped(ZIO.acquireRelease(for {
       dir <- Live.live(persistentDir)
