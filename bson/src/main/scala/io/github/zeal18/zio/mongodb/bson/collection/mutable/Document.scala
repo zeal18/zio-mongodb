@@ -246,7 +246,9 @@ case class Document(protected[mongodb] val underlying: BsonDocument)
     */
   def retain(p: (String, BsonValue) => Boolean): Document = {
     for ((k, v) <- this)
-      if (!p(k, v)) underlying.remove(k)
+      if (!p(k, v)) {
+        val _ = underlying.remove(k)
+      }
     this
   }
 
