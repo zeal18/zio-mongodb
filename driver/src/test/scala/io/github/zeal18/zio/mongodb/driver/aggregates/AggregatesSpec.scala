@@ -2,7 +2,6 @@ package io.github.zeal18.zio.mongodb.driver.aggregates
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.driver.aggregates
-import io.github.zeal18.zio.mongodb.driver.aggregates.expressions
 import io.github.zeal18.zio.mongodb.driver.filters
 import io.github.zeal18.zio.mongodb.driver.projections
 import io.github.zeal18.zio.mongodb.driver.sorts
