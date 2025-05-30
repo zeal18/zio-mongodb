@@ -75,8 +75,8 @@ object Macro:
       val caseClass                   = TypeRepr.of[A]
       val caseClassName: Expr[String] = Expr(caseClassTypeInfo.short)
 
-      val fields   = TypeRepr.of[A].typeSymbol.caseFields
-      val defaults = getDefaultValues[A]
+      val fields      = TypeRepr.of[A].typeSymbol.caseFields
+      val defaults    = getDefaultValues[A]
       val annotations = fields
         .map { f =>
           f.name -> f.annotations.map(_.asExpr)
@@ -187,7 +187,7 @@ object Macro:
         import f.{Type as F, typeInstance}
 
         val (name, notFound) = labels.get(f.name) match
-          case None => (Expr(f.name), Expr(s"Missing field: '${f.name}'"))
+          case None        => (Expr(f.name), Expr(s"Missing field: '${f.name}'"))
           case Some(label) =>
             (Expr(label), Expr(s"Missing field: '$label' (renamed from '${f.name}')"))
 
@@ -225,7 +225,7 @@ object Macro:
 
     def fieldToArg(data: Expr[Map[String, Any]], field: Symbol): NamedArg =
       val (name, notFound) = labels.get(field.name) match
-        case None => (Expr(field.name), Expr(s"Missing field: '${field.name}'"))
+        case None        => (Expr(field.name), Expr(s"Missing field: '${field.name}'"))
         case Some(label) =>
           (Expr(label), Expr(s"Missing field: '$label' (renamed from '${field.name}')"))
 
@@ -280,7 +280,7 @@ object Macro:
     import q.reflect.*
 
     val children = TypeRepr.of[A].typeSymbol.children
-    val isEnum = children.forall(_.flags.is(Flags.Module)) ||
+    val isEnum   = children.forall(_.flags.is(Flags.Module)) ||
       (TypeRepr.of[A].typeSymbol.flags.is(Flags.Enum) && children.forall(_.caseFields.isEmpty))
 
     if isEnum then Prepared(deriveEnum(logCode))
@@ -340,7 +340,7 @@ object Macro:
     if logCode then println(s"Flattened coproduct subtypes are: ${fields.map(_._1.name).mkString(", ")}")
 
     fields.map(_._1.name).groupBy(identity).filter(_._2.size > 1).toList match
-      case Nil => ()
+      case Nil       => ()
       case ambiguous =>
         report.errorAndAbort(
           s"Error deriving '${enumTypeInfo.full}': Ambiguous subtypes: '${ambiguous.map(_._1).mkString("', '")}'\n" +
@@ -403,7 +403,7 @@ object Macro:
 
       def childToName(field: Field): CaseDef =
         childrenCodecs.get(field.name) match
-          case None => throw new Exception("")
+          case None        => throw new Exception("")
           case Some(codec) =>
             val tuple  = '{ (${ Expr(field.name) }, $codec) }
             val symbol = fieldSymbol(field)
@@ -413,7 +413,7 @@ object Macro:
 
       def nameToChild(field: Field): CaseDef =
         childrenCodecs.get(field.name) match
-          case None => throw new Exception("")
+          case None        => throw new Exception("")
           case Some(codec) =>
             val someChild = '{ Some($codec.asInstanceOf[Codec[A]]) }
             CaseDef(Literal(StringConstant(field.name)), None, Block(Nil, someChild.asTerm))

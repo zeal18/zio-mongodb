@@ -12,9 +12,9 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 private[codecs] trait TemporalCodecs {
-  implicit lazy val instant: Codec[Instant]     = Codec[Instant](new InstantCodec())
-  implicit lazy val localDate: Codec[LocalDate] = Codec[LocalDate](new LocalDateCodec())
-  implicit lazy val localTime: Codec[LocalTime] = Codec[LocalTime](new LocalTimeCodec())
+  implicit lazy val instant: Codec[Instant]             = Codec[Instant](new InstantCodec())
+  implicit lazy val localDate: Codec[LocalDate]         = Codec[LocalDate](new LocalDateCodec())
+  implicit lazy val localTime: Codec[LocalTime]         = Codec[LocalTime](new LocalTimeCodec())
   implicit lazy val localDateTime: Codec[LocalDateTime] =
     Codec[LocalDateTime](new LocalDateTimeCodec())
 }

@@ -10,10 +10,10 @@ import com.mongodb.CreateIndexCommitQuorum as JCreateIndexCommitQuorum
   */
 sealed trait CreateIndexCommitQuorum { self =>
   private[driver] def toJava: JCreateIndexCommitQuorum = self match {
-    case CreateIndexCommitQuorum.WotingMembers       => JCreateIndexCommitQuorum.VOTING_MEMBERS
-    case CreateIndexCommitQuorum.Majority            => JCreateIndexCommitQuorum.MAJORITY
-    case CreateIndexCommitQuorum.Disabled            => JCreateIndexCommitQuorum.create(0)
-    case CreateIndexCommitQuorum.ReplicaSetTag(name) => JCreateIndexCommitQuorum.create(name)
+    case CreateIndexCommitQuorum.WotingMembers             => JCreateIndexCommitQuorum.VOTING_MEMBERS
+    case CreateIndexCommitQuorum.Majority                  => JCreateIndexCommitQuorum.MAJORITY
+    case CreateIndexCommitQuorum.Disabled                  => JCreateIndexCommitQuorum.create(0)
+    case CreateIndexCommitQuorum.ReplicaSetTag(name)       => JCreateIndexCommitQuorum.create(name)
     case CreateIndexCommitQuorum.ReplicaSetMembers(amount) =>
       JCreateIndexCommitQuorum.create(amount)
   }

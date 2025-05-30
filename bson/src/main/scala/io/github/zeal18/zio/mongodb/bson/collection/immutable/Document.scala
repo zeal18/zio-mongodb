@@ -90,7 +90,7 @@ object Document extends SpecificIterableFactory[(String, BsonValue), Document] {
     apply(underlying)
   }
 
-  override def newBuilder: mutable.Builder[(String, BsonValue), Document] = builder
+  override def newBuilder: mutable.Builder[(String, BsonValue), Document]    = builder
   override def fromSpecific(it: IterableOnce[(String, BsonValue)]): Document = fromSeq(
     it.iterator.toSeq,
   )

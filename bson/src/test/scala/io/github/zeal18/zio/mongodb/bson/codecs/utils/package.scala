@@ -74,7 +74,7 @@ package object utils {
       result.fold[TestResult](
         {
           case e: BsonError.CodecError => assertion(e.underlying)
-          case e =>
+          case e                       =>
             TestResult(TestArrow.make((_: Any) => TestTrace.fail("Unexpected error: " + e)))
         },
         _ => TestResult(TestArrow.make((_: Any) => TestTrace.fail("Unexpected success"))),

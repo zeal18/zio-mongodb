@@ -78,7 +78,7 @@ object AggregatesSpec extends ZIOSpecDefault {
         boundaries = Seq(10, 25, 39),
         default = "Other",
         output = Map(
-          "count" -> accumulators.sum(expressions.const(1)),
+          "count"   -> accumulators.sum(expressions.const(1)),
           "artists" -> accumulators.push(
             expressions.obj(
               "name" -> expressions.concat(
@@ -99,7 +99,7 @@ object AggregatesSpec extends ZIOSpecDefault {
         groupBy = expressions.fieldPath("$a"),
         buckets = 42,
         output = Map(
-          "count" -> accumulators.sum(expressions.const(1)),
+          "count"   -> accumulators.sum(expressions.const(1)),
           "artists" -> accumulators.push(
             expressions.obj(
               "name" -> expressions.concat(

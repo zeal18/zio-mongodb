@@ -150,7 +150,7 @@ object AggregationsItSpec extends ZIOSpecDefault {
                   boundaries = Seq(1840, 1850, 1860, 1870, 1880),
                   default = "Other",
                   output = Map(
-                    "count" -> accumulators.sum(expressions.const(1)),
+                    "count"   -> accumulators.sum(expressions.const(1)),
                     "artists" -> accumulators.push(
                       expressions.obj(
                         "name" -> expressions.concat(

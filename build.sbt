@@ -30,7 +30,7 @@ inThisBuild(
     licenses               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     sonatypeCredentialHost := "s01.oss.sonatype.org",
     sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
-    developers := List(
+    developers             := List(
       Developer(
         "zeal18",
         "Aleksei Lezhoev",
@@ -86,7 +86,7 @@ lazy val bson = (project in file("bson")).settings(
   ),
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => Seq.empty
-    case _ =>
+    case _            =>
       Seq(
         "com.softwaremill.magnolia1_2" %% "magnolia"      % magnolia2Version,
         "org.scala-lang"                % "scala-reflect" % scalaVersion.value % Provided, // required by magnolia

@@ -19,7 +19,7 @@ class Init(using val q: Quotes)(freshNameFn: Int => String, flags: q.reflect.Fla
   var seen: Map[Expr[Any], TypedValDef[Any]] = Map.empty
   var stmts                                  = Vector.empty[Statement]
 
-  private var vars = 0
+  private var vars      = 0
   def newName(): String =
     vars += 1
     freshNameFn(vars)

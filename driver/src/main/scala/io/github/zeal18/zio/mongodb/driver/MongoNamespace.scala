@@ -21,7 +21,7 @@ import com.mongodb.MongoNamespace as JMongoNamespace
 /** A companion object for MongoNamespace
   */
 object MongoNamespace {
-  def apply(namespace: String): JMongoNamespace = new JMongoNamespace(namespace)
+  def apply(namespace: String): JMongoNamespace                            = new JMongoNamespace(namespace)
   def apply(databaseName: String, collectionName: String): JMongoNamespace =
     new JMongoNamespace(databaseName, collectionName)
 }

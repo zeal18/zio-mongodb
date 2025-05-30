@@ -13,8 +13,8 @@ sealed trait Sort extends Bson { self =>
     documentClass: Class[TDocument],
     codecRegistry: CodecRegistry,
   ): BsonDocument = self match {
-    case Sort.Asc(fieldName)  => new BsonDocument(fieldName, new BsonInt32(1))
-    case Sort.Desc(fieldName) => new BsonDocument(fieldName, new BsonInt32(-1))
+    case Sort.Asc(fieldName)       => new BsonDocument(fieldName, new BsonInt32(1))
+    case Sort.Desc(fieldName)      => new BsonDocument(fieldName, new BsonInt32(-1))
     case Sort.TextScore(fieldName) =>
       new BsonDocument(fieldName, new BsonDocument("$meta", new BsonString("textScore")))
     case Sort.Compound(sorts) =>
