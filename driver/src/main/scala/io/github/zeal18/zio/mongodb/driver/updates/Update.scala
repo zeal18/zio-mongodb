@@ -102,7 +102,7 @@ sealed trait Update extends Bson { self =>
           writer.writeInt32(s"$$slice", slice)
         }
         options.sort.foreach {
-          case Left(sort) => writer.writeInt32(s"$$sort", if (sort) 1 else -1)
+          case Left(sort)  => writer.writeInt32(s"$$sort", if (sort) 1 else -1)
           case Right(sort) =>
             writer.writeName(s"$$sort")
             val codec        = codecRegistry.get(classOf[BsonDocument])

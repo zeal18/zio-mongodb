@@ -51,31 +51,31 @@ import org.bson.codecs.ObjectIdCodec
 private[codecs] trait BsonCodecs {
   private lazy val bsonDocumentCodec: BsonDocumentCodec = new BsonDocumentCodec()
 
-  implicit lazy val bsonArray: Codec[BsonArray]     = Codec[BsonArray](new BsonArrayCodec())
-  implicit lazy val bsonBinary: Codec[BsonBinary]   = Codec[BsonBinary](new BsonBinaryCodec())
-  implicit lazy val bsonBoolean: Codec[BsonBoolean] = Codec[BsonBoolean](new BsonBooleanCodec())
+  implicit lazy val bsonArray: Codec[BsonArray]       = Codec[BsonArray](new BsonArrayCodec())
+  implicit lazy val bsonBinary: Codec[BsonBinary]     = Codec[BsonBinary](new BsonBinaryCodec())
+  implicit lazy val bsonBoolean: Codec[BsonBoolean]   = Codec[BsonBoolean](new BsonBooleanCodec())
   implicit lazy val bsonDateTime: Codec[BsonDateTime] =
     Codec[BsonDateTime](new BsonDateTimeCodec())
   implicit lazy val bsonDecimal128: Codec[BsonDecimal128] =
     Codec[BsonDecimal128](new BsonDecimal128Codec())
   implicit lazy val bsonDocument: Codec[BsonDocument] =
     Codec[BsonDocument](bsonDocumentCodec)
-  implicit lazy val bsonDouble: Codec[BsonDouble] = Codec[BsonDouble](new BsonDoubleCodec())
-  implicit lazy val bsonInt32: Codec[BsonInt32]   = Codec[BsonInt32](new BsonInt32Codec())
-  implicit lazy val bsonInt64: Codec[BsonInt64]   = Codec[BsonInt64](new BsonInt64Codec())
+  implicit lazy val bsonDouble: Codec[BsonDouble]         = Codec[BsonDouble](new BsonDoubleCodec())
+  implicit lazy val bsonInt32: Codec[BsonInt32]           = Codec[BsonInt32](new BsonInt32Codec())
+  implicit lazy val bsonInt64: Codec[BsonInt64]           = Codec[BsonInt64](new BsonInt64Codec())
   implicit lazy val bsonJavaScript: Codec[BsonJavaScript] =
     Codec[BsonJavaScript](new BsonJavaScriptCodec())
   implicit lazy val bsonJavaScriptWithScope: Codec[BsonJavaScriptWithScope] =
     Codec[BsonJavaScriptWithScope](new BsonJavaScriptWithScopeCodec(bsonDocumentCodec))
-  implicit lazy val bsonMaxKey: Codec[BsonMaxKey] = Codec[BsonMaxKey](new BsonMaxKeyCodec())
-  implicit lazy val bsonMinKey: Codec[BsonMinKey] = Codec[BsonMinKey](new BsonMinKeyCodec())
-  implicit lazy val bsonNull: Codec[BsonNull]     = Codec[BsonNull](new BsonNullCodec())
+  implicit lazy val bsonMaxKey: Codec[BsonMaxKey]     = Codec[BsonMaxKey](new BsonMaxKeyCodec())
+  implicit lazy val bsonMinKey: Codec[BsonMinKey]     = Codec[BsonMinKey](new BsonMinKeyCodec())
+  implicit lazy val bsonNull: Codec[BsonNull]         = Codec[BsonNull](new BsonNullCodec())
   implicit lazy val bsonObjectId: Codec[BsonObjectId] =
     Codec[BsonObjectId](new BsonObjectIdCodec())
   implicit lazy val bsonRegularExpression: Codec[BsonRegularExpression] =
     Codec[BsonRegularExpression](new BsonRegularExpressionCodec())
-  implicit lazy val bsonString: Codec[BsonString] = Codec[BsonString](new BsonStringCodec())
-  implicit lazy val bsonSymbol: Codec[BsonSymbol] = Codec[BsonSymbol](new BsonSymbolCodec())
+  implicit lazy val bsonString: Codec[BsonString]       = Codec[BsonString](new BsonStringCodec())
+  implicit lazy val bsonSymbol: Codec[BsonSymbol]       = Codec[BsonSymbol](new BsonSymbolCodec())
   implicit lazy val bsonTimestamp: Codec[BsonTimestamp] =
     Codec[BsonTimestamp](new BsonTimestampCodec())
   implicit lazy val bsonUndefined: Codec[BsonUndefined] =

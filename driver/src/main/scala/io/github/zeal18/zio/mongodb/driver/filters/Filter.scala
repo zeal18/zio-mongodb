@@ -105,7 +105,7 @@ sealed trait Filter extends Bson { self =>
     }
 
     self match {
-      case Filter.Empty => new BsonDocument()
+      case Filter.Empty                         => new BsonDocument()
       case Filter.Eq(fieldName, value, encoder) =>
         simpleEncodingFilter(fieldName, value, encoder)
       case Filter.Ne(fieldName, value, encoder) =>
@@ -122,10 +122,10 @@ sealed trait Filter extends Bson { self =>
         iterableOperatorFilter("$in", fieldName, value.toSeq, encoder)
       case Filter.Nin(fieldName, value, encoder) =>
         iterableOperatorFilter("$nin", fieldName, value.toSeq, encoder)
-      case Filter.And(filters) => combineFilters("$and", filters)
-      case Filter.Or(filters)  => combineFilters("$or", filters)
-      case Filter.Nor(filters) => combineFilters("$nor", filters)
-      case Filter.Not(filter)  => notFilter(filter)
+      case Filter.And(filters)              => combineFilters("$and", filters)
+      case Filter.Or(filters)               => combineFilters("$or", filters)
+      case Filter.Nor(filters)              => combineFilters("$nor", filters)
+      case Filter.Not(filter)               => notFilter(filter)
       case Filter.Exists(fieldName, exists) =>
         operatorFilter("$exists", fieldName, exists, Codec[Boolean])
       case Filter.Type(fieldName, bsonType) =>

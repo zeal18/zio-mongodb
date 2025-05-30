@@ -172,7 +172,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
               indexName <- collection.createIndex(indexes.asc("a"))
-              _ <- ZIO.scoped[Any] {
+              _         <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexName)
                 }
@@ -186,7 +186,7 @@ object MongoCollectionSpec extends ZIOSpecDefault {
           MongoCollectionTest.withRandomName[Document, TestResult] { collection =>
             for {
               indexName <- collection.createIndex(indexes.asc("a"))
-              _ <- ZIO.scoped[Any] {
+              _         <- ZIO.scoped[Any] {
                 collection.startSession().flatMap { session =>
                   collection.dropIndex(session, indexName, DropIndexOptions(10.seconds))
                 }

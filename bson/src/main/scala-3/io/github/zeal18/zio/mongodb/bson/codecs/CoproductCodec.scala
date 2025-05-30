@@ -49,7 +49,7 @@ case class CoproductCodec[A](
       reader.readStartDocument()
       val typeTag = reader.readString(discriminator)
       val codec   = codecByName(typeTag)
-      val result = codec
+      val result  = codec
         .map { codec =>
           try codec.decode(reader, decoderCtx)
           catch

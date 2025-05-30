@@ -19,7 +19,7 @@ trait Decoder[A] { self =>
 
 object Decoder {
   def apply[A](implicit d: Decoder[A]): Decoder[A] = d
-  def apply[A](d: JDecoder[A]): Decoder[A] = new Decoder[A] {
+  def apply[A](d: JDecoder[A]): Decoder[A]         = new Decoder[A] {
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
       d.decode(reader, decoderContext)
   }

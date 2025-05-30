@@ -73,8 +73,8 @@ object ImmutableDocumentCodecSpec extends ZIOSpecDefault {
     },
     test("should respect encodeIdFirst property in encoder context") {
       val original: Document = Document(
-        "a"   -> new BsonString("string"),
-        "_id" -> new BsonInt32(1),
+        "a"      -> new BsonString("string"),
+        "_id"    -> new BsonInt32(1),
         "nested" -> Document(
           "a"   -> new BsonString("string"),
           "_id" -> new BsonInt32(1),

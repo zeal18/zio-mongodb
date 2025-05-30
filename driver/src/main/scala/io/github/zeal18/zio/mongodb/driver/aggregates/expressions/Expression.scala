@@ -22,7 +22,7 @@ sealed trait Expression { self =>
   def encode(writer: BsonWriter): Unit =
     self match {
       case Expression.FieldPath(path) => writer.writeString(path)
-      case l: Expression.Literal[?] =>
+      case l: Expression.Literal[?]   =>
         writer.writeStartDocument()
         writer.writeName("$literal")
         l.encoder.encode(writer, l.value, EncoderContext.builder().build())

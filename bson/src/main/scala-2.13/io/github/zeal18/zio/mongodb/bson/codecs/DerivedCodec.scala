@@ -27,7 +27,7 @@ private[codecs] trait DerivedCodec {
 
   def split[A](ctx: SealedTrait[Typeclass, A]): Codec[A] = {
     ctx.subtypes.groupBy(_.typeName.short).filter(_._2.size > 1).toList match {
-      case Nil => ()
+      case Nil            => ()
       case ambiguous :: _ =>
         throw BsonError.CodecError(
           ctx.typeName.full,
@@ -119,7 +119,7 @@ object DerivedCodec {
             }
           }
       catch {
-        case e: BsonSerializationException => throw BsonError.SerializationError(e)
+        case e: BsonSerializationException    => throw BsonError.SerializationError(e)
         case e: BsonInvalidOperationException =>
           throw BsonError.SerializationError(e)
       }
@@ -161,7 +161,7 @@ object DerivedCodec {
                   reader.skipValue()
                   step(values)
                 } else {
-                  val codec = param.typeclass
+                  val codec      = param.typeclass
                   val maybeValue =
                     try
                       Some(param.label -> codec.decode(reader, decoderCtx))
@@ -182,7 +182,7 @@ object DerivedCodec {
 
       try step(Map.empty)
       catch {
-        case e: BsonSerializationException => throw BsonError.SerializationError(e)
+        case e: BsonSerializationException    => throw BsonError.SerializationError(e)
         case e: BsonInvalidOperationException =>
           throw BsonError.SerializationError(e)
       }
@@ -265,10 +265,10 @@ object DerivedCodec {
 
     override def decode(reader: BsonReader, decoderContext: DecoderContext): A =
       try {
-        val shortName = reader.readString
+        val shortName        = reader.readString
         val maybeObjectCodec =
           for {
-            st <- ctx.subtypes.find(_.typeName.short == shortName)
+            st          <- ctx.subtypes.find(_.typeName.short == shortName)
             objectCodec <- st.typeclass match {
               case oc: CaseObjectCodec[?] =>
                 Some(oc.asInstanceOf[CaseObjectCodec[A]])
@@ -357,7 +357,7 @@ object DerivedCodec {
       try {
         reader.readStartDocument()
         val typeTag = reader.readString(TypeTag)
-        val result = ctx.subtypes
+        val result  = ctx.subtypes
           .collectFirst {
             case st if st.typeName.short == typeTag =>
               val codec = st.typeclass

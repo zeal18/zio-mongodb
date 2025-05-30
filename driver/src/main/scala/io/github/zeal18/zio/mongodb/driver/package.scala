@@ -310,7 +310,7 @@ package object driver {
   implicit def documentToUntypedDocument(doc: Document): org.bson.Document =
     bsonDocumentToUntypedDocument(doc.underlying)
 
-  private lazy val DOCUMENT_CODEC = new DocumentCodec()
+  private lazy val DOCUMENT_CODEC                                                  = new DocumentCodec()
   implicit def bsonDocumentToUntypedDocument(doc: BsonDocument): org.bson.Document =
     DOCUMENT_CODEC.decode(new BsonDocumentReader(doc), DecoderContext.builder().build())
 }

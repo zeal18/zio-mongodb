@@ -49,7 +49,7 @@ class FlatCaseClassCodec[A](ctx: CaseClass[A]) extends Codec[A]:
               reader.skipValue()
               step(values)
             case Some(field) =>
-              val codec = field.codec()
+              val codec      = field.codec()
               val maybeValue =
                 try Some(field.label -> codec.decode(reader, decoderCtx))
                 catch

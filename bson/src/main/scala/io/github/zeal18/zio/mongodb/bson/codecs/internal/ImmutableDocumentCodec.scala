@@ -29,7 +29,7 @@ import org.bson.codecs.configuration.CodecRegistry
 /** Companion helper for immutable Document instances.
   */
 private[mongodb] object ImmutableDocumentCodec {
-  def apply(): ImmutableDocumentCodec = ImmutableDocumentCodec(None)
+  def apply(): ImmutableDocumentCodec                        = ImmutableDocumentCodec(None)
   def apply(registry: CodecRegistry): ImmutableDocumentCodec = ImmutableDocumentCodec(
     Some(registry),
   )

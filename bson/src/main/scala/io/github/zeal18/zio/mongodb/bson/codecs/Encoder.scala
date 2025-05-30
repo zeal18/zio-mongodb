@@ -23,7 +23,7 @@ abstract class Encoder[A] { self =>
 
 object Encoder {
   def apply[A](implicit e: Encoder[A]): Encoder[A] = e
-  def apply[A](e: JEncoder[A]): Encoder[A] = new Encoder[A] {
+  def apply[A](e: JEncoder[A]): Encoder[A]         = new Encoder[A] {
     override def encode(writer: BsonWriter, value: A, encoderContext: EncoderContext): Unit =
       e.encode(writer, value, encoderContext)
   }

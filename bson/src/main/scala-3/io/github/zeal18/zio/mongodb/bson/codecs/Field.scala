@@ -23,8 +23,8 @@ private object Fields:
     def go[Ls: Type, Ts: Type](idx: Int): List[Field] =
       (Type.of[Ls], Type.of[Ts]) match
         case ('[l *: ll], '[t *: tt]) =>
-          val t    = Type.of[t]
-          val _idx = idx
+          val t     = Type.of[t]
+          val _idx  = idx
           val _name = TypeRepr.of[l] match
             case ConstantType(StringConstant(n)) => n
             case _                               => "?"
