@@ -38,7 +38,6 @@ object EasierValDef {
       this.asInstanceOf[UntypedValDef.WithQuotes[qq.type]]
 
     def as[A: Type]: TypedValDef.WithQuotes[A, q.type] =
-      import quotes.reflect.*
       TypedValDef(symbol, valDef, ref.asExprOf[A])
 
     def assign(rhs: Term): Assign =
