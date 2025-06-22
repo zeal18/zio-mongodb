@@ -2,7 +2,6 @@ package io.github.zeal18.zio.mongodb.driver.model
 
 import com.mongodb.client.model.CreateCollectionOptions as JCreateCollectionOptions
 import com.mongodb.client.model.IndexOptionDefaults
-import io.github.zeal18.zio.mongodb.driver.model.ValidationOptions
 import org.bson.conversions.Bson
 
 import java.util.concurrent.TimeUnit
