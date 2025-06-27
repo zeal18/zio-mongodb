@@ -11,7 +11,7 @@ val mongoVersion = "5.5.1"
 val rsVersion    = "1.0.4"
 
 val flapdoodleVersion = "4.20.1"
-val immutablesVersion = "2.10.1"
+val immutablesVersion = "2.11.0"
 
 val magnolia2Version = "1.1.10"
 
