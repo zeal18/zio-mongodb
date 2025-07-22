@@ -95,6 +95,6 @@ object BsonTransformerSpec extends ZIOSpecDefault {
     ),
   )
 
-  implicit def transform[T](v: T)(implicit transformer: BsonTransformer[T]): BsonValue =
+  def transform[T](v: T)(implicit transformer: BsonTransformer[T]): BsonValue =
     transformer(v)
 }
