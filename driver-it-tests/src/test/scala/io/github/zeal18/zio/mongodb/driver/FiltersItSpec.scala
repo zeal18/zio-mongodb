@@ -16,6 +16,12 @@ object FiltersItSpec extends ZIOSpecDefault {
     id: Int,
     name: String,
   )
+  final private case class Person2(
+    @BsonId
+    id: Int,
+    name: String,
+    age: Option[Int]
+  )
 
   override def spec =
     suite("FiltersItSpec")(
@@ -44,6 +50,18 @@ object FiltersItSpec extends ZIOSpecDefault {
               result1 <- collection.find(filters.eq("name", "foo")).runToChunk
               result2 <- collection.find(filters.eq("name", "bar")).runToChunk
             } yield assertTrue(result1 == Chunk(person1), result2 == Chunk(person2))
+          }
+        },
+        test("is null age") {
+          val person1 = Person2(id = 42, name = "foo", age = None)
+          val person2 = Person2(id = 43, name = "bar", age = Some(42))
+          val person3 = Person2(id = 44, name = "baz", age = None)
+
+          MongoCollectionTest.withRandomName[Person2, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(person1, person2, person3))
+              result1 <- collection.find(filters.eq("age",None)).runToChunk
+            } yield assertTrue(result1.length == 2)
           }
         },
       ),
