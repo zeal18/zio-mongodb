@@ -2,8 +2,10 @@ package io.github.zeal18.zio.mongodb.driver.filters
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonString
+import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates
 import io.github.zeal18.zio.mongodb.driver.filters
+import io.github.zeal18.zio.mongodb.driver.filters.FiltersSpec.testFilter
 import org.bson.BsonType
 import zio.test.ZIOSpecDefault
 import zio.test.assertTrue
@@ -32,6 +34,14 @@ object FiltersSpec extends ZIOSpecDefault {
     suite("lt/lte")(
       testFilter("lt", filters.lt("field-lt", 45), """{"field-lt": {"$lt": 45}}"""),
       testFilter("lte", filters.lte("field-lte", 46), """{"field-lte": {"$lte": 46}}"""),
+    ),
+    suite("isNull")(
+      testFilter("None",filters.isNull("x"),"""{"x": null}"""),
+      testFilter("None",filters.equal("x",None),"""{"x": null}""")
+    ),
+    suite("notNull")(
+      testFilter("None",filters.notNull("x"),"""{"x": {"$ne": null}}"""),
+      testFilter("None",filters.notEqual("x",None),"""{"x": {"$ne": null}}""")
     ),
     suite("in")(
       testFilter(

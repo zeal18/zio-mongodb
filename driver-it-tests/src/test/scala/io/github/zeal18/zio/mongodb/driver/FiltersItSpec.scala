@@ -60,10 +60,26 @@ object FiltersItSpec extends ZIOSpecDefault {
           MongoCollectionTest.withRandomName[Person2, TestResult] { collection =>
             for {
               _ <- collection.insertMany(Chunk(person1, person2, person3))
-              result1 <- collection.find(filters.eq("age",None)).runToChunk
-            } yield assertTrue(result1.length == 2)
+
+              result1 <- collection.find(filters.isNull("age")).runToChunk
+              result2 <- collection.find(filters.equal("age",None)).runToChunk
+            } yield assertTrue(result1.length == 2 && result2.length == 2)
           }
         },
+        test("not null age") {
+          val person1 = Person2(id = 42, name = "foo", age = None)
+          val person2 = Person2(id = 43, name = "bar", age = Some(42))
+          val person3 = Person2(id = 44, name = "baz", age = None)
+
+          MongoCollectionTest.withRandomName[Person2, TestResult] { collection =>
+            for {
+              _ <- collection.insertMany(Chunk(person1, person2, person3))
+
+              result1 <- collection.find(filters.notNull("age")).runToChunk
+              result2 <- collection.find(filters.notEqual("age",None)).runToChunk
+            } yield assertTrue(result1.length == 1 && result2.length == 1)
+          }
+        }
       ),
       test("ne") {
         val person1 = Person(id = 42, name = "foo")
