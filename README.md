@@ -16,9 +16,9 @@ The main goals of the project:
 
 ```sbt
 libraryDependencies ++= Seq(
-  "io.github.zeal18" %% "zio-mongodb-bson"    % "0.11.1",
-  "io.github.zeal18" %% "zio-mongodb-driver"  % "0.11.1",
-  "io.github.zeal18" %% "zio-mongodb-testkit" % "0.11.1" % Test
+  "io.github.zeal18" %% "zio-mongodb-bson"    % "0.11.2",
+  "io.github.zeal18" %% "zio-mongodb-driver"  % "0.11.2",
+  "io.github.zeal18" %% "zio-mongodb-testkit" % "0.11.2" % Test
 )
 ```
 
