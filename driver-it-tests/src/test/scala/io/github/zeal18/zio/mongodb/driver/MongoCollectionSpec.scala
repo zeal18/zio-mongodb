@@ -2,7 +2,6 @@ package io.github.zeal18.zio.mongodb.driver
 
 import io.github.zeal18.zio.mongodb.bson.BsonString
 import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
-import io.github.zeal18.zio.mongodb.driver.indexes
 import io.github.zeal18.zio.mongodb.driver.indexes.CreateIndexOptions
 import io.github.zeal18.zio.mongodb.driver.indexes.DropIndexOptions
 import io.github.zeal18.zio.mongodb.driver.indexes.Index
@@ -16,7 +15,7 @@ import zio.Chunk
 import zio.test.*
 
 object MongoCollectionSpec extends ZIOSpecDefault {
-  override def spec = suite("MongoCollectionSpec")(
+  override def spec: Spec[Environment, Any] = suite("MongoCollectionSpec")(
     suite("indexes")(
       suite("createIndex")(
         test("createIndex") {
