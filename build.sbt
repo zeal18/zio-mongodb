@@ -25,12 +25,10 @@ ThisBuild / Test / fork              := true
 
 inThisBuild(
   List(
-    organization           := "io.github.zeal18",
-    homepage               := Some(url("https://github.com/zeal18/zio-mongodb")),
-    licenses               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    sonatypeCredentialHost := "s01.oss.sonatype.org",
-    sonatypeRepository     := "https://s01.oss.sonatype.org/service/local",
-    developers             := List(
+    organization := "io.github.zeal18",
+    homepage     := Some(url("https://github.com/zeal18/zio-mongodb")),
+    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers   := List(
       Developer(
         "zeal18",
         "Aleksei Lezhoev",
