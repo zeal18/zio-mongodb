@@ -1,4 +1,4 @@
-val scala2_13 = "2.13.16"
+val scala2_13 = "2.13.17"
 val scala3    = "3.3.6"
 
 ThisBuild / scalaVersion       := scala2_13
@@ -11,7 +11,7 @@ val mongoVersion = "5.5.1"
 val rsVersion    = "1.0.4"
 
 val flapdoodleVersion = "4.20.1"
-val immutablesVersion = "2.10.1"
+val immutablesVersion = "2.11.4"
 
 val magnolia2Version = "1.1.10"
 
