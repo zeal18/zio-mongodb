@@ -14,6 +14,23 @@ private[codecs] trait OptionCodecs {
   implicit def nestedOption[A <: Option[?]: Codec]: Codec[Option[A]] =
     new NestedOptionCodec[A]
   implicit def option[A: Codec]: Codec[Option[A]] = new OptionCodec[A]
+
+  implicit val noneCodec: Codec[None.type] = new Codec[None.type] {
+
+    override def decode(reader: BsonReader, decoderContext: DecoderContext): None.type =
+      reader.getCurrentBsonType() match {
+        case BsonType.NULL =>
+          reader.skipValue()
+          None
+        case t =>
+          throw new BsonSerializationException(
+            s"Expected a document or null but found $t",
+          )
+      }
+
+    override def encode(writer: BsonWriter, value: None.type, encoderContext: EncoderContext): Unit =
+      writer.writeNull()
+  }
 }
 
 private class OptionCodec[A: Codec] extends Codec[Option[A]] {

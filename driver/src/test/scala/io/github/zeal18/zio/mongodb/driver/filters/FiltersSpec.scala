@@ -33,6 +33,14 @@ object FiltersSpec extends ZIOSpecDefault {
       testFilter("lt", filters.lt("field-lt", 45), """{"field-lt": {"$lt": 45}}"""),
       testFilter("lte", filters.lte("field-lte", 46), """{"field-lte": {"$lte": 46}}"""),
     ),
+    suite("isNull")(
+      testFilter("None", filters.isNull("x"), """{"x": null}"""),
+      testFilter("None", filters.equal("x", None), """{"x": null}"""),
+    ),
+    suite("notNull")(
+      testFilter("None", filters.notNull("x"), """{"x": {"$ne": null}}"""),
+      testFilter("None", filters.notEqual("x", None), """{"x": {"$ne": null}}"""),
+    ),
     suite("in")(
       testFilter(
         "in seq",
