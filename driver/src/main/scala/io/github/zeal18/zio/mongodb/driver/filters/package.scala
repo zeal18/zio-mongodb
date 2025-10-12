@@ -78,20 +78,20 @@ package object filters {
     Ne(fieldName, value, e)
 
   /** Creates a filter that matches all documents where the value of the field name is equal to null.
-   * @param fieldName the field name
-   * @return the filter
-   * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
-   */
-  def isNull(fieldName:String):Eq[None.type] =
-    equal(fieldName,None)
+    * @param fieldName the field name
+    * @return the filter
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
+    */
+  def isNull(fieldName: String): Eq[None.type] =
+    equal(fieldName, None)
 
   /** Creates a filter that matches all documents where the value of the field name is not equal to null.
-   * @param fieldName the field name
-   * @return the filter
-   * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
-   */
-  def notNull(fieldName:String):Ne[None.type] =
-    notEqual(fieldName,None)
+    * @param fieldName the field name
+    * @return the filter
+    * @see [[https://docs.mongodb.com/manual/reference/operator/query/eq/]]
+    */
+  def notNull(fieldName: String): Ne[None.type] =
+    notEqual(fieldName, None)
 
   /** Creates a filter that matches all documents where the value of the given field is greater than the specified value.
     *

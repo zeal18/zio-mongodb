@@ -17,7 +17,7 @@ private[codecs] trait OptionCodecs {
 
   implicit val noneCodec: Codec[None.type] = new Codec[None.type] {
 
-    override def decode(reader: BsonReader, decoderContext: DecoderContext): None.type = {
+    override def decode(reader: BsonReader, decoderContext: DecoderContext): None.type =
       reader.getCurrentBsonType() match {
         case BsonType.NULL =>
           reader.skipValue()
@@ -27,11 +27,9 @@ private[codecs] trait OptionCodecs {
             s"Expected a document or null but found $t",
           )
       }
-    }
 
-    override def encode(writer: BsonWriter, value: None.type, encoderContext: EncoderContext): Unit = {
+    override def encode(writer: BsonWriter, value: None.type, encoderContext: EncoderContext): Unit =
       writer.writeNull()
-    }
   }
 }
 

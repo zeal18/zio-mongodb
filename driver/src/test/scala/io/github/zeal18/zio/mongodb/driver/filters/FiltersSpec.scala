@@ -2,10 +2,8 @@ package io.github.zeal18.zio.mongodb.driver.filters
 
 import io.github.zeal18.zio.mongodb.bson.BsonDocument
 import io.github.zeal18.zio.mongodb.bson.BsonString
-import io.github.zeal18.zio.mongodb.bson.codecs.Codec
 import io.github.zeal18.zio.mongodb.driver.aggregates
 import io.github.zeal18.zio.mongodb.driver.filters
-import io.github.zeal18.zio.mongodb.driver.filters.FiltersSpec.testFilter
 import org.bson.BsonType
 import zio.test.ZIOSpecDefault
 import zio.test.assertTrue
