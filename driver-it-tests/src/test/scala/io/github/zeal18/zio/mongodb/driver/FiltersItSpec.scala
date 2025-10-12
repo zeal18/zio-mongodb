@@ -20,7 +20,7 @@ object FiltersItSpec extends ZIOSpecDefault {
     @BsonId
     id: Int,
     name: String,
-    age: Option[Int]
+    age: Option[Int],
   )
 
   override def spec =
@@ -62,7 +62,7 @@ object FiltersItSpec extends ZIOSpecDefault {
               _ <- collection.insertMany(Chunk(person1, person2, person3))
 
               result1 <- collection.find(filters.isNull("age")).runToChunk
-              result2 <- collection.find(filters.equal("age",None)).runToChunk
+              result2 <- collection.find(filters.equal("age", None)).runToChunk
             } yield assertTrue(result1.length == 2 && result2.length == 2)
           }
         },
@@ -76,10 +76,10 @@ object FiltersItSpec extends ZIOSpecDefault {
               _ <- collection.insertMany(Chunk(person1, person2, person3))
 
               result1 <- collection.find(filters.notNull("age")).runToChunk
-              result2 <- collection.find(filters.notEqual("age",None)).runToChunk
+              result2 <- collection.find(filters.notEqual("age", None)).runToChunk
             } yield assertTrue(result1.length == 1 && result2.length == 1)
           }
-        }
+        },
       ),
       test("ne") {
         val person1 = Person(id = 42, name = "foo")

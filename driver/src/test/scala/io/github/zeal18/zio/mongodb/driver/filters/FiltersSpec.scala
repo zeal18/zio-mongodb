@@ -34,12 +34,12 @@ object FiltersSpec extends ZIOSpecDefault {
       testFilter("lte", filters.lte("field-lte", 46), """{"field-lte": {"$lte": 46}}"""),
     ),
     suite("isNull")(
-      testFilter("None",filters.isNull("x"),"""{"x": null}"""),
-      testFilter("None",filters.equal("x",None),"""{"x": null}""")
+      testFilter("None", filters.isNull("x"), """{"x": null}"""),
+      testFilter("None", filters.equal("x", None), """{"x": null}"""),
     ),
     suite("notNull")(
-      testFilter("None",filters.notNull("x"),"""{"x": {"$ne": null}}"""),
-      testFilter("None",filters.notEqual("x",None),"""{"x": {"$ne": null}}""")
+      testFilter("None", filters.notNull("x"), """{"x": {"$ne": null}}"""),
+      testFilter("None", filters.notEqual("x", None), """{"x": {"$ne": null}}"""),
     ),
     suite("in")(
       testFilter(
