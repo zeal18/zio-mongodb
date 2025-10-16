@@ -1,5 +1,5 @@
 val scala2_13 = "2.13.17"
-val scala3    = "3.3.6"
+val scala3    = "3.3.7"
 
 ThisBuild / scalaVersion       := scala2_13
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
