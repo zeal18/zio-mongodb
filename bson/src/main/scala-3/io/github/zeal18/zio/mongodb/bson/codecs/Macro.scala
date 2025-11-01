@@ -489,8 +489,11 @@ object Macro:
         tpe.companionClass
           .declaredMethod(s"$$lessinit$$greater$$default$$${i + 1}")
           .headOption
-          .flatMap(_.tree.asInstanceOf[DefDef].rhs)
-          .map(field.name -> _.asExprOf[Any])
+          .map(method =>
+            field.name -> Ident(tpe.companionModule.termRef)
+              .select(method)
+              .asExpr,
+          )
       }
       .toMap
 
