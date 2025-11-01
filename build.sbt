@@ -49,7 +49,6 @@ val commonSettings =
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         Seq(
-          "-Yretain-trees", // to enable default values for codec derivation
           "-Xmax-inlines:64",
         )
       case _ =>
