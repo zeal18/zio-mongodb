@@ -475,6 +475,22 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             } yield assertTrue(result == Chunk(model2))
           }
         },
+        test("find distinct") {
+          case class Model(a: Int, b: String)
+          val model1 = Model(a = 42, b = "foo")
+          val model2 = Model(a = 43, b = "bar")
+          val model3 = Model(a = 42, b = "baz")
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            val intCollection = collection.withDocumentClass[Int] // projecting to Int collection
+            for {
+              _    <- collection.insertMany(Chunk(model1, model2, model3))
+              ints <- intCollection.distinct("a", filters.empty).runToChunk
+            } yield assertTrue(
+              ints.toSet == Set(42, 43),
+            )
+          }
+        },
       ),
     ),
   ).provideLayerShared(MongoClientTest.live())
