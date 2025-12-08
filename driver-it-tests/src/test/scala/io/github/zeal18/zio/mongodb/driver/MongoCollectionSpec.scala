@@ -491,6 +491,23 @@ object MongoCollectionSpec extends ZIOSpecDefault {
             )
           }
         },
+        test("field projection") {
+          case class Model(a: Int, b: String, c: Boolean)
+          val model1 = Model(a = 42, b = "foo", c = true)
+          val model2 = Model(a = 43, b = "bar", c = false)
+
+          case class ModelA(a: Int)
+
+          MongoCollectionTest.withRandomName[Model, TestResult] { collection =>
+            val modelACollection = collection.withDocumentClass[ModelA] // projecting to ModelA
+            for {
+              _       <- collection.insertMany(Chunk(model1, model2))
+              modelAs <- modelACollection.find().projection(projections.include("a")).runToChunk
+            } yield assertTrue(
+              modelAs.toSet == Set(ModelA(42), ModelA(43)),
+            )
+          }
+        },
       ),
     ),
   ).provideLayerShared(MongoClientTest.live())
