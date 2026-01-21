@@ -1,7 +1,7 @@
 val scala2_13 = "2.13.17"
 val scala3    = "3.3.7"
 
-ThisBuild / scalaVersion       := scala2_13
+ThisBuild / scalaVersion       := scala3
 ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 
 val zioVersion          = "2.1.22"
@@ -46,6 +46,10 @@ val commonSettings =
     // updateOptions := updateOptions.value.withLatestSnapshots(false),
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions -= "-Xfatal-warnings", // remove the flag added in sbt-tpolecat plugin
+    scalacOptions += {
+      if (insideCI.value) "-Wconf:any:error"
+      else "-Wconf:any:warning"
+    },
     scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         Seq(
@@ -55,8 +59,6 @@ val commonSettings =
         Seq(
           "-Xsource:3-cross",
           "-Ymacro-annotations",
-          if (insideCI.value) "-Wconf:any:error"
-          else "-Wconf:any:warning",
         )
     }),
     Compile / doc / scalacOptions -= "-Wconf:any:error",
