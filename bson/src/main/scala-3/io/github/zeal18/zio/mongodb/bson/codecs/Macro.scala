@@ -312,7 +312,7 @@ object Macro:
     val valueByName: Expr[String => Option[A]] = '{ (s: String) =>
       ${
         val cases = children.map(nameToChild) :+
-          CaseDef(Wildcard(), None, '{ None }.asTerm)
+          CaseDef(Wildcard(), None, 'None.asTerm)
 
         Match('s.asTerm, cases).asExprOf[Option[A]]
       }
@@ -427,7 +427,7 @@ object Macro:
       val codecByName: Expr[String => Option[Codec[A]]] = '{ (s: String) =>
         ${
           val cases = fields.map { case (f, _) => nameToChild(f) } :+
-            CaseDef(Wildcard(), None, '{ None }.asTerm)
+            CaseDef(Wildcard(), None, 'None.asTerm)
 
           Match('s.asTerm, cases).asExprOf[Option[Codec[A]]]
         }
@@ -489,11 +489,7 @@ object Macro:
         tpe.companionClass
           .declaredMethod(s"$$lessinit$$greater$$default$$${i + 1}")
           .headOption
-          .map(method =>
-            field.name -> Ident(tpe.companionModule.termRef)
-              .select(method)
-              .asExpr,
-          )
+          .map(method => field.name -> Ident(tpe.companionModule.termRef).select(method).asExpr)
       }
       .toMap
 
