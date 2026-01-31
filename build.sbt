@@ -7,11 +7,11 @@ ThisBuild / crossScalaVersions := Seq(scala2_13, scala3)
 val zioVersion          = "2.1.22"
 val zioInteropRSVersion = "2.0.2"
 
-val mongoVersion = "5.6.1"
+val mongoVersion = "5.6.2"
 val rsVersion    = "1.0.4"
 
-val flapdoodleVersion = "4.21.0"
-val immutablesVersion = "2.11.6"
+val flapdoodleVersion = "4.24.0"
+val immutablesVersion = "2.12.1"
 
 val magnolia2Version = "1.1.10"
 
