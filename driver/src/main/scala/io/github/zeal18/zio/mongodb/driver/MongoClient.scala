@@ -9,7 +9,6 @@ import io.github.zeal18.zio.mongodb.bson.collection.immutable.Document
 import io.github.zeal18.zio.mongodb.driver.*
 import io.github.zeal18.zio.mongodb.driver.ClientSessionOptions
 import io.github.zeal18.zio.mongodb.driver.MongoClientSettings
-import io.github.zeal18.zio.mongodb.driver.MongoDriverInformation
 import io.github.zeal18.zio.mongodb.driver.aggregates.Aggregation
 import io.github.zeal18.zio.mongodb.driver.query.*
 import io.github.zeal18.zio.mongodb.driver.reactivestreams.*

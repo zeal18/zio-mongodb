@@ -1506,7 +1506,7 @@ object Expression {
     final case class Year(date: Expression)         extends Date
 
     final case class GetField(field: Expression, input: Option[Expression] = None) extends Misc
-    final object Rand                                                              extends Misc
+    object Rand                                                                    extends Misc
     final case class SampleRate(rate: Expression)                                  extends Misc
 
     final case class MergeObjects(expressions: Seq[Expression])                        extends Object

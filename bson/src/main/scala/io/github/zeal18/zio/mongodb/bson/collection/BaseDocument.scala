@@ -140,7 +140,7 @@ private[bson] trait BaseDocument[T] extends Iterable[(String, BsonValue)] with B
     * @return an option value containing the value associated with `key` in this document,
     *         or `None` if none exists.
     */
-  @nowarn("cat=unused")
+  @nowarn("msg=parameter e in method get is never used")
   def get[TResult <: BsonValue](
     key: String,
   )(implicit e: TResult DefaultsTo BsonValue, ct: ClassTag[TResult]): Option[TResult] =
