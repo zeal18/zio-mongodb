@@ -40,7 +40,7 @@ object MongoClientSettings {
   def builder(settings: MongoClientSettings): Builder = {
     val builder = JMongoClientSettings.builder(settings)
     if (settings.getCodecRegistry == JMongoClients.getDefaultCodecRegistry) {
-      builder.codecRegistry(MongoClient.DEFAULT_CODEC_REGISTRY)
+      val _ = builder.codecRegistry(MongoClient.DEFAULT_CODEC_REGISTRY)
     }
     builder
   }

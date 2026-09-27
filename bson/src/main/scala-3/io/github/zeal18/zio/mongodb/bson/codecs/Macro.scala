@@ -4,18 +4,14 @@ import EasierValDef.*
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonId
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonIgnore
 import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
-import io.github.zeal18.zio.mongodb.bson.codecs.error.BsonError
-import org.bson.BsonInvalidOperationException
 import org.bson.BsonReader
 import org.bson.BsonSerializationException
-import org.bson.BsonType
 import org.bson.BsonWriter
 import org.bson.codecs.DecoderContext
 import org.bson.codecs.EncoderContext
 
-import scala.annotation.tailrec
+import scala.annotation.nowarn
 import scala.compiletime
-import scala.deriving.*
 import scala.deriving.Mirror
 import scala.quoted.*
 
@@ -112,14 +108,11 @@ object Macro:
 
       val filedsToProcess = fields.filterNot(f => ignored.contains(f.name))
 
-      val fieldTypes = filedsToProcess.map(t => caseClass.memberType(t))
-
       val preparedFields = Expr.ofList(filedsToProcess.map { f =>
         val tpe = caseClass.memberType(f)
         tpe.asType match {
           case '[t] =>
-            val paramTypeInfo = TypeInfo[t]
-            val codecExpr     = '{ () => ${ preparations.getStablisedImplicitInstance[t] } }
+            val codecExpr = '{ () => ${ preparations.getStablisedImplicitInstance[t] } }
 
             val derefDefSymbol = Symbol.newMethod(
               Symbol.spliceOwner,
@@ -178,10 +171,10 @@ object Macro:
   )(using q: Quotes): Expr[Map[String, Any] => A] =
     import q.reflect.*
 
-    val caseClass         = TypeRepr.of[A]
     val caseClassTypeInfo = TypeInfo[A]
     val fields            = Fields.fromMirror(mirror)
 
+    @nowarn("msg=unused import")
     def fieldsToA(data: Expr[Map[String, Any]]): Expr[A] =
       val elems = fields.map { f =>
         import f.{Type as F, typeInstance}
@@ -293,8 +286,7 @@ object Macro:
 
     if logCode then println(s"Deriving enum type: ${enumTypeInfo.full}")
 
-    val enumSymbol = TypeRepr.of[A].typeSymbol
-    val children   = TypeRepr.of[A].typeSymbol.children
+    val children = TypeRepr.of[A].typeSymbol.children
 
     def childToName(child: Symbol): CaseDef =
       CaseDef(Ident(child.termRef), None, Block(Nil, Literal(StringConstant(child.name))))
@@ -325,6 +317,7 @@ object Macro:
     result
   end deriveEnum
 
+  @nowarn("msg=unused import")
   private def deriveMixedCoproduct[A: Type](
     logCode: Boolean,
     preparations: Preparations,
@@ -388,8 +381,6 @@ object Macro:
       val childrenCodecs: Map[String, Expr[Codec[?]]] =
         fields.map { case (field, idx) =>
           import field.{Type as F, typeInstance}
-
-          val symbol = fieldSymbol(field)
 
           val codec: Expr[Codec[?]] =
             val c = nonRecursiveCases(idx).getOrElse(preparations.need[F].varRef)
@@ -497,6 +488,7 @@ object Macro:
       }
       .toMap
 
+  @nowarn("msg=unused import")
   private def flattenCoproductSubtypes[A: Type](mirror: Expr[Mirror.SumOf[A]])(using
     q: Quotes,
   ): List[Field] =

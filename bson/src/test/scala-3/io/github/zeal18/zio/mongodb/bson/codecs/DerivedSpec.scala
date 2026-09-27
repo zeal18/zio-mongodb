@@ -6,6 +6,8 @@ import io.github.zeal18.zio.mongodb.bson.annotations.BsonProperty
 import io.github.zeal18.zio.mongodb.bson.codecs.utils.*
 import zio.test.*
 
+import scala.annotation.nowarn
+
 object DerivedSpec extends ZIOSpecDefault {
   private case class Simple(a: Int, b: String)
   private case class Nested(a: Simple, b: Long)
@@ -42,6 +44,7 @@ object DerivedSpec extends ZIOSpecDefault {
   enum Scala3Enum derives Codec:
     case A, B, C
 
+  @nowarn("msg=unused explicit parameter")
   enum Scala3ParamEnum(a: Int) derives Codec:
     case A extends Scala3ParamEnum(1)
     case B extends Scala3ParamEnum(3)
